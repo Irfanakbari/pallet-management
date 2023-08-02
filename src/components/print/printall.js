@@ -1,9 +1,7 @@
 import React, {useCallback, useRef, useState} from 'react';
-import ReactToPrint, {useReactToPrint} from 'react-to-print';
-import html2canvas from 'html2canvas';
+import {useReactToPrint} from 'react-to-print';
 import { QRCode } from 'react-qrcode-logo';
 import {BiPrinter} from "react-icons/bi";
-import ModalLayout from "@/components/Modal/AddModalLayout";
 import {FaRegWindowMaximize} from "react-icons/fa";
 import {ImCross} from "react-icons/im";
 
@@ -128,7 +126,7 @@ export default function PrintAll({ data }) {
             <div>
                 <div onClick={()=>setModal(true)} className={`flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer`}>
                     <BiPrinter size={12} />
-                    <p className={`text-white font-bold text-sm`}>Cetak Semua QR</p>
+                    <p className={`text-white font-bold text-sm`}>Cetak QR Per Halaman</p>
                 </div>
             </div>
         </>

@@ -41,13 +41,22 @@ export default function Pallet() {
     }, [])
 
     const fetchData = () => {
-        axios.get(`/api/pallets?customer=${custFilter.current.value??''}&vehicle=${vehicleFilter.current.value??''}&part=${partFilter.current.value??''}&page=1`).then(response=>{
+        const searchValueLowerCase = searchTerm.toLowerCase().split(' ').join('');
+        axios.get(`/api/pallets?search=${searchValueLowerCase}&customer=${custFilter.current.value??''}&vehicle=${vehicleFilter.current.value??''}&part=${partFilter.current.value??''}&page=1`).then(response=>{
            setPallet(response.data);
            setFilters(response.data['data'])
        }).catch(()=>{
            showErrorToast("Gagal Fetch Data")
        })
     };
+
+    const handleSearch = async () => {
+        const searchValueLowerCase = searchTerm.toLowerCase().split(' ').join('');
+        const response = await axios.get(`/api/pallets?search=${searchValueLowerCase}`);
+        setPallet(response.data);
+        setFilters(response.data['data']);
+    };
+
 
     const submitData = (data) => {
         axios.post('/api/pallets',data).then(() =>{
@@ -73,32 +82,14 @@ export default function Pallet() {
         })
     }
 
-    function searchValue(value) {
-        if (value.trim() === '') {
-            return listPallet.data;
-        }
-        const searchValueLowerCase = value.toLowerCase();
-        return listPallet.data.filter((item) => {
-            for (let key in item) {
-                if (typeof item[key] === 'string' && item[key].toLowerCase().includes(searchValueLowerCase)) {
-                    return true;
-                }
-            }
-            return false;
-        });
-    }
 
     const handlePageChange = (selectedPage) => {
+        const searchValueLowerCase = searchTerm.toLowerCase().split(' ').join('');
         // Lakukan perubahan halaman di sini
-        axios.get(`/api/pallets?customer=${custFilter.current.value??''}&vehicle=${vehicleFilter.current.value??''}&part=${partFilter.current.value??''}&page=` + selectedPage).then(response=>{
+        axios.get(`/api/pallets?search=${searchValueLowerCase}&customer=${custFilter.current.value??''}&vehicle=${vehicleFilter.current.value??''}&part=${partFilter.current.value??''}&page=` + selectedPage).then(response=>{
             setPallet(response.data);
             setFilters(response.data['data'])
         })
-    };
-
-    const handleSearch = () => {
-        const searchResult = searchValue(searchTerm);
-        setFilters(searchResult);
     };
 
     const excel = useExcelJS({

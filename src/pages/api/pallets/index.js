@@ -16,7 +16,7 @@ async function handler(req, res) {
                     });
                 }
 
-                const { customer, vehicle, part } = req.query;
+                const { customer, vehicle, part, search } = req.query;
                 // Menentukan parameter halaman dan batasan data
                 const page = parseInt(req.query.page) || 1; // Halaman saat ini (default: 1)
                 const limit = parseInt(req.query.limit) || 20; // Batasan data per halaman (default: 10)
@@ -42,6 +42,12 @@ async function handler(req, res) {
                     whereClause = {
                         ...whereClause,
                         '$Part.kode$': part,
+                    };
+                }
+                if (search) {
+                    whereClause = {
+                        ...whereClause,
+                        kode: search,
                     };
                 }
 

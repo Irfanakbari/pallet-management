@@ -224,14 +224,14 @@ async function handler(req, res) {
                     });
                 }
                 await connection.transaction(async t => {
-                    await Pallet.update(
-                        {status: 1},
-                        {where: {kode: kode}, transaction: t}
-                    );
                     // Buat data history baru
                     await History.update(
                         {masuk: Date.now(), user_in: req.user.username},
                         {where: {id_pallet: kode}, transaction: t}
+                    );
+                    await Pallet.update(
+                        {status: 1},
+                        {where: {kode: kode}, transaction: t}
                     );
                 })
 

@@ -89,7 +89,7 @@ export default function Dashboard() {
             <div className={`bg-[#2589ce] py-1.5 px-2 text-white flex flex-row justify-between`}>
                 <div className={`flex flex-row justify-between w-full mr-1 items-center`}>
                     <div className={`flex items-center gap-4`}>
-                        <Image src={'/logo.png'} alt={'Logo'} width={90} height={80} />
+                        <Image src={'/logos.png'} alt={'Logo'} width={90} height={80} />
                         <h2 className={`font-bold text-[18px]`}>PT VUTEQ INDONESIA - Realtime Pallet Monitoring System</h2>
                     </div>
                     <h2 className={`font-bold text-[14px]`}>Dasboard Status Pallet</h2>

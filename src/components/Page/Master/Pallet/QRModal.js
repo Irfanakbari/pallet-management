@@ -23,14 +23,12 @@ export default function QRModalLayout({ selectedCell }) {
                 </div>
                 <div className={`p-6 flex flex-col gap-3 justify-center items-center`}>
                     <QRCode
-                        eyeRadius={10}
                         logoWidth={70}
                         ecLevel={'Q'}
                         size={350}
                         logoOpacity={0.5}
                         value={selectedCell.kode}
                         qrStyle={'squares'}
-                        logoImage={'/logo.png'} r
                         removeQrCodeBehindLogo={true} />
                     <h2 className={`text-xl font-bold`}>
                         {

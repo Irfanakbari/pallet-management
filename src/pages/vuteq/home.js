@@ -19,6 +19,7 @@ import {showErrorToast, showSuccessToast} from "@/utils/toast";
 import {useRouter} from "next/router";
 import Department from "@/components/Page/Master/Department/Department";
 import DashboardAdmin from "@/components/Page/DashboardAdmin";
+import LapStok from "@/components/Page/Laporan/LapStok/LapStok";
 
 
 export default function Home() {
@@ -115,6 +116,7 @@ export default function Home() {
                                     {activeMenu === "Pallet" && <Pallet />}
                                     {activeMenu === "Lap. Riwayat Pallet" && <LapRiwayat />}
                                     {activeMenu === "Lap. Maintenance Pallet" && <LapMaintenance />}
+                                    {activeMenu === "Lap. Stok Pallet" && <LapStok />}
                                     {activeMenu === "Users" && <User />}
                             </div>
                                 :

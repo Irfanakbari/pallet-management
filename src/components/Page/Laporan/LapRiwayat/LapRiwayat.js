@@ -88,8 +88,10 @@ export default function LapRiwayat() {
     const saveExcel = async (e) => {
         e.preventDefault();
         const workbook = new ExcelJS.Workbook();
-        const sheet = workbook.addWorksheet("My Sheet");
-        sheet.properties.defaultRowHeight = 40;
+        const sheet = workbook.addWorksheet("My Sheet", {
+            headerFooter:{firstHeader: "Hello Exceljs", firstFooter: "Hello World"},
+            pageSetup:{paperSize: 9, orientation:'landscape'}
+        });
         sheet.getCell('A1:I1').fill = {
             type: 'pattern',
             pattern:'solid',
@@ -136,9 +138,7 @@ export default function LapRiwayat() {
             fgColor : {argb: '0366fc'}
         }
         sheet.getRow(1).font = {
-            name: "Comic Sans MS",
-            family: 4,
-            size: 16,
+            size: 12,
             bold: true,
             color: {argb: 'FFFFFF'}
         }
@@ -146,22 +146,22 @@ export default function LapRiwayat() {
             {
                 header: "No",
                 key: "no",
-                width: 10,
+                width: 4,
             },
             {
                 header: "Kode Pallet",
                 key: "id",
-                width: 32,
+                width: 25,
             },
             {
                 header: "Customer",
                 key: "customer",
-                width: 32,
+                width: 20,
             },
             {
                 header: "Vehicle",
                 key: "vehicle",
-                width: 32,
+                width: 24,
             },
             {
                 header: "Part",
@@ -171,38 +171,25 @@ export default function LapRiwayat() {
             {
                 header: "Keluar",
                 key: "keluar",
-                width: 32,
+                width: 27,
             },
             {
                 header: "Operator Out",
                 key: "user_out",
-                width: 32,
+                width: 13,
             },
             {
                 header: "Masuk",
                 key: "masuk",
-                width: 32,
+                width: 27,
             },
             {
                 header: "Operator In",
                 key: "user_in",
-                width: 32,
+                width: 13,
             },
         ];
         filters.map((item, index) => {
-            const keluarDate = item['keluar'] ? dayjs(item['keluar']) : null;
-            const masukDate = item['masuk'] ? dayjs(item['masuk']) : null;
-            const oneWeekAgo = dayjs().subtract(1, 'week');
-
-            const rowFill = {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: {
-                    argb:
-                        masukDate === null && keluarDate.isBefore(oneWeekAgo) ? 'FF0000' : 'FFFFFFFF'
-                },
-            };
-
             const row = sheet.addRow({
                 no: index + 1,
                 id: item.id_pallet,
@@ -214,7 +201,6 @@ export default function LapRiwayat() {
                 masuk: item['masuk'] ? dayjs(item['masuk']).locale('id').format('DD MMMM YYYY HH:mm') : '-',
                 user_in: item['user_in'],
             });
-            row.fill = rowFill
         });
         await workbook.xlsx.writeBuffer().then(data=>{
             const blob = new Blob([data], {type: 'application/vnd.openxmlformats-officedocument.spreadsheet.sheet'})
