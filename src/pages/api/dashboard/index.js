@@ -9,6 +9,7 @@ import Vehicle from "@/models/Vehicle";
 import Department from "@/models/Department";
 import Part from "@/models/Part";
 
+
 async function handler(req, res) {
     switch (req.method) {
         case 'GET':
@@ -56,7 +57,7 @@ async function handler(req, res) {
                         include: [
                             {
                                 model: Pallet,
-                                attributes: ['kode'],
+                                attributes: [],
                                 where: {
                                     status: 0
                                 },

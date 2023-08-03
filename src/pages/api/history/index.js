@@ -6,6 +6,8 @@ import connection from "@/config/database";
 import checkCookieMiddleware from "@/pages/api/middleware";
 import Part from "@/models/Part";
 import {Op} from "sequelize";
+import TempHistoryUser from "@/models/TempHistoryUser";
+import TempHistory from "@/models/TempHistoryUser";
 
 async function handler(req, res) {
     switch (req.method) {
@@ -153,7 +155,6 @@ async function handler(req, res) {
                     currentPage: parseInt(page),
                 });
             } catch (e) {
-                console.error(e.message);
                 res.status(500).json({
                     ok: false,
                     data: "Internal Server Error",
@@ -181,10 +182,6 @@ async function handler(req, res) {
                     });
                 }
                 await connection.transaction(async t => {
-                    await Pallet.update(
-                        {status: 0},
-                        {where: {kode: kode}, transaction: t}
-                    );
                     await History.create(
                         {
                             id_pallet: kode,
@@ -192,12 +189,22 @@ async function handler(req, res) {
                         },
                         {transaction: t}
                     );
+                    await Pallet.update(
+                        {status: 0},
+                        {where: {kode: kode}, transaction: t}
+                    );
+                    await TempHistory.create({
+                        id_pallet: kode,
+                        status: 'Keluar',
+                        operator: req.user.username
+                    },{transaction: t})
                     res.status(201).json({
                         ok: true,
                         data: "Sukses"
                     });
                 })
             } catch (e) {
+                console.log(e.message);
                 res.status(500).json({
                     ok: false,
                     data: "Internal Server Error"
@@ -224,15 +231,28 @@ async function handler(req, res) {
                     });
                 }
                 await connection.transaction(async t => {
-                    // Buat data history baru
-                    await History.update(
-                        {masuk: Date.now(), user_in: req.user.username},
-                        {where: {id_pallet: kode}, transaction: t}
+                    const currentHistory = await History.findOne({
+                        where: {
+                            id_pallet: kode
+                        },
+                        order: [['keluar', 'DESC']]
+                    },{
+                        transaction: t
+                    })
+                    await currentHistory.update(
+                        {masuk: Date.now(), user_in: req.user.username}, {
+                            transaction: t
+                        }
                     );
                     await Pallet.update(
                         {status: 1},
                         {where: {kode: kode}, transaction: t}
                     );
+                    await TempHistory.create({
+                        id_pallet: kode,
+                        status: 'Masuk',
+                        operator: req.user.username
+                    }, {transaction: t})
                 })
 
                 res.status(200).json({

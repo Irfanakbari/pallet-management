@@ -1,5 +1,7 @@
 import Pallet from "@/models/Pallet";
 import checkCookieMiddleware from "@/pages/api/middleware";
+import TempHistory from "@/models/TempHistoryUser";
+import connection from "@/config/database";
 
 async function handler(req, res) {
     switch (req.method) {
@@ -61,14 +63,21 @@ async function handler(req, res) {
                         newStatus = 3;
                     }
 
-                    await Pallet.update({
-                        status: newStatus
-                    }, {
-                        where: {
-                            kode: kode
-                        }
-                    });
+                  await connection.transaction(async t => {
+                      await Pallet.update({
+                          status: newStatus
+                      }, {
+                          where: {
+                              kode: kode
+                          }
+                      }, {transaction: t});
 
+                      await TempHistory.create({
+                          id_pallet: kode,
+                          status: 'Maintenance',
+                          operator: req.user.username
+                      }, {transaction: t})
+                  })
                     res.status(200).json({
                         ok: true,
                         data: "Sukses"

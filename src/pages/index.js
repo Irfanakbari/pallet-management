@@ -29,7 +29,7 @@ export default function Index() {
                     progress: undefined,
                     theme: "colored",
                 });
-                router.push('/vuteq/home')
+                router.push('/home')
             })
         } catch (e) {
             toast.error(e.response.data['data'], {
@@ -96,7 +96,7 @@ export const getServerSideProps = ({ req, res }) => {
     const cookie = getCookie('@vuteq-token', { req, res });
 
     if (cookie) {
-        res.writeHead(302, { Location: '/vuteq/home' });
+        res.writeHead(302, { Location: '/home' });
         res.end();
     }
 
