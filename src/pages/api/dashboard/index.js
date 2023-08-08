@@ -154,16 +154,19 @@ async function handler(req, res) {
                             keluar: {
                                 [Op.lt]: moment().subtract(1, 'week').toDate(),
                             },
-                            '$Pallet.Vehicle.department$': { [Op.in]: allowedDepartments },
+                            masuk: null
                         },
                         include: [
                             {
                                 model: Pallet,
-                                attributes: ['kode'],
+                                attributes: [],
                                 where: {
                                     status: 0
                                 },
-                                include: [
+                                include : [
+                                    {
+                                        model: Customer,
+                                    },
                                     {
                                         model: Vehicle,
                                         attributes: [], // Tidak perlu memuat atribut apapun dari Customer
@@ -171,8 +174,8 @@ async function handler(req, res) {
                                             department: { [Op.in]: allowedDepartments }, // Filter berdasarkan department_id
                                         },
                                     },
-                                ],
-                            },
+                                ]
+                            }
                         ],
                         group: [sequelize.literal('Pallet.customer')], // Mengganti 'Pallet.customer' dengan 'Customer.name'
                         raw: true

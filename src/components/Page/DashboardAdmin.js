@@ -133,30 +133,30 @@ export default function DashboardAdmin() {
                         <Metric className={`font-bold text-white`}>{cardInfo.repair } Pallet</Metric>
                     </Card>
                 </div>
-                <div className={`w-full grid grid-cols-2 gap-4`}>
+                <div className={`w-full flex-col flex gap-5`}>
                     <Chart2 data={dataChart2} />
                     {/*<Chart3 data={dataChart3} />*/}
 
-                    <Card className={`overflow-y-scroll]`}>
-                        <div className={`bg-red-800 text-white p-2 font-semibold`}>
-                            Detail Stok
-                        </div>
-                       <div className={`flex`}>
-                           <List className={`p-2`}>
-                               {
-                                   dataChart1.map((item, index) => {
-                                       if (index < 7) {
-                                           return (
-                                               <ListItem className={`text-sm`} key={item.customer}>
-                                                   <span>{item.customer}</span>
-                                                   <span>{item.Total} Pallet</span>
-                                               </ListItem>
-                                           )
-                                       }
-                                   } )}
-                           </List>
-                       </div>
-                    </Card>
+                    {/*<Card className={`overflow-y-scroll]`}>*/}
+                    {/*    <div className={`bg-red-800 text-white p-2 font-semibold`}>*/}
+                    {/*        Detail Stok*/}
+                    {/*    </div>*/}
+                    {/*   <div className={`flex`}>*/}
+                    {/*       <List className={`p-2`}>*/}
+                    {/*           {*/}
+                    {/*               dataChart1.map((item, index) => {*/}
+                    {/*                   if (index < 7) {*/}
+                    {/*                       return (*/}
+                    {/*                           <ListItem className={`text-sm`} key={item.customer}>*/}
+                    {/*                               <span>{item.customer}</span>*/}
+                    {/*                               <span>{item.Total} Pallet</span>*/}
+                    {/*                           </ListItem>*/}
+                    {/*                       )*/}
+                    {/*                   }*/}
+                    {/*               } )}*/}
+                    {/*       </List>*/}
+                    {/*   </div>*/}
+                    {/*</Card>*/}
                     <Chart1 data={dataChart1} />
                 </div>
                 <div className={`w-full`}>

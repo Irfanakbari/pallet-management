@@ -2,6 +2,9 @@ import Pallet from "@/models/Pallet";
 import checkCookieMiddleware from "@/pages/api/middleware";
 import TempHistory from "@/models/TempHistoryUser";
 import connection from "@/config/database";
+import Customer from "@/models/Customer";
+import Vehicle from "@/models/Vehicle";
+import Part from "@/models/Part";
 
 async function handler(req, res) {
     switch (req.method) {
@@ -20,6 +23,28 @@ async function handler(req, res) {
                 const pallets = await Pallet.findAndCountAll({
                     where: {
                         status: 3,
+                    },
+                    order: [
+                        [
+                            'customer', 'ASC'
+                        ]
+                    ],
+                    include: [
+                        {
+                            model: Customer,
+                            attributes: ['name']
+                        },
+                        {
+                            model: Vehicle,
+                            attributes: ['name','department']
+                        },
+                        {
+                            model: Part,
+                            attributes: ['name']
+                        }
+                    ],
+                    attributes:{
+                      exclude: ['status']
                     },
                     limit: parseInt('20'),
                     offset: offset,

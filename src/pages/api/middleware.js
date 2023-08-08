@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import User from "@/models/User";
 import DepartmentUser from "@/models/DepartmentUsers";
 import {where} from "sequelize";
+import Department from "@/models/Department";
 
 const checkCookieMiddleware = (handler) => async (req, res) => {
     const cookies = getCookie('@vuteq-token', { req, res });
@@ -20,6 +21,11 @@ const checkCookieMiddleware = (handler) => async (req, res) => {
     const access = await DepartmentUser.findAll({
         where : {
             user_id : decoded.id
+        },
+        attributes: ['department_id'],
+        include: {
+            model: Department,
+            attributes: ['name']
         }
     })
 

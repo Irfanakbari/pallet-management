@@ -3,7 +3,7 @@ import { Card, Title, BarChart } from "@tremor/react";
 
 export default function Chart1({data}) {
     return (<Card className={`mb-5 col-span-2`}>
-        <Title>Diagram Stok Pallet Per Part</Title>
+        <Title>Diagram Per Part</Title>
         <BarChart
             className="mt-2"
             data={data}

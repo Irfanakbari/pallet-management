@@ -61,11 +61,12 @@ async function handler(req, res) {
                         data: "Role must be admin"
                     });
                 }
+                const vehic = await Vehicle.findByPk(vehicle);
                 await Part.create({
-                    kode: customer + kode,
+                    kode: customer + vehic.dataValues.department + kode,
                     name: name,
                     customer: customer,
-                    vehicle: vehicle
+                    vehicle: vehic.dataValues.kode
                 });
                 res.status(200).json({ success: true });
             } catch (error) {

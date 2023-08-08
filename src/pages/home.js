@@ -24,7 +24,7 @@ import LapStok from "@/components/Page/Laporan/LapStok/LapStok";
 
 export default function Home() {
     const { listTab, setCloseTab, activeMenu, setActiveMenu } = useStoreTab();
-    const {setCustomer, setVehicle, setPart, setPallet, setListDepartment, user, setUser} = dataState()
+    const {setCustomer, setVehicle, setPart, setListDepartment, user, setUser} = dataState()
     const router = useRouter()
 
 
@@ -45,20 +45,23 @@ export default function Home() {
 
     const fetchData = async () => {
         try {
-            const response = await axios.get('/api/customers');
-            setCustomer(response.data['data']);
-            const response1 = await axios.get('/api/departments');
-            setListDepartment(response1.data['data']);
-            const response2 = await axios.get('/api/vehicle');
-            setVehicle(response2.data['data']);
-            const response3 = await axios.get('/api/parts');
-            setPart(response3.data['data']);
-            const response4 = await axios.get('/api/pallets');
-            setPallet(response4.data['data']);
+            const [response1, response2, response3, response4] = await Promise.all([
+                axios.get('/api/customers'),
+                axios.get('/api/departments'),
+                axios.get('/api/vehicle'),
+                axios.get('/api/parts'),
+            ]);
+
+            setCustomer(response1.data['data']);
+            setListDepartment(response2.data['data']);
+            setVehicle(response3.data['data']);
+            setPart(response4.data['data']);
+            // Do other necessary processing here
         } catch (error) {
             showErrorToast("Gagal Fetch Data");
         }
     };
+
 
     function getCurrentUser(){
         axios.get('/api/auth/user').then(r =>  {

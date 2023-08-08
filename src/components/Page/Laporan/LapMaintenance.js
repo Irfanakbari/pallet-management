@@ -1,12 +1,16 @@
 import {BiPrinter, BiRefresh, BiSolidUpArrow} from "react-icons/bi";
 import {ImCross} from "react-icons/im";
 import {AiFillFileExcel} from "react-icons/ai";
-import {useEffect, useRef, useState} from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 import axios from "axios";
 import { useExcelJS } from "react-use-exceljs"
 import PaginationSelect from "@/components/PaginationSelect";
 import {showErrorToast} from "@/utils/toast";
 import {dataState} from "@/context/states";
+import dayjs from "dayjs";
+import {useReactToPrint} from "react-to-print";
+import {FaRegWindowMaximize} from "react-icons/fa";
+import Image from "next/image";
 
 
 export default function LapMaintenance() {
@@ -209,10 +213,7 @@ export default function LapMaintenance() {
             <div className={`w-full bg-white h-4 border border-gray-500`} />
             <div className={`w-full bg-white p-2`}>
                 <div className={`w-full bg-[#3da0e3] py-0.5 px-1 text-white flex flex-row`}>
-                    <div className={`flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer`}>
-                        <BiPrinter size={12} />
-                        <p className={`text-white font-bold text-sm`}>Cetak</p>
-                    </div>
+                    <PrintAll data={dataMaintenance} />
                     <div
                         onClick={onClick}
                         className={`flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer`}>
@@ -261,5 +262,101 @@ export default function LapMaintenance() {
                 />
             </div>
         </div>
+    )
+}
+
+function PrintAll({ data }) {
+    const componentRef = useRef(null);
+    const [modal, setModal] = useState(false)
+    const currentDate = dayjs(); // Ambil tanggal dan waktu saat ini
+    const formattedDate = currentDate.format('DD MMMM YYYY HH:mm [WIB]');
+
+
+    const reactToPrintContent = useCallback(() => {
+        return componentRef.current;
+    }, [componentRef.current]);
+
+    const handlePrint = useReactToPrint({
+        content: reactToPrintContent,
+        documentTitle: "AwesomeFileName",
+        onAfterPrint: ()=>setModal(false),
+        removeAfterPrint: true,
+    });
+
+    return (
+        <>
+            {
+                modal && <div className="fixed bg-black h-full bg-opacity-20 flex items-center justify-center top-0 left-0 z-[5000] w-full overflow-x-hidden outline-none">
+                    <div className="h-2/3 flex flex-col rounded bg-white border-4 border-[#3da0e3]">
+                        <div className="w-full flex items-center justify-between bg-[#3da0e3] font-light py-1 px-2 text-white text-sm">
+                            <div className="flex items-center gap-2">
+                                <FaRegWindowMaximize />
+                                Print Preview
+                            </div>
+                            <div onClick={() => setModal(false)} className="hover:bg-red-800 p-1">
+                                <ImCross size={10} />
+                            </div>
+                        </div>
+                        <div className="p-2 flex flex-col gap-5 h-full w-full">
+                            <div ref={componentRef} className={`text-black text-sm overflow-y-auto `} >
+                                <div className="w-full flex flex-col">
+                                    <div className={`flex gap-4 items-center print-header`}>
+                                        <Image src={'/logos.png'} alt={'Logo'} width={120} height={120} />
+                                        <div className={`flex flex-col`}>
+                                            <h2 className={`font-bold text-xl `}>Laporan Pallet Maintenance</h2>
+                                            <h3>Tanggal : {formattedDate}</h3>
+                                        </div>
+                                    </div>
+                                    <table className="print-table w-full">
+                                        <thead>
+                                        <tr>
+                                            <th className="text-center p-2 bg-gray-100 w-10">#</th>
+                                            <th className="p-2 bg-gray-100">ID Pallet</th>
+                                            <th className="p-2 bg-gray-100">Department</th>
+                                            <th className="p-2 bg-gray-100">Customer</th>
+                                            <th className="p-2 bg-gray-100">Vehicle</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {data['data'].map((e, index) => (
+                                            <>
+                                                <tr className={`font-semibold border-b border-gray-500`} key={index}>
+                                                    <td className="text-center p-1.5">{index + 1}</td>
+                                                    <td className="px-4">{e['kode']}</td>
+                                                    <td className="px-4">Produksi {e['Vehicle']['department']}</td>
+                                                    <td className="px-4">{e['customer']} - {e['Customer']['name']}</td>
+                                                    <td className="px-4">{e['vehicle']} - {e['Vehicle']['name']}</td>
+                                                </tr>
+                                            </>
+                                        ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div className="border border-gray-300 w-full p-3 flex flex-col gap-3 text-sm mb-6">
+                                <div className="flex flex-row justify-center gap-2 text-black">
+                                    <button onClick={() => {
+                                        handlePrint()
+                                    }} className="border w-full border-gray-500 py-1 text-sm rounded">
+                                        Print
+                                    </button>
+                                    <button onClick={() => {
+                                        setModal(false)
+                                    }} className="border w-full border-gray-500 py-1 text-sm rounded">
+                                        Batal
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div>
+                <div onClick={()=>setModal(true)} className={`flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer`}>
+                    <BiPrinter size={12} />
+                    <p className={`text-white font-bold text-sm`}>Cetak Laporan</p>
+                </div>
+            </div>
+        </>
     )
 }

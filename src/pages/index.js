@@ -1,24 +1,21 @@
 import Head from "next/head";
 import {FaLock, FaUserAlt} from "react-icons/fa";
-import {useState} from "react";
 import axios from "axios";
 import {toast} from "react-toastify";
 import {useRouter} from "next/router";
 import {getCookie} from "cookies-next";
+import {useForm} from "react-hook-form";
 
 export default function Index() {
-    const [username, setUsername] = useState('')
-    const [password, setPassword] = useState('')
-
+    const {
+        register,
+        handleSubmit,
+    } = useForm()
     const router = useRouter()
 
-    const handleLogin = async (e) =>{
-        e.preventDefault();
+    const handleLogin = async (data) =>{
         try {
-            await axios.post('api/auth/login',{
-                username : username,
-                password : password,
-            }).then(() =>{
+            await axios.post('api/auth/login',data).then(() =>{
                 toast.success("Login Sukses", {
                     position: "top-right",
                     autoClose: 2000,
@@ -56,13 +53,13 @@ export default function Index() {
                             PT VUTEQ INDONESIA
                         </h2>
                     </div>
-                    <div className={`p-5 mt-8`}>
+                    <form onSubmit={handleSubmit(handleLogin)} className={`p-5 mt-8`}>
                         <div className="flex items-center border border-gray-300 rounded-lg py-3 px-4">
                             <div className="mr-2">
                                 <FaUserAlt />
                             </div>
                             <input
-                                onChange={(e)=> setUsername(e.currentTarget.value)}
+                                {...register('username')}
                                 className="focus:outline-none w-full border-none outline-none focus:border-none" type="text" placeholder="Username" />
                         </div>
                         <br/>
@@ -71,21 +68,21 @@ export default function Index() {
                                <FaLock />
                             </div>
                             <input
-                                onChange={(e)=> setPassword(e.currentTarget.value)}
+                                {...register('password')}
                                 className="focus:outline-none w-full border-none outline-none focus:border-none" type="password" placeholder="Password" />
                         </div>
                         <button
-                            onClick={handleLogin}
+                            type={'submit'}
                             className={`w-full bg-[#09209f] py-4 text-white text-center text-xl mt-7 rounded-b-xl`}>
                             Login
                         </button>
-                    </div>
+                    </form>
                 </div>
                 <p className={`text-white mt-8`}>
                     Copyright © 2023
                 </p>
                 <p className={`text-white mt-2`}>
-                    Version 2.0.4
+                    Version 2.1.7
                 </p>
             </div>
         </>

@@ -6,7 +6,7 @@ async function handler(req, res) {
             try {
                 res.status(200).json({
                     ok: true,
-                    data: req.user
+                    data: req.user,
                 });
 
             } catch (e) {
