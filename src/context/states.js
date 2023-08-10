@@ -45,11 +45,13 @@ const modalState = create((set) => ({
     modalEdit: false,
     modalDelete: false,
     modalQr: false,
+    modal: false,
     setModalAdd: (data) => set ({modalAdd: data}),
     setModalEdit: (data) => set ({modalEdit: data}),
     setModalDelete: (data) => set ({modalDelete: data}),
     setModalQR: (data) => set ({modalQr: data}),
-    setModalFilter: (data) => set ({modalFilter: data})
+    setModalFilter: (data) => set ({modalFilter: data}),
+    setModal: (data) => set ({modal: data})
 }));
 
 const filterState = create((set) => ({

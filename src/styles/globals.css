@@ -21,6 +21,9 @@ body {
         color: white;
     }
     .print-table{
-        font-size:12px;
+        font-size:11px;
+    }
+    .print-table tr td{
+        padding: 2px 0 !important;
     }
 }

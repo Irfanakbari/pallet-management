@@ -2,11 +2,12 @@ import {BiFullscreen} from "react-icons/bi";
 import React, {useEffect, useRef, useState} from "react";
 import axios from "axios";
 import {showErrorToast} from "@/utils/toast";
-import {Card, List, ListItem, Metric, Text} from "@tremor/react";
+import {Card, Metric, Text} from "@tremor/react";
 import Chart1 from "@/components/Chart/DashboardChart1";
 import dayjs from "dayjs";
 import Chart2 from "@/components/Chart/DashboardChart2";
 import Image from "next/image";
+import Head from "next/head";
 
 export default function DashboardAdmin() {
     const [history, setHistory] = useState([])
@@ -82,137 +83,142 @@ export default function DashboardAdmin() {
     };
 
     return(
-        <div className={`bg-white h-full`} ref={elemRef}>
-            <div className={`bg-[#2589ce] py-1.5 px-2 text-white flex flex-row justify-between`}>
-                <div className={`flex flex-row justify-between w-full mr-1 items-center`}>
-                    <div className={`flex items-center gap-4`}>
-                        <Image src={'/logos.png'} alt={'Logo'} width={90} height={80} />
-                        <h2 className={`font-bold text-[18px]`}>PT VUTEQ INDONESIA - Realtime Pallet Monitoring System</h2>
-                    </div>
-                    <h2 className={`font-bold text-[14px]`}>Dasboard Status Pallet</h2>
-                </div>
-                <div
-                    onClick={enterFullscreen}
-                    className={`flex items-center`}>
-                    <BiFullscreen size={20}/>
-                </div>
-            </div>
-            <div className={`w-full p-5 h-full`}>
-                {
-                    (cardInfo.totalMendep !== 0) && <div role="alert" className={`mb-3`}>
-                        <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 text-2xl">
-                            WARNING!!!
+        <>
+            <Head>
+                <title>Dashboard | PT Vuteq Indonesia</title>
+            </Head>
+            <div className={`bg-white h-full`} ref={elemRef}>
+                <div className={`bg-[#2589ce] py-1.5 px-2 text-white flex flex-row justify-between`}>
+                    <div className={`flex flex-row justify-between w-full mr-1 items-center`}>
+                        <div className={`flex items-center gap-4`}>
+                            <Image src={'/logos.png'} alt={'Logo'} width={90} height={80} />
+                            <h2 className={`font-bold text-[18px]`}>PT VUTEQ INDONESIA - Realtime Pallet Monitoring System</h2>
                         </div>
-                        <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 text-xl">
-                            <p>{
-                                cardInfo.totalMendep
-                            } Pallet Belum Kembali ke Vuteq Lebih Dari Seminggu</p>
-                            <p className={`text-sm`}>{
-                                cardInfo.mendep.map(e=>(
-                                   `Customer ` + e['Pallet.Customer.name'] + ' = ' + e.total + ' Pallet, '
-                                ))
-                            }</p>
-                        </div>
+                        <h2 className={`font-bold text-[14px]`}>Dasboard Status Pallet</h2>
                     </div>
-                }
-                <div className={`grid-cols-4 pt-2 grid gap-5 text-white mb-5`}>
-                    <Card className="bg-blue-500" >
-                        <Text className={`text-xl text-white`}>Total Stok</Text>
-                        <Metric className={`font-bold text-white`}>{cardInfo.total } Pallet</Metric>
-                    </Card>
-                    <Card className="bg-green-500" >
-                        <Text className={`text-xl text-white`}>Stok Tersedia</Text>
-                        <Metric className={`font-bold text-white`}>{cardInfo.stok } Pallet</Metric>
-                    </Card>
-                    <Card className="bg-red-500" >
-                        <Text className={`text-xl text-white`}>Keluar</Text>
-                        <Metric className={`font-bold text-white`}>{cardInfo.keluar } Pallet</Metric>
-                    </Card>
-                    <Card className="bg-orange-500">
-                        <Text className={`text-xl text-white`}>Repair</Text>
-                        <Metric className={`font-bold text-white`}>{cardInfo.repair } Pallet</Metric>
-                    </Card>
+                    <div
+                        onClick={enterFullscreen}
+                        className={`flex items-center`}>
+                        <BiFullscreen size={20}/>
+                    </div>
                 </div>
-                <div className={`w-full flex-col flex gap-5`}>
-                    <Chart2 data={dataChart2} />
-                    {/*<Chart3 data={dataChart3} />*/}
+                <div className={`w-full p-5 h-full`}>
+                    {
+                        (cardInfo.totalMendep !== 0) && <div role="alert" className={`mb-3`}>
+                            <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 text-2xl">
+                                WARNING!!!
+                            </div>
+                            <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700 text-xl">
+                                <p>{
+                                    cardInfo.totalMendep
+                                } Pallet Belum Kembali ke Vuteq Lebih Dari Seminggu</p>
+                                <p className={`text-sm`}>{
+                                    cardInfo.mendep.map(e=>(
+                                        `Customer ` + e['Pallet.Customer.name'] + ' = ' + e.total + ' Pallet, '
+                                    ))
+                                }</p>
+                            </div>
+                        </div>
+                    }
+                    <div className={`grid-cols-4 pt-2 grid gap-5 text-white mb-5`}>
+                        <Card className="bg-blue-500" >
+                            <Text className={`text-xl text-white`}>Total Stok</Text>
+                            <Metric className={`font-bold text-white`}>{cardInfo.total } Pallet</Metric>
+                        </Card>
+                        <Card className="bg-green-500" >
+                            <Text className={`text-xl text-white`}>Stok Tersedia</Text>
+                            <Metric className={`font-bold text-white`}>{cardInfo.stok } Pallet</Metric>
+                        </Card>
+                        <Card className="bg-red-500" >
+                            <Text className={`text-xl text-white`}>Keluar</Text>
+                            <Metric className={`font-bold text-white`}>{cardInfo.keluar } Pallet</Metric>
+                        </Card>
+                        <Card className="bg-orange-500">
+                            <Text className={`text-xl text-white`}>Repair</Text>
+                            <Metric className={`font-bold text-white`}>{cardInfo.repair } Pallet</Metric>
+                        </Card>
+                    </div>
+                    <div className={`w-full flex-col flex gap-5`}>
+                        <Chart2 data={dataChart2} />
+                        {/*<Chart3 data={dataChart3} />*/}
 
-                    {/*<Card className={`overflow-y-scroll]`}>*/}
-                    {/*    <div className={`bg-red-800 text-white p-2 font-semibold`}>*/}
-                    {/*        Detail Stok*/}
-                    {/*    </div>*/}
-                    {/*   <div className={`flex`}>*/}
-                    {/*       <List className={`p-2`}>*/}
-                    {/*           {*/}
-                    {/*               dataChart1.map((item, index) => {*/}
-                    {/*                   if (index < 7) {*/}
-                    {/*                       return (*/}
-                    {/*                           <ListItem className={`text-sm`} key={item.customer}>*/}
-                    {/*                               <span>{item.customer}</span>*/}
-                    {/*                               <span>{item.Total} Pallet</span>*/}
-                    {/*                           </ListItem>*/}
-                    {/*                       )*/}
-                    {/*                   }*/}
-                    {/*               } )}*/}
-                    {/*       </List>*/}
-                    {/*   </div>*/}
-                    {/*</Card>*/}
-                    <Chart1 data={dataChart1} />
-                </div>
-                <div className={`w-full`}>
-                    <div className={`bg-red-800 text-white p-2 font-semibold`}>
-                        Riwayat In/Out Pallet
+                        {/*<Card className={`overflow-y-scroll]`}>*/}
+                        {/*    <div className={`bg-red-800 text-white p-2 font-semibold`}>*/}
+                        {/*        Detail Stok*/}
+                        {/*    </div>*/}
+                        {/*   <div className={`flex`}>*/}
+                        {/*       <List className={`p-2`}>*/}
+                        {/*           {*/}
+                        {/*               dataChart1.map((item, index) => {*/}
+                        {/*                   if (index < 7) {*/}
+                        {/*                       return (*/}
+                        {/*                           <ListItem className={`text-sm`} key={item.customer}>*/}
+                        {/*                               <span>{item.customer}</span>*/}
+                        {/*                               <span>{item.Total} Pallet</span>*/}
+                        {/*                           </ListItem>*/}
+                        {/*                       )*/}
+                        {/*                   }*/}
+                        {/*               } )}*/}
+                        {/*       </List>*/}
+                        {/*   </div>*/}
+                        {/*</Card>*/}
+                        <Chart1 data={dataChart1} />
                     </div>
-                    <div>
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead>
-                            <tr>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Kode Pallet
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Part
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Tujuan
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Operator Out
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Out
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Operator In
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    In
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                            {
-                                history.map((val, index) =>(
-                                    <tr key={index}>
-                                        <td className="px-6 py-4 whitespace-nowrap">{val.id_pallet}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">{val['Pallet'].part}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">{val['Pallet'].customer}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">{val.user_out}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">{
-                                            val['keluar'] ? dayjs(val['keluar']).locale('id').format('DD MMMM YYYY HH:mm') : '-'
-                                        }</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">{val.user_in ?? '-'}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">{
-                                            val['masuk'] ? dayjs(val['masuk']).locale('id').format('DD MMMM YYYY HH:mm') : '-'
-                                        }</td>
-                                    </tr>
-                                ))
-                            }
-                            </tbody>
-                        </table>
+                    <div className={`w-full`}>
+                        <div className={`bg-red-800 text-white p-2 font-semibold`}>
+                            Riwayat In/Out Pallet
+                        </div>
+                        <div>
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead>
+                                <tr>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Kode Pallet
+                                    </th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Part
+                                    </th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Tujuan
+                                    </th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Operator Out
+                                    </th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Out
+                                    </th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Operator In
+                                    </th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        In
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                {
+                                    history.map((val, index) =>(
+                                        <tr key={index}>
+                                            <td className="px-6 py-4 whitespace-nowrap">{val.id_pallet}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap">{val['Pallet'].part}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap">{val['Pallet'].customer}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap">{val.user_out}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap">{
+                                                val['keluar'] ? dayjs(val['keluar']).locale('id').format('DD MMMM YYYY HH:mm') : '-'
+                                            }</td>
+                                            <td className="px-6 py-4 whitespace-nowrap">{val.user_in ?? '-'}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap">{
+                                                val['masuk'] ? dayjs(val['masuk']).locale('id').format('DD MMMM YYYY HH:mm') : '-'
+                                            }</td>
+                                        </tr>
+                                    ))
+                                }
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     )
 }

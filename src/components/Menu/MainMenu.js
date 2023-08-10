@@ -26,6 +26,15 @@ export default function MainMenu({title, data}) {
                             if (e.name === 'Department' && user.role !== 'super') {
                                 return null;
                             }
+                            if (e.name === 'Customer' && user.role !== 'super') {
+                                return null;
+                            }
+                            if (e.name === 'Vehicle' && (user.role !== 'super' || user.role !== 'admin')) {
+                                return null;
+                            }
+                            if (e.name === 'Part' && (user.role !== 'super' || user.role !== 'admin')) {
+                                return null;
+                            }
                             return (
                                 <span key={index} onClick={() => { setNewTab(e.name) }}>{e.name}</span>
                             );

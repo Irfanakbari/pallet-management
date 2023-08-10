@@ -9,6 +9,7 @@ import {dataState, modalState} from "@/context/states";
 import {useForm} from "react-hook-form";
 import AddModalLayout from "@/components/Page/Master/Vehicle/AddModal";
 import EditModalLayout from "@/components/Page/Master/Vehicle/EditModal";
+import Head from "next/head";
 
 export default function Vehicle() {
     const {setVehicle, listVehicle} = dataState()
@@ -105,10 +106,14 @@ export default function Vehicle() {
     };
 
     return(
-        <div className={`h-full bg-white`}>
-            {modalDelete && <DeleteModal data={selectedCell} setCloseModal={setModalDelete} action={deleteData} />}
-            {modalAdd && <AddModalLayout onSubmit={handleSubmit(submitData)} reset={reset} register={register} />}
-            {modalEdit && (<EditModalLayout onSubmit={handleSubmit(editData)} reset={reset} register={register} selectedCell={selectedCell} />)}
+        <>
+            <Head>
+                <title>Vehicle | PT Vuteq Indonesia</title>
+            </Head>
+            <div className={`h-full bg-white`}>
+                {modalDelete && <DeleteModal data={selectedCell} setCloseModal={setModalDelete} action={deleteData} />}
+                {modalAdd && <AddModalLayout onSubmit={handleSubmit(submitData)} reset={reset} register={register} />}
+                {modalEdit && (<EditModalLayout onSubmit={handleSubmit(editData)} reset={reset} register={register} selectedCell={selectedCell} />)}
                 <div className={`bg-[#2589ce] py-1.5 px-2 text-white flex flex-row justify-between`}>
                     <h2 className={`font-bold text-[14px]`}>Filter</h2>
                     <div className={`flex items-center`}>
@@ -191,6 +196,7 @@ export default function Vehicle() {
                         </table>
                     </div>
                 </div>
-        </div>
+            </div>
+        </>
     )
 }

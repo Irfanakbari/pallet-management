@@ -106,7 +106,7 @@ export default function LapStok() {
             },
         ];
         dataStok.map((item, index) => {
-            const row = sheet.addRow({
+            sheet.addRow({
                 no: index + 1,
                 name: item.part,
                 stok: item.Total,
@@ -230,7 +230,7 @@ function PrintAll({ data }) {
 
     const handlePrint = useReactToPrint({
         content: reactToPrintContent,
-        documentTitle: "AwesomeFileName",
+        documentTitle: "Laporan Stok Pallet",
         onAfterPrint: ()=>setModal(false),
         removeAfterPrint: true,
     });
@@ -262,18 +262,18 @@ function PrintAll({ data }) {
                                     <table className="print-table w-full">
                                         <thead>
                                         <tr>
-                                            <th className="text-center p-2 bg-gray-100 w-10">#</th>
-                                            <th className="p-2 bg-gray-100">Part</th>
-                                            <th className="p-2 bg-gray-100">Total Keluar</th>
-                                            <th className="p-2 bg-gray-100">Total Maintenance</th>
-                                            <th className="p-2 bg-gray-100">Total Stok</th>
+                                            <th className="text-centerbg-gray-100 w-10">#</th>
+                                            <th className="py-2 bg-gray-100">Part</th>
+                                            <th className="py-2 bg-gray-100">Total Keluar</th>
+                                            <th className="py-2 bg-gray-100">Total Maintenance</th>
+                                            <th className="py-2 bg-gray-100">Total Stok</th>
                                         </tr>
                                         </thead>
                                         <tbody>
                                         {data.map((e, index) => (
                                             <>
                                                 <tr className={`font-semibold border-b border-gray-500`} key={index}>
-                                                    <td className="text-center p-1.5">{index + 1}</td>
+                                                    <td className="text-center py-1">{index + 1}</td>
                                                     <td className="px-4">{e['part']}</td>
                                                     <td className="px-4">{e['Keluar']}</td>
                                                     <td className="px-4">{e['Maintenance']}</td>

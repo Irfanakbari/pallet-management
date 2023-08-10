@@ -39,13 +39,13 @@ async function handler(req, res) {
                 const hash = bcrypt.hashSync(newUser.password, 10);
 
                 await connection.transaction(async (t) => {
-                    try {
-                        const user = await User.create({
-                            username: newUser.username,
-                            password: hash,
-                            role: newUser.role
-                        }, { transaction: t });
+                    const user = await User.create({
+                        username: newUser.username,
+                        password: hash,
+                        role: newUser.role
+                    }, { transaction: t });
 
+                    if (newUser.department) {
                         // Buat array untuk menyimpan promise pembuatan DepartmentUser
                         const departmentUserPromises = newUser.department.map(async (departmentId) => {
                             return DepartmentUser.create({
@@ -56,14 +56,6 @@ async function handler(req, res) {
 
                         // Tunggu hingga semua promise pembuatan DepartmentUser selesai
                         await Promise.all(departmentUserPromises);
-                    } catch (error) {
-                        // Jika terjadi error dalam operasi pembuatan user atau department user,
-                        // lakukan rollback terhadap transaksi
-                        await t.rollback();
-                        return res.status(500).json({
-                            ok: false,
-                            data: "Internal Server Error"
-                        });
                     }
                 });
 

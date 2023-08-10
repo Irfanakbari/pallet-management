@@ -26,7 +26,7 @@ export default function Index() {
                     progress: undefined,
                     theme: "colored",
                 });
-                router.push('/home')
+                router.replace('/home')
             })
         } catch (e) {
             toast.error(e.response.data['data'], {

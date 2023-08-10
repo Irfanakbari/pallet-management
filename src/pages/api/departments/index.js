@@ -5,10 +5,10 @@ async function handler(req, res) {
     switch (req.method) {
         case 'GET':
             try {
-                if (req.user.role !== 'super' && req.user.role !== 'admin') {
-                    res.status(401).json({
+                if (req.user.role === 'operator') {
+                    return res.status(401).json({
                         ok: false,
-                        data: "Role must be admin"
+                        data: "Operator Tidak Boleh Mengakses Halaman Ini"
                     });
                 }
                 const departments = await Department.findAll()

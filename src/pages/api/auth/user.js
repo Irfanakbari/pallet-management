@@ -16,6 +16,11 @@ async function handler(req, res) {
                 });
             }
             break;
+        default:
+            res.status(405).json({
+                ok: false,
+                data: "Method Not Allowed"
+            });
     }
 }
 

@@ -6,7 +6,6 @@ import connection from "@/config/database";
 import checkCookieMiddleware from "@/pages/api/middleware";
 import Part from "@/models/Part";
 import {Op} from "sequelize";
-import TempHistoryUser from "@/models/TempHistoryUser";
 import TempHistory from "@/models/TempHistoryUser";
 
 async function handler(req, res) {
@@ -14,10 +13,10 @@ async function handler(req, res) {
         case 'GET':
             const { customer, vehicle, page, start, end, search, part, status } = req.query;
             try {
-                if (req.user.role !== 'super' && req.user.role !== 'admin') {
+                if (req.user.role === 'operator') {
                     return res.status(401).json({
                         ok: false,
-                        data: "Role must be admin"
+                        data: "Operator Tidak Boleh Mengakses Halaman Ini"
                     });
                 }
                 let histories;
@@ -113,7 +112,7 @@ async function handler(req, res) {
                         limit: 20,
                         offset: offset,
                     });
-                } else if (req.user.role === 'admin') {
+                } else if (req.user.role === 'admin' || req.user.role === 'viewer') {
                     // Jika user memiliki role 'admin', tampilkan data Part dengan departemen yang sesuai
                     const allowedDepartments = req.department.map((department) => department.department_id);
 

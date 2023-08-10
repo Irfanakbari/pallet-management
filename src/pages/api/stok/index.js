@@ -8,10 +8,10 @@ async function handler(req, res) {
         case 'GET':
             try {
                 const {customer, department} = req.query;
-                if (req.user.role !== 'super' && req.user.role !== 'admin') {
+                if (req.user.role === 'operator') {
                     return res.status(401).json({
                         ok: false,
-                        data: "Role must be admin"
+                        data: "Operator Tidak Boleh Mengakses Halaman Ini"
                     });
                 }
                 let stok;
@@ -88,7 +88,7 @@ async function handler(req, res) {
                     })
                     stok = await Promise.all(stokPromises);
 
-                } else if (req.user.role === 'admin') {
+                } else if (req.user.role === 'admin' || req.user.role === 'viewer') {
                     // Jika user memiliki role 'admin', tampilkan data Part dengan departemen yang sesuai
                     const allowedDepartments = req.department.map((department) => department.department_id);
 

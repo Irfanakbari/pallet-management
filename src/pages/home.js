@@ -1,4 +1,3 @@
-import Head from "next/head";
 import HeadTitle from "@/components/Head/HeadTitle";
 import {useEffect} from "react";
 import Customer from "@/components/Page/Master/Customer/Customer";
@@ -79,9 +78,6 @@ export default function Home() {
 
     return (
         <>
-            <Head>
-                <title>Home | PT Vuteq Indonesia</title>
-            </Head>
             <div className={`p-2 min-h-screen flex overflow-x-scroll`}>
                 <div className={`w-full bg-white border border-gray-500 h-full`}>
                     <HeadTitle user={user} />
@@ -109,9 +105,9 @@ export default function Home() {
                     </div>
                     <div className="w-full bg-white p-2 h-full overflow-y-scroll">
                         {
-                            (user.role === 'admin' || user.role === 'super') ? <div className="bg-[#EBEBEB] p-2 h-full">
+                            (user.role !== 'operator') ? <div className="bg-[#EBEBEB] p-2 h-full">
                                     {activeMenu === "Dashboard" && user.role === 'super' && <Dashboard />}
-                                    {activeMenu === "Dashboard" && user.role === 'admin' && <DashboardAdmin />}
+                                    {(activeMenu === "Dashboard" && (user.role === 'admin' || user.role === 'viewer') ) && <DashboardAdmin />}
                                     {activeMenu === "Department" && <Department />}
                                     {activeMenu === "Customer" && <Customer />}
                                     {activeMenu === "Vehicle" && <Vehicle />}
