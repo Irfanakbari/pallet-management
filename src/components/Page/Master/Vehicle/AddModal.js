@@ -1,7 +1,5 @@
-import React from "react";
 import ModalLayout from "@/components/Modal/AddModalLayout";
 import {dataState} from "@/context/states";
-import {list} from "postcss";
 
 export default function AddModalLayout({ onSubmit, reset, register }) {
     const {listCustomer, listDepartment} = dataState()

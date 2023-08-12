@@ -9,6 +9,7 @@ import PaginationSelect from "@/components/PaginationSelect";
 import {showErrorToast} from "@/utils/toast";
 import FilterModal from "@/components/Page/Laporan/LapRiwayat/FilterModal";
 import {filterState, modalState} from "@/context/states";
+import Head from "next/head";
 
 export default function LapRiwayat() {
     const [dataHistory, setDataHistory] = useState([]);
@@ -21,18 +22,15 @@ export default function LapRiwayat() {
         startDateValue,
         endDateValue,
     } = filterState();
-
     const [selectedCell, setSelectedCell] = useState(null);
-
     const [searchTerm, setSearchTerm] = useState('');
     const [filters, setFilters] = useState([]);
-
 
     useEffect(() => {
         fetchData();
     }, []);
 
-    const getHistory = async (e) => {
+    const getFilteredData = async (e) => {
         e.preventDefault()
         try {
             const response = await axios.get(`/api/history?customer=${custFilterValue}&vehicle=${vehicleFilterValue}&part=${partFilterValue}&status=${statusFilterValue}&start=${startDateValue}&end=${endDateValue}&page=1`);
@@ -71,19 +69,14 @@ export default function LapRiwayat() {
     const isMoreThanAWeekAgoAndNoEntry = (keluar, masuk) => {
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
         // Parse tanggal 'keluar' menjadi objek Date
         const keluarDate = new Date(keluar);
-
         // Memeriksa apakah 'keluarDate' lebih dari seminggu lalu
         const isMoreThanAWeekAgo = keluarDate < oneWeekAgo;
-
         // Memeriksa apakah 'masuk' kosong atau bernilai null
         const isEntryEmpty = !masuk || false;
-
         return isMoreThanAWeekAgo && isEntryEmpty;
     };
-
 
     const saveExcel = async (e) => {
         e.preventDefault();
@@ -190,7 +183,7 @@ export default function LapRiwayat() {
             },
         ];
         filters.map((item, index) => {
-            const row = sheet.addRow({
+            sheet.addRow({
                 no: index + 1,
                 id: item.id_pallet,
                 customer: `${item['Pallet']['Customer'].kode} - ${item['Pallet']['Customer'].name}`,
@@ -215,100 +208,105 @@ export default function LapRiwayat() {
 
 
     return (
-        <div className="h-full bg-white">
-            <div className="bg-[#2589ce] py-1.5 px-2 text-white flex flex-row justify-between">
-                <h2 className="font-bold text-[14px]">Filter</h2>
-                <div className="flex items-center">
-                    <BiSolidUpArrow size={10} />
-                </div>
-            </div>
-            <div className="w-full gap-8 flex items-center bg-white px-3 py-2">
-                <div className="flex flex-row items-center">
-                    <label className="text-sm font-semibold mr-3">Cari :</label>
-                    <input
-                        type="text"
-                        className="border border-gray-300 rounded mr-3"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                    <ImCross
-                        className="hover:cursor-pointer text-blue-700 mr-4"
-                        onClick={getHistory}
-                    />
-                    <button
-                        className="bg-green-500 py-1 px-2 text-white font-semibold text-sm"
-                        onClick={handleSearch}
-                    >
-                        Dapatkan Data
-                    </button>
-                </div>
-                {modalFilter&&
-                    <FilterModal onSubmit={getHistory}/>
-                }
-            </div>
-            <div className="w-full bg-white h-4 border border-gray-500" />
-            <div className="w-full bg-white p-2">
-                <div className="w-full bg-[#3da0e3] py-0.5 px-1 text-white flex flex-row">
-                    <div className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
-                        <BiPrinter size={12} />
-                        <p className="text-white font-bold text-sm">Cetak</p>
-                    </div>
-                    <div onClick={saveExcel} className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
-                        <AiFillFileExcel size={12} />
-                        <p className="text-white font-bold text-sm">Excel</p>
-                    </div>
-                    <div onClick={fetchData} className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
-                        <BiRefresh size={12} />
-                        <p className="text-white font-bold text-sm">Refresh</p>
-                    </div>
-                    <div onClick={()=>setModalFilter(true)} className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
-                        <BiFilter size={12} />
-                        <p className="text-white font-bold text-sm">Filter</p>
+        <>
+            <Head>
+                <title>Laporan Riwayat | PT Vuteq Indonesia</title>
+            </Head>
+            <div className="h-full bg-white">
+                <div className="bg-[#2589ce] py-1.5 px-2 text-white flex flex-row justify-between">
+                    <h2 className="font-bold text-[14px]">Filter</h2>
+                    <div className="flex items-center">
+                        <BiSolidUpArrow size={10} />
                     </div>
                 </div>
-                <table className="w-full">
-                    <thead>
-                    <tr>
-                        <th className="py-2 bg-gray-100 text-left w-10">#</th>
-                        <th className="py-2 bg-gray-100 text-left">Kode Pallet</th>
-                        <th className="py-2 bg-gray-100 text-left">Customer</th>
-                        <th className="py-2 bg-gray-100 text-left">Vehicle</th>
-                        <th className="py-2 bg-gray-100 text-left">Part</th>
-                        <th className="py-2 bg-gray-100 text-left">Keluar</th>
-                        <th className="py-2 bg-gray-100 text-left">Operator Out</th>
-                        <th className="py-2 bg-gray-100 text-left">Masuk</th>
-                        <th className="py-2 bg-gray-100 text-left">Operator In</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {
-                        filters.map((e, index) => (
-                            <tr
-                                className={`${selectedCell === index ? 'bg-[#85d3ff]' : ''} ${isMoreThanAWeekAgoAndNoEntry(e['keluar'], e['masuk']) ? 'bg-red-500 text-white' : ''} text-sm font-semibold border-b border-gray-500`}
-                                key={index}
-                                onClick={() => setSelectedCell(index)}
-                            >
-                                <td className="text-center p-1.5">{index + 1}</td>
-                                <td>{e['id_pallet']}</td>
-                                <td>{e['Pallet']['Customer']['kode'] + ' - ' + e['Pallet']['Customer']['name']}</td>
-                                <td>{e['Pallet']['Vehicle']['kode'] + ' - ' + e['Pallet']['Vehicle']['name']}</td>
-                                <td>{e['Pallet']['Part']['kode'] + ' - ' + e['Pallet']['Part']['name']}</td>
-                                <td>{e['keluar'] ? dayjs(e['keluar']).locale('id').format('DD MMMM YYYY HH:mm') : '-'}</td>
-                                <td>{e['user_out'] ?? '-'}</td>
-                                <td>{e['masuk'] ? dayjs(e['masuk']).locale('id').format('DD MMMM YYYY HH:mm') : '-'}</td>
-                                <td className="px-4">{e['user_in'] ?? '-'}</td>
-                            </tr>
-                        ))
+                <div className="w-full gap-8 flex items-center bg-white px-3 py-2">
+                    <div className="flex flex-row items-center">
+                        <label className="text-sm font-semibold mr-3">Cari :</label>
+                        <input
+                            type="text"
+                            className="border border-gray-300 rounded mr-3"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        <ImCross
+                            className="hover:cursor-pointer text-blue-700 mr-4"
+                            onClick={getFilteredData}
+                        />
+                        <button
+                            className="bg-green-500 py-1 px-2 text-white font-semibold text-sm"
+                            onClick={handleSearch}
+                        >
+                            Dapatkan Data
+                        </button>
+                    </div>
+                    {modalFilter&&
+                        <FilterModal onSubmit={getFilteredData}/>
                     }
-                    </tbody>
-                </table>
-                <br/>
-                <PaginationSelect
-                    totalPages={dataHistory['totalPages']}
-                    currentPage={dataHistory['currentPage']}
-                    onPageChange={handlePageChange}
-                />
+                </div>
+                <div className="w-full bg-white h-4 border border-gray-500" />
+                <div className="w-full bg-white p-2">
+                    <div className="w-full bg-base py-0.5 px-1 text-white flex flex-row">
+                        <div className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
+                            <BiPrinter size={12} />
+                            <p className="text-white font-bold text-sm">Cetak</p>
+                        </div>
+                        <div onClick={saveExcel} className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
+                            <AiFillFileExcel size={12} />
+                            <p className="text-white font-bold text-sm">Excel</p>
+                        </div>
+                        <div onClick={fetchData} className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
+                            <BiRefresh size={12} />
+                            <p className="text-white font-bold text-sm">Refresh</p>
+                        </div>
+                        <div onClick={()=>setModalFilter(true)} className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
+                            <BiFilter size={12} />
+                            <p className="text-white font-bold text-sm">Filter</p>
+                        </div>
+                    </div>
+                    <table className="w-full">
+                        <thead>
+                        <tr>
+                            <th className="py-2 bg-gray-100 text-left w-10">#</th>
+                            <th className="py-2 bg-gray-100 text-left">Kode Pallet</th>
+                            <th className="py-2 bg-gray-100 text-left">Customer</th>
+                            <th className="py-2 bg-gray-100 text-left">Vehicle</th>
+                            <th className="py-2 bg-gray-100 text-left">Part</th>
+                            <th className="py-2 bg-gray-100 text-left">Keluar</th>
+                            <th className="py-2 bg-gray-100 text-left">Operator Out</th>
+                            <th className="py-2 bg-gray-100 text-left">Masuk</th>
+                            <th className="py-2 bg-gray-100 text-left">Operator In</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {
+                            filters.map((e, index) => (
+                                <tr
+                                    className={`${selectedCell === index ? 'bg-[#85d3ff]' : ''} ${isMoreThanAWeekAgoAndNoEntry(e['keluar'], e['masuk']) ? 'bg-red-500 text-white' : ''} text-sm font-semibold border-b border-gray-500`}
+                                    key={index}
+                                    onClick={() => setSelectedCell(index)}
+                                >
+                                    <td className="text-center p-1.5">{index + 1}</td>
+                                    <td>{e['id_pallet']}</td>
+                                    <td>{e['Pallet']['Customer']['kode'] + ' - ' + e['Pallet']['Customer']['name']}</td>
+                                    <td>{e['Pallet']['Vehicle']['kode'] + ' - ' + e['Pallet']['Vehicle']['name']}</td>
+                                    <td>{e['Pallet']['Part']['kode'] + ' - ' + e['Pallet']['Part']['name']}</td>
+                                    <td>{e['keluar'] ? dayjs(e['keluar']).locale('id').format('DD MMMM YYYY HH:mm') : '-'}</td>
+                                    <td>{e['user_out'] ?? '-'}</td>
+                                    <td>{e['masuk'] ? dayjs(e['masuk']).locale('id').format('DD MMMM YYYY HH:mm') : '-'}</td>
+                                    <td className="px-4">{e['user_in'] ?? '-'}</td>
+                                </tr>
+                            ))
+                        }
+                        </tbody>
+                    </table>
+                    <br/>
+                    <PaginationSelect
+                        totalPages={dataHistory['totalPages']}
+                        currentPage={dataHistory['currentPage']}
+                        onPageChange={handlePageChange}
+                    />
+                </div>
             </div>
-        </div>
+        </>
     );
 }

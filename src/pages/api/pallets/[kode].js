@@ -1,5 +1,6 @@
 import Pallet from "@/models/Pallet";
 import checkCookieMiddleware from "@/pages/api/middleware";
+import logger from "@/utils/logger";
 
 async function handler(req, res) {
     switch (req.method) {
@@ -22,12 +23,18 @@ async function handler(req, res) {
                     data: "Valet deleted successfully"
                 });
             } catch (e) {
+                logger.error(e.message);
                 res.status(500).json({
                     ok: false,
                     data: "Internal Server Error"
                 });
             }
             break;
+        default:
+            res.status(405).json({
+                ok: false,
+                data: "Method Not Allowed"
+            });
     }
 }
 

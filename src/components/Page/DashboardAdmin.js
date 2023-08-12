@@ -8,10 +8,13 @@ import dayjs from "dayjs";
 import Chart2 from "@/components/Chart/DashboardChart2";
 import Image from "next/image";
 import Head from "next/head";
+import {modalState} from "@/context/states";
+import DetailPalletSlow from "@/components/Modal/DetailPalletSlow";
 
 export default function DashboardAdmin() {
     const [history, setHistory] = useState([])
-
+    const [selectedCustomer, setSelectedCustomer] = useState(null);
+    const {modal, setModal} = modalState()
     const [cardInfo, setCardInfo] = useState({
         stok: '-',
         total: '-',
@@ -87,6 +90,7 @@ export default function DashboardAdmin() {
             <Head>
                 <title>Dashboard | PT Vuteq Indonesia</title>
             </Head>
+            {modal && <DetailPalletSlow selected={selectedCustomer} />}
             <div className={`bg-white h-full`} ref={elemRef}>
                 <div className={`bg-[#2589ce] py-1.5 px-2 text-white flex flex-row justify-between`}>
                     <div className={`flex flex-row justify-between w-full mr-1 items-center`}>
@@ -112,11 +116,19 @@ export default function DashboardAdmin() {
                                 <p>{
                                     cardInfo.totalMendep
                                 } Pallet Belum Kembali ke Vuteq Lebih Dari Seminggu</p>
-                                <p className={`text-sm`}>{
-                                    cardInfo.mendep.map(e=>(
-                                        `Customer ` + e['Pallet.Customer.name'] + ' = ' + e.total + ' Pallet, '
-                                    ))
-                                }</p>
+                                <p className={`text-sm`}>
+                                    {cardInfo.mendep.map(e => (
+                                        <span
+                                            key={e['Pallet.Customer.name']}
+                                            onClick={() => {
+                                                setSelectedCustomer(e['Pallet.Customer.name'])
+                                                setModal(true)
+                                            }}
+                                            className={`cursor-pointer text-blue-500 hover:text-red-500`}>
+                                        {`${e['Pallet.Customer.name']} = ${e.total} Pallet, `}
+                                     </span>
+                                    ))}
+                                </p>
                             </div>
                         </div>
                     }

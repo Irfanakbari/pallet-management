@@ -3,18 +3,18 @@ import Customer from "@/models/Customer";
 import Part from "@/models/Part";
 import {Op} from "sequelize";
 import Vehicle from "@/models/Vehicle";
+import logger from "@/utils/logger";
 
 async function handler(req, res) {
     switch (req.method) {
         case 'GET':
+            if (req.user.role === 'operator') {
+                return res.status(401).json({
+                    ok: false,
+                    data: "Operator Tidak Boleh Mengakses Halaman Ini"
+                });
+            }
             try {
-                if (req.user.role === 'operator') {
-                    return res.status(401).json({
-                        ok: false,
-                        data: "Operator Tidak Boleh Mengakses Halaman Ini"
-                    });
-                }
-
                 let parts;
                 if (req.user.role === 'super') {
                     // Jika user memiliki role 'super', tampilkan semua data Part tanpa batasan departemen
@@ -45,22 +45,22 @@ async function handler(req, res) {
                     data: parts
                 });
             } catch (e) {
+                logger.error(e.message);
                 res.status(500).json({
                     ok: false,
                     data: "Internal Server Error"
                 });
             }
             break;
-
         case 'POST':
-            const { name, customer, kode, vehicle } = req.body;
+            if (req.user.role !== 'super' && req.user.role !== 'admin') {
+                return res.status(401).json({
+                    ok: false,
+                    data: "Role must be admin"
+                });
+            }
             try {
-                if (req.user.role !== 'super' && req.user.role !== 'admin') {
-                    return res.status(401).json({
-                        ok: false,
-                        data: "Role must be admin"
-                    });
-                }
+                const { name, customer, kode, vehicle } = req.body;
                 const vehic = await Vehicle.findByPk(vehicle);
                 await Part.create({
                     kode: customer + vehic.dataValues.department + kode,
@@ -70,6 +70,7 @@ async function handler(req, res) {
                 });
                 res.status(200).json({ success: true });
             } catch (error) {
+                logger.error(e.message);
                 if (error.name === 'SequelizeUniqueConstraintError') {
                     const field = error.errors[0].path;
                     const message = `Duplikat data pada kolom ${field}`;
@@ -78,9 +79,14 @@ async function handler(req, res) {
                     res.status(500).json({ success: false, error: error.message });
                 }
             }
+            break;
+        default:
+            res.status(405).json({
+                ok: false,
+                data: "Method Not Allowed"
+            });
     }
 }
 
 const protectedAPIHandler = checkCookieMiddleware(handler);
-
 export default protectedAPIHandler;

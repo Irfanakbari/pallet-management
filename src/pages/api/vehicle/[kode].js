@@ -1,16 +1,17 @@
 import Vehicle from "@/models/Vehicle";
 import checkCookieMiddleware from "@/pages/api/middleware";
+import logger from "@/utils/logger";
 
 async function handler(req, res) {
     switch (req.method) {
         case 'DELETE':
+            if (req.user.role !== 'super' && req.user.role !== 'admin') {
+                res.status(401).json({
+                    ok: false,
+                    data: "Role must be admin"
+                });
+            }
             try {
-                if (req.user.role !== 'super' && req.user.role !== 'admin') {
-                    res.status(401).json({
-                        ok: false,
-                        data: "Role must be admin"
-                    });
-                }
                 const projectId = req.query.kode; // Anggap req.body.id berisi ID pelanggan yang akan dihapus
                 await Vehicle.destroy({
                     where: {
@@ -22,6 +23,7 @@ async function handler(req, res) {
                     data: "Project deleted successfully"
                 });
             } catch (e) {
+                logger.error(e.message);
                 res.status(500).json({
                     ok: false,
                     data: "Internal Server Error"
@@ -29,13 +31,13 @@ async function handler(req, res) {
             }
             break;
         case 'PUT':
+            if (req.user.role !== 'super' && req.user.role !== 'admin') {
+                res.status(401).json({
+                    ok: false,
+                    data: "Role must be admin"
+                });
+            }
             try {
-                if (req.user.role !== 'super' && req.user.role !== 'admin') {
-                    res.status(401).json({
-                        ok: false,
-                        data: "Role must be admin"
-                    });
-                }
                 const customerId = req.query.kode; // Anggap req.body.id berisi ID pelanggan yang akan dihapus
                 const newVehicle = req.body; // Anggap req.body berisi data pelanggan baru
                 await Vehicle.update(newVehicle,{
@@ -48,15 +50,20 @@ async function handler(req, res) {
                     data: "Success"
                 });
             } catch (e) {
+                logger.error(e.message);
                 res.status(500).json({
                     ok: false,
                     data: "Internal Server Error"
                 });
             }
             break;
+        default:
+            res.status(405).json({
+                ok: false,
+                data: "Method Not Allowed"
+            });
     }
 }
 
 const protectedAPIHandler = checkCookieMiddleware(handler);
-
 export default protectedAPIHandler;

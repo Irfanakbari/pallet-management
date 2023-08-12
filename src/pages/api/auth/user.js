@@ -1,4 +1,5 @@
 import checkCookieMiddleware from "@/pages/api/middleware";
+import logger from "@/utils/logger";
 
 async function handler(req, res) {
     switch (req.method) {
@@ -8,8 +9,8 @@ async function handler(req, res) {
                     ok: true,
                     data: req.user,
                 });
-
             } catch (e) {
+                logger.error(e.message);
                 res.status(500).json({
                     ok: false,
                     data: "Internal Server Error"
@@ -25,6 +26,5 @@ async function handler(req, res) {
 }
 
 const protectedAPIHandler = checkCookieMiddleware(handler);
-
 export default protectedAPIHandler;
 

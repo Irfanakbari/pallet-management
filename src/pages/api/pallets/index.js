@@ -4,18 +4,18 @@ import Vehicle from "@/models/Vehicle";
 import {Op} from "sequelize";
 import checkCookieMiddleware from "@/pages/api/middleware";
 import Part from "@/models/Part";
+import logger from "@/utils/logger";
 
 async function handler(req, res) {
     switch (req.method) {
         case 'GET':
+            if (req.user.role === 'operator') {
+                return res.status(401).json({
+                    ok: false,
+                    data: "Operator Tidak Boleh Mengakses Halaman Ini"
+                });
+            }
             try {
-                if (req.user.role === 'operator') {
-                    return res.status(401).json({
-                        ok: false,
-                        data: "Operator Tidak Boleh Mengakses Halaman Ini"
-                    });
-                }
-
                 const { customer, vehicle, part, search } = req.query;
                 // Menentukan parameter halaman dan batasan data
                 const page = parseInt(req.query.page) || 1; // Halaman saat ini (default: 1)
@@ -74,24 +74,22 @@ async function handler(req, res) {
                     currentPage: page,
                 });
             } catch (e) {
+                logger.error(e.message);
                 res.status(500).json({
                     ok: false,
                     data: "Internal Server Error",
                 });
             }
             break;
-
         case 'POST':
-            const { part, name, total } = req.body;
-
+            if (req.user.role !== 'super' && req.user.role !== 'admin') {
+                res.status(401).json({
+                    ok: false,
+                    data: "Role must be admin"
+                });
+            }
             try {
-                if (req.user.role !== 'super' && req.user.role !== 'admin') {
-                    res.status(401).json({
-                        ok: false,
-                        data: "Role must be admin"
-                    });
-                }
-
+                const { part, name, total } = req.body;
                 const parts = await Part.findOne({
                     where: {
                         kode: part
@@ -152,11 +150,17 @@ async function handler(req, res) {
                 res.status(200).json({ success: true });
 
             } catch (error) {
+                logger.error(e.message);
                 res.status(500).json({ success: false, error: 'Failed to save Pallet' });
             }
+            break;
+        default:
+            res.status(405).json({
+                ok: false,
+                data: "Method Not Allowed"
+            });
     }
 }
 
 const protectedAPIHandler = checkCookieMiddleware(handler);
-
 export default protectedAPIHandler;

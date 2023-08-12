@@ -14,13 +14,9 @@ import Head from "next/head";
 export default function Part() {
     const {setPart, listPart} = dataState()
     const {setModalAdd, modalAdd, modalEdit, setModalEdit, modalDelete,setModalDelete} = modalState()
-
-
     const [selectedCell, setSelectedCell] = useState('')
-
     const [searchTerm, setSearchTerm] = useState('');
     const [filters, setFilters] = useState([])
-
     const {
         register,
         handleSubmit,
@@ -133,7 +129,7 @@ export default function Part() {
                 </div>
                 <div className={`w-full h-4 border border-gray-500`} />
                 <div className={`w-full p-2`}>
-                    <div className={`w-full bg-[#3da0e3] py-0.5 px-1 text-white flex flex-row`}>
+                    <div className={`w-full bg-base py-0.5 px-1 text-white flex flex-row`}>
                         <div
                             onClick={()=> setModalAdd(true)}
                             className={`flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer`}>

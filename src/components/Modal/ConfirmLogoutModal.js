@@ -1,5 +1,5 @@
 export default function ConfirmLogoutModal({setCloseModal, action}) {
-    return(
+    return (
             <div className={`fixed bg-black bg-opacity-20 h-full flex items-center justify-center top-0 left-0 z-[5000] w-full text-center overflow-y-auto overflow-x-hidden outline-none`}>
                 <div className={`w-1/4 rounded bg-white`}>
                     <div className={`w-full bg-[#f17373] text-center font-bold py-1 text-white text-sm`}>

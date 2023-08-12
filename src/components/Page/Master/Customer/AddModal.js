@@ -1,8 +1,6 @@
-import React from "react";
 import ModalLayout from "@/components/Modal/AddModalLayout";
 
 export default function AddModalLayout({ onSubmit, reset, register }) {
-
     return (
         <ModalLayout onSubmit={onSubmit} reset={reset}>
             <div className="border border-gray-300 w-full p-3 flex flex-col gap-3 text-sm">

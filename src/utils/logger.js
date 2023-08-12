@@ -1,10 +1,18 @@
-import log4js from "log4js";
+import winston from "winston";
 
-log4js.configure({
-    appenders: { cheese: { type: "file", filename: "db.log" } },
-    categories: { default: { appenders: ["cheese"], level: "debug" } },
+const logger = winston.createLogger({
+    level: 'info',
+    format: winston.format.combine(
+        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        winston.format.errors({ stack: true }),
+        winston.format.splat(),
+        winston.format.printf(({ timestamp, level, message, stack }) => {
+            return `[${timestamp}] ${level}: ${stack || message}`;
+        })
+    ),
+    transports: [
+        new winston.transports.File({ filename: 'app-error.log', level: 'error' }),
+    ],
 });
 
-const logger = log4js.getLogger("cheese");
-
-export default logger
+export default logger;

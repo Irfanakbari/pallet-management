@@ -11,6 +11,7 @@ module.exports = {
     extend: {
       colors: {
         // light mode
+        'base': '#3da0e3',
         tremor: {
           brand: {
             faint: "#eff6ff", // blue-50

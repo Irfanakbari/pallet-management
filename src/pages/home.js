@@ -1,45 +1,48 @@
+import { useEffect } from "react";
+import { ImCross } from "react-icons/im";
+import axios from "axios";
+import { getCookie } from "cookies-next";
+import { useRouter } from "next/router";
+
+// Import State
+import { dataState, useStoreTab } from "@/context/states";
+import { showErrorToast, showSuccessToast } from "@/utils/toast";
+import { laporan, master } from "@/utils/constants";
+
+// Import Component
 import HeadTitle from "@/components/Head/HeadTitle";
-import {useEffect} from "react";
 import Customer from "@/components/Page/Master/Customer/Customer";
 import Dashboard from "@/components/Page/Dashboard";
-import {ImCross} from "react-icons/im";
 import Pallet from "@/components/Page/Master/Pallet/Pallet";
 import LapRiwayat from "@/components/Page/Laporan/LapRiwayat/LapRiwayat";
-import LapMaintenance from "@/components/Page/Laporan/LapMaintenance";
+import LapMaintenance from "@/components/Page/Laporan/LapMaintenance/LapMaintenance";
 import User from "@/components/Page/Master/User";
-import {getCookie} from "cookies-next";
-import axios from "axios";
 import Vehicle from "@/components/Page/Master/Vehicle/Vehicle";
 import Part from "@/components/Page/Master/Part/Part";
-import MainMenu from "@/components/Menu/MainMenu";
-import {laporan, master} from "@/components/Menu/ListMenu";
-import {dataState, useStoreTab} from "@/context/states";
-import {showErrorToast, showSuccessToast} from "@/utils/toast";
-import {useRouter} from "next/router";
+import MainMenu from "@/components/MainMenu/MainMenu";
 import Department from "@/components/Page/Master/Department/Department";
 import DashboardAdmin from "@/components/Page/DashboardAdmin";
 import LapStok from "@/components/Page/Laporan/LapStok/LapStok";
 
-
 export default function Home() {
     const { listTab, setCloseTab, activeMenu, setActiveMenu } = useStoreTab();
-    const {setCustomer, setVehicle, setPart, setListDepartment, user, setUser} = dataState()
-    const router = useRouter()
+    const { setCustomer, setVehicle, setPart, setListDepartment, user, setUser } = dataState();
+    const router = useRouter();
 
+    useEffect(() => {
+        getCurrentUser();
+        fetchData();
+    }, []);
 
-    useEffect(()=>{
-        getCurrentUser()
-        fetchData()
-    },[])
-
-    const logoutHandle = (e) => {
-        e.preventDefault()
-        axios.get('/api/auth/logout').then(async () => {
-            showSuccessToast('Logout Berhasil')
-            await router.replace('/')
-        }).catch(()=>{
+    const logoutHandle = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.get('/api/auth/logout');
+            showSuccessToast('Logout Berhasil');
+            await router.replace('/');
+        } catch (error) {
             showErrorToast("Gagal Logout");
-        })
+        }
     }
 
     const fetchData = async () => {
@@ -55,25 +58,28 @@ export default function Home() {
             setListDepartment(response2.data['data']);
             setVehicle(response3.data['data']);
             setPart(response4.data['data']);
-            // Do other necessary processing here
+            // Lakukan pemrosesan lain yang diperlukan di sini
         } catch (error) {
-            showErrorToast("Gagal Fetch Data");
+            showErrorToast("Gagal Mengambil Data");
         }
     };
 
-
-    function getCurrentUser(){
-        axios.get('/api/auth/user').then(r =>  {
-            if (r.data['data'] === null){
-                axios.get('/api/auth/logout').then(async () => {
-                    showSuccessToast('Logout Berhasil')
-                    await router.replace('/').then(()=>router.reload)
-                }).catch(()=>{
-                    showErrorToast("Gagal Logout");
-                })
-            }
-            setUser(r.data['data'])
-        });
+    function getCurrentUser() {
+        axios.get('/api/auth/user')
+            .then(response => {
+                if (response.data['data'] === null) {
+                    axios.get('/api/auth/logout')
+                        .then(async () => {
+                            showSuccessToast('Logout Berhasil');
+                            await router.replace('/');
+                            router.reload();
+                        })
+                        .catch(() => {
+                            showErrorToast("Gagal Logout");
+                        });
+                }
+                setUser(response.data['data']);
+            });
     }
 
     return (
@@ -87,7 +93,7 @@ export default function Home() {
                             <MainMenu data={laporan} title={'Transaksi'}/>
                         </div>
                     </div>
-                    <div className={`bg-[#3da0e3] w-full mt-2 flex pt-1 px-1`}>
+                    <div className={`bg-base w-full mt-2 flex pt-1 px-1`}>
                         {
                             listTab.map((e, index)=>{
                                 return (
@@ -135,13 +141,14 @@ export default function Home() {
     )
 }
 
-export const getServerSideProps = async ({req, res}) => {
-    const cookie = getCookie('@vuteq-token', {req, res});
+// Fungsi untuk mengizinkan akses hanya jika ada cookie token
+export const getServerSideProps = async ({ req, res }) => {
+    const cookie = getCookie('@vuteq-token', { req, res });
 
     if (!cookie) {
-        res.writeHead(302, {Location: '/'});
+        res.writeHead(302, { Location: '/' });
         res.end();
     }
 
-    return {props: {}};
+    return { props: {} };
 };

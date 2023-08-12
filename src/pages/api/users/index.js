@@ -3,23 +3,25 @@ import bcrypt from "bcrypt";
 import checkCookieMiddleware from "@/pages/api/middleware";
 import connection from "@/config/database";
 import DepartmentUser from "@/models/DepartmentUsers";
+import logger from "@/utils/logger";
 
 async function handler(req, res) {
     switch (req.method) {
         case 'GET':
+            if (req.user.role !== 'super') {
+                res.status(401).json({
+                    ok: false,
+                    data: "Role must be admin"
+                });
+            }
             try {
-                if (req.user.role !== 'super') {
-                    res.status(401).json({
-                        ok: false,
-                        data: "Role must be admin"
-                    });
-                }
                 const users = await User.findAll()
                 res.status(200).json({
                     ok : true,
                     data : users
                 })
             } catch (e) {
+                logger.error(e.message);
                 res.status(500).json({
                     ok : false,
                     data : "Internal Server Error"
@@ -27,14 +29,13 @@ async function handler(req, res) {
             }
             break;
         case 'POST':
+            if (req.user.role !== 'super') {
+                return res.status(401).json({
+                    ok: false,
+                    data: "Role must be admin"
+                });
+            }
             try {
-                if (req.user.role !== 'super') {
-                    return res.status(401).json({
-                        ok: false,
-                        data: "Role must be admin"
-                    });
-                }
-
                 const newUser = req.body; // Anggap req.body berisi data pelanggan baru
                 const hash = bcrypt.hashSync(newUser.password, 10);
 
@@ -64,16 +65,21 @@ async function handler(req, res) {
                     data: "Success"
                 });
             } catch (e) {
+                logger.error(e.message);
                 res.status(500).json({
                     ok: false,
                     data: "Internal Server Error"
                 });
             }
             break;
+        default:
+            res.status(405).json({
+                ok: false,
+                data: "Method Not Allowed"
+            });
 
     }
 }
 
 const protectedAPIHandler = checkCookieMiddleware(handler);
-
 export default protectedAPIHandler;

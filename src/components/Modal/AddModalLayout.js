@@ -6,8 +6,8 @@ export default function ModalLayout({children, onSubmit, reset}) {
     const {setModalAdd, setModalEdit} = modalState()
     return (
         <div className="fixed bg-black bg-opacity-20 h-full flex items-center justify-center top-0 left-0 z-[5000] w-full overflow-y-auto overflow-x-hidden outline-none">
-            <div className="w-1/3 rounded bg-white border-4 border-[#3da0e3]">
-                <div className="w-full flex items-center justify-between bg-[#3da0e3] font-light py-1 px-2 text-white text-sm">
+            <div className="w-1/3 rounded bg-white border-4 border-base">
+                <div className="w-full flex items-center justify-between bg-base font-light py-1 px-2 text-white text-sm">
                     <div className="flex items-center gap-2">
                         <FaRegWindowMaximize />
                         Form Tambah/Edit Data

@@ -18,24 +18,17 @@ import Head from "next/head";
 export default function Pallet() {
     const {listCustomer, listVehicle, listPallet, setPallet, listPart,user} = dataState()
     const {setModalAdd, modalAdd,  modalDelete,setModalDelete, modalQr, setModalQR} = modalState()
-
     const [selectedCell, setSelectedCell] = useState({})
-
     const [searchTerm, setSearchTerm] = useState('');
     const [filters, setFilters] = useState([])
-
     const custFilter = useRef(null);
     const vehicleFilter = useRef(null);
     const partFilter = useRef(null);
-
-
     const {
         register,
         handleSubmit,
         reset
     } = useForm()
-
-
 
     useEffect(() => {
         fetchData();
@@ -58,7 +51,6 @@ export default function Pallet() {
         setFilters(response.data['data']);
     };
 
-
     const submitData = (data) => {
         axios.post('/api/pallets',data).then(() =>{
             showSuccessToast("Sukses Simpan Data")
@@ -71,7 +63,6 @@ export default function Pallet() {
         })
     }
 
-
     const deleteData = (e) => {
         axios.delete('/api/pallets/' + e).then(()=>{
             showSuccessToast("Sukses Hapus Data")
@@ -82,7 +73,6 @@ export default function Pallet() {
             getFilter()
         })
     }
-
 
     const handlePageChange = (selectedPage) => {
         const searchValueLowerCase = searchTerm.toLowerCase().split(' ').join('');
@@ -245,38 +235,37 @@ export default function Pallet() {
                 </div>
                 <div className={`w-full bg-white h-4 border border-gray-500`} />
                 <div className={`w-full bg-white p-2`}>
-                    <div className={`w-full bg-[#3da0e3] py-0.5 px-1 text-white flex flex-row`}>
-                        {
-                            (!user.role === 'viewer') &&
+                    <div className={`w-full bg-base py-0.5 px-1 text-white flex flex-row`}>
+                        {user.role !== 'viewer' && (
                             <>
                                 <div
-                                    onClick={()=> setModalAdd(true)}
-                                    className={`flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer`}>
+                                    onClick={() => setModalAdd(true)}
+                                    className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
                                     <BiPlusMedical size={12} />
-                                    <p className={`text-white font-bold text-sm`}>Baru</p>
+                                    <p className="text-white font-bold text-sm">Baru</p>
                                 </div>
                                 <div
-                                    onClick={()=>setModalDelete(true)}
-                                    className={`flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer`}>
+                                    onClick={() => setModalDelete(true)}
+                                    className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
                                     <BsFillTrashFill size={12} />
-                                    <p className={`text-white font-bold text-sm`}>Hapus</p>
+                                    <p className="text-white font-bold text-sm">Hapus</p>
                                 </div>
                                 <Print data={selectedCell} />
                                 <PrintAll data={filters} />
                                 <div
                                     onClick={onClick}
-                                    className={`flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer`}>
+                                    className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
                                     <AiFillFileExcel size={12} />
-                                    <p className={`text-white font-bold text-sm`}>Excel</p>
+                                    <p className="text-white font-bold text-sm">Excel</p>
                                 </div>
                                 <div
-                                    onClick={()=>setModalQR(true)}
-                                    className={`flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer`}>
+                                    onClick={() => setModalQR(true)}
+                                    className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
                                     <BsQrCode size={12} />
-                                    <p className={`text-white font-bold text-sm`}>QR Code</p>
+                                    <p className="text-white font-bold text-sm">QR Code</p>
                                 </div>
                             </>
-                        }
+                        )}
                         <div
                             onClick={()=> fetchData()}
                             className={`flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer`}>

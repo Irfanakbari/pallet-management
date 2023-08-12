@@ -2,18 +2,19 @@ import Pallet from "@/models/Pallet";
 import Vehicle from "@/models/Vehicle";
 import checkCookieMiddleware from "@/pages/api/middleware";
 import Part from "@/models/Part";
+import logger from "@/utils/logger";
 
 async function handler(req, res) {
     switch (req.method) {
         case 'GET':
+            if (req.user.role === 'operator') {
+                return res.status(401).json({
+                    ok: false,
+                    data: "Operator Tidak Boleh Mengakses Halaman Ini"
+                });
+            }
             try {
                 const {customer, department} = req.query;
-                if (req.user.role === 'operator') {
-                    return res.status(401).json({
-                        ok: false,
-                        data: "Operator Tidak Boleh Mengakses Halaman Ini"
-                    });
-                }
                 let stok;
                 let whereClause = {}
                 let whereclause2 = {}
@@ -61,7 +62,7 @@ async function handler(req, res) {
                             where: {
                                 ...whereClause,
                                 status: 0,
-                                '$part$': part.kode ,
+                                '$part$': part['kode'] ,
                             },
                             include: {
                                 model: Vehicle,
@@ -72,7 +73,7 @@ async function handler(req, res) {
                             where: {
                                 ...whereClause,
                                 status: 3,
-                                '$part$': part.kode ,
+                                '$part$': part['kode'] ,
                             },
                             include: {
                                 model: Vehicle,
@@ -80,7 +81,7 @@ async function handler(req, res) {
                             }
                         })
                         return {
-                            part: `${part.kode} - ${part.name}`,
+                            part: `${part['kode']} - ${part['kode']}`,
                             Total: palletCounts.total,
                             Keluar:palletCounts.keluar,
                             Maintenance:palletCounts.maintenance,
@@ -105,7 +106,7 @@ async function handler(req, res) {
                         palletCounts['total'] = await Pallet.count({
                             where: {
                                 ...whereClause,
-                                '$part$': part.kode,
+                                '$part$': part['kode'],
                             },
                             include: {
                                 model: Vehicle,
@@ -116,7 +117,7 @@ async function handler(req, res) {
                             where: {
                                 ...whereClause,
                                 status: 0,
-                                '$part$': part.kode,
+                                '$part$': part['kode'],
                             },
                             include: {
                                 model: Vehicle,
@@ -127,7 +128,7 @@ async function handler(req, res) {
                             where: {
                                 ...whereClause,
                                 status: 3,
-                                '$part$': part.kode,
+                                '$part$': part['kode'],
                             },
                             include: {
                                 model: Vehicle,
@@ -135,7 +136,7 @@ async function handler(req, res) {
                             }
                         })
                         return {
-                            part: `${part.kode} - ${part.name}`,
+                            part: `${part['kode']} - ${part['kode']}`,
                             Total: palletCounts.total,
                             Keluar: palletCounts.keluar,
                             Maintenance: palletCounts.maintenance,
@@ -143,22 +144,25 @@ async function handler(req, res) {
                     })
                     stok = await Promise.all(stokPromises);
                 }
-
                 res.status(200).json({
                     ok: true,
                     data: stok,
                 });
             } catch (e) {
-                console.log(e.message);
+                logger.error(e.message);
                 res.status(500).json({
                     ok: false,
                     data: "Internal Server Error",
                 });
             }
             break;
+        default:
+            res.status(405).json({
+                ok: false,
+                data: "Method Not Allowed"
+            });
     }
 }
 
 const protectedAPIHandler = checkCookieMiddleware(handler);
-
 export default protectedAPIHandler;

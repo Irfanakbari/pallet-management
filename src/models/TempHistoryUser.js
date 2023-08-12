@@ -23,5 +23,4 @@ const TempHistory = connection.define('TempHistory', {
     createdAt: 'timestamp'
 });
 
-
 export default TempHistory;

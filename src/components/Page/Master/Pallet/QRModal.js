@@ -1,4 +1,3 @@
-import React from "react";
 import {QRCode} from "react-qrcode-logo";
 import {FaRegWindowMaximize} from "react-icons/fa";
 import {ImCross} from "react-icons/im";
@@ -9,8 +8,8 @@ export default function QRModalLayout({ selectedCell }) {
 
     return (
         <div className={`fixed bg-black bg-opacity-20 h-full flex items-center justify-center top-0 left-0 z-[5000] w-full overflow-y-auto overflow-x-hidden outline-none`}>
-            <div className={`rounded bg-white border-4 border-[#3da0e3]`}>
-                <div className={`w-full flex items-center justify-between bg-[#3da0e3] font-light py-1 px-2 text-white text-sm`}>
+            <div className={`rounded bg-white border-4 border-base`}>
+                <div className={`w-full flex items-center justify-between bg-base font-light py-1 px-2 text-white text-sm`}>
                     <div className={'flex items-center gap-2'}>
                         <FaRegWindowMaximize />
                         {

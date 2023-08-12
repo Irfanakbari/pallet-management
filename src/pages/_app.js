@@ -5,14 +5,12 @@ import {useEffect, useState} from "react";
 import {useRouter} from "next/router";
 import LoadingOverlay from '@speedy4all/react-loading-overlay';
 
-
 export default function App({ Component, pageProps }) {
     const [loading, setLoading] = useState(false)
     const router = useRouter()
 
-
     useEffect(() => {
-        const handleRouteChange = (url) => {
+        const handleRouteChange = () => {
             setLoading(true)
         }
 

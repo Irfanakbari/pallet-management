@@ -1,4 +1,3 @@
-import React from "react";
 import ModalLayout from "@/components/Modal/AddModalLayout";
 
 export default function AddModalLayout({ onSubmit, reset, register }) {

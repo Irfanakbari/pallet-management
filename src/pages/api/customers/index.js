@@ -1,16 +1,17 @@
 import Customer from "@/models/Customer";
 import checkCookieMiddleware from "@/pages/api/middleware";
+import logger from "@/utils/logger";
 
 async function handler(req, res) {
     switch (req.method) {
         case 'GET':
+            if (req.user.role === 'operator') {
+                return res.status(401).json({
+                    ok: false,
+                    data: "Operator Tidak Boleh Mengakses Halaman Ini"
+                });
+            }
             try {
-                if (req.user.role === 'operator') {
-                    return res.status(401).json({
-                        ok: false,
-                        data: "Operator Tidak Boleh Mengakses Halaman Ini"
-                    });
-                }
                 let customers;
                 customers = await Customer.findAll();
                 res.status(200).json({
@@ -18,6 +19,7 @@ async function handler(req, res) {
                     data : customers
                 })
             } catch (e) {
+                logger.error(e.message);
                 res.status(500).json({
                     ok : false,
                     data : "Internal Server Error"
@@ -25,13 +27,13 @@ async function handler(req, res) {
             }
             break;
         case 'POST':
+            if (req.user.role !== 'super') {
+                res.status(401).json({
+                    ok: false,
+                    data: "Role must be admin"
+                });
+            }
             try {
-                if (req.user.role !== 'super') {
-                    res.status(401).json({
-                        ok: false,
-                        data: "Role must be admin"
-                    });
-                }
                 const newCustomer = req.body; // Anggap req.body berisi data pelanggan baru
                 const customer = await Customer.create(newCustomer);
                 res.status(201).json({
@@ -39,6 +41,7 @@ async function handler(req, res) {
                     data: customer
                 });
             } catch (e) {
+                logger.error(e.message);
                 res.status(500).json({
                     ok: false,
                     data: "Internal Server Error"
@@ -54,5 +57,4 @@ async function handler(req, res) {
 }
 
 const protectedAPIHandler = checkCookieMiddleware(handler);
-
 export default protectedAPIHandler;

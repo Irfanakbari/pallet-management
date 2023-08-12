@@ -30,7 +30,7 @@ export default function DeleteModal({data, setCloseModal, action}) {
                                  </span>
                    </div>
                    <div className={`flex flex-row justify-center gap-2 p-5`}>
-                       <button onClick={()=> setCloseModal(false)} className={`bg-[#3da0e3] w-full text-white py-1 text-sm rounded`}>Close</button>
+                       <button onClick={()=> setCloseModal(false)} className={`bg-base w-full text-white py-1 text-sm rounded`}>Close</button>
                    </div>
                </div>
            </div>

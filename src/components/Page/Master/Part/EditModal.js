@@ -1,6 +1,4 @@
-import React from "react";
 import ModalLayout from "@/components/Modal/AddModalLayout";
-
 export default function EditModalLayout({ onSubmit, reset, register, selectedCell }) {
     return (
         <ModalLayout onSubmit={onSubmit} reset={reset}>

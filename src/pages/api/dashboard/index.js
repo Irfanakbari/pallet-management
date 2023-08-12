@@ -8,18 +8,18 @@ import moment from "moment";
 import Vehicle from "@/models/Vehicle";
 import Department from "@/models/Department";
 import Part from "@/models/Part";
-
+import logger from "@/utils/logger";
 
 async function handler(req, res) {
     switch (req.method) {
         case 'GET':
+            if (req.user.role === 'operator') {
+                return res.status(401).json({
+                    ok: false,
+                    data: "Operator Tidak Boleh Mengakses Halaman Ini"
+                });
+            }
             try {
-                if (req.user.role === 'operator') {
-                    return res.status(401).json({
-                        ok: false,
-                        data: "Operator Tidak Boleh Mengakses Halaman Ini"
-                    });
-                }
                 let customers;
                 let departments;
                 let parts;
@@ -41,7 +41,6 @@ async function handler(req, res) {
                         include: [Pallet],
                         order: [['updated_at', 'DESC'], ['masuk', 'DESC']],
                     });
-
                     paletMendep = await History.findAll({
                         attributes: [
                             [sequelize.literal('Pallet.customer'), 'customer'], // Mengganti 'Pallet.customer' dengan 'Customer.name'
@@ -476,12 +475,16 @@ async function handler(req, res) {
                    });
                }
             } catch (error) {
+                logger.error(e.message);
                 res.status(500).json({ error: 'Internal Server Error' });
             }
             break;
+        default:
+            res.status(405).json({
+                ok: false,
+                data: "Method Not Allowed"
+            });
     }
 }
 const protectedAPIHandler = checkCookieMiddleware(handler);
-
-
 export default protectedAPIHandler;

@@ -7,21 +7,21 @@ import checkCookieMiddleware from "@/pages/api/middleware";
 import Part from "@/models/Part";
 import {Op} from "sequelize";
 import TempHistory from "@/models/TempHistoryUser";
+import logger from "@/utils/logger";
 
 async function handler(req, res) {
     switch (req.method) {
         case 'GET':
-            const { customer, vehicle, page, start, end, search, part, status } = req.query;
+            if (req.user.role === 'operator') {
+                return res.status(401).json({
+                    ok: false,
+                    data: "Operator Tidak Boleh Mengakses Halaman Ini"
+                });
+            }
             try {
-                if (req.user.role === 'operator') {
-                    return res.status(401).json({
-                        ok: false,
-                        data: "Operator Tidak Boleh Mengakses Halaman Ini"
-                    });
-                }
+                const { customer, vehicle, page, start, end, search, part, status } = req.query;
                 let histories;
                 let whereClause = {}; // Inisialisasi objek kosong untuk kondisi where
-
 
                 if (customer && vehicle && part) {
                     whereClause = {
@@ -154,6 +154,7 @@ async function handler(req, res) {
                     currentPage: parseInt(page),
                 });
             } catch (e) {
+                logger.error(e.message);
                 res.status(500).json({
                     ok: false,
                     data: "Internal Server Error",
@@ -162,6 +163,12 @@ async function handler(req, res) {
             break;
 
         case 'POST':
+            if (req.user.role !== 'operator') {
+                return res.status(401).json({
+                    ok: false,
+                    data: "Role must be Operator"
+                });
+            }
             try {
                 const { kode } = req.body;
                 const pallet = await Pallet.findOne({
@@ -203,7 +210,7 @@ async function handler(req, res) {
                     });
                 })
             } catch (e) {
-                console.log(e.message);
+                logger.error(e.message);
                 res.status(500).json({
                     ok: false,
                     data: "Internal Server Error"
@@ -211,6 +218,12 @@ async function handler(req, res) {
             }
             break;
         case 'PUT':
+            if (req.user.role !== 'operator') {
+                return res.status(401).json({
+                    ok: false,
+                    data: "Role must be Operator"
+                });
+            }
             try {
                 const { kode } = req.body;
 
@@ -259,12 +272,18 @@ async function handler(req, res) {
                     data: "Sukses"
                 });
             } catch (e) {
+                logger.error(e.message);
                 res.status(500).json({
                     ok: false,
                     data: "Internal Server Error"
                 });
             }
             break;
+        default:
+            res.status(405).json({
+                ok: false,
+                data: "Method Not Allowed"
+            });
     }
 }
 

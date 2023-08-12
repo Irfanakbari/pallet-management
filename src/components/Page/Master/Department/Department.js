@@ -9,20 +9,16 @@ import {useForm} from "react-hook-form";
 import AddModalLayout from "@/components/Page/Master/Department/AddModal";
 import EditModalLayout from "@/components/Page/Master/Department/EditModal";
 import Head from "next/head";
-
 export default function Department() {
     const {setListDepartment, listDepartment} = dataState()
     const {setModalAdd, modalAdd, modalEdit, setModalEdit, modalDelete,setModalDelete} = modalState()
-
     const [selectedCell, setSelectedCell] = useState({});
-
     const {
         register,
         handleSubmit,
         reset
     } = useForm()
-
-
+    
     useEffect(() => {
         fetchData();
     }, []);
@@ -96,7 +92,7 @@ export default function Department() {
 
                 <div className="w-full h-4 border border-gray-500" />
                 <div className="w-full p-2">
-                    <div className="w-full bg-[#3da0e3] py-0.5 px-1 text-white flex flex-row">
+                    <div className="w-full bg-base py-0.5 px-1 text-white flex flex-row">
                         <div
                             onClick={() => setModalAdd(true)}
                             className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer"

@@ -156,7 +156,6 @@ export default function Dashboard() {
                     <div className={`w-full grid grid-cols-2 gap-4`}>
                         <Chart2 data={dataChart2} />
                         <Chart3 data={dataChart3} />
-
                         {/*<Card className={`overflow-y-scroll]`}>*/}
                         {/*    <div className={`bg-red-800 text-white p-2 font-semibold`}>*/}
                         {/*        Detail Stok*/}

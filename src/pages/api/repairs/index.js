@@ -5,18 +5,19 @@ import connection from "@/config/database";
 import Customer from "@/models/Customer";
 import Vehicle from "@/models/Vehicle";
 import Part from "@/models/Part";
+import logger from "@/utils/logger";
 
 async function handler(req, res) {
     switch (req.method) {
         case 'GET':
-            const { page } = req.query;
+            if (req.user.role === 'operator') {
+                return res.status(401).json({
+                    ok: false,
+                    data: "Operator Tidak Boleh Mengakses Halaman Ini"
+                });
+            }
             try {
-                if (req.user.role === 'operator') {
-                    return res.status(401).json({
-                        ok: false,
-                        data: "Operator Tidak Boleh Mengakses Halaman Ini"
-                    });
-                }
+                const { page } = req.query;
                 // Menghitung offset berdasarkan halaman dan batasan data
                 const offset = (parseInt(page) - 1) * parseInt('20');
 
@@ -59,6 +60,7 @@ async function handler(req, res) {
                     currentPage: parseInt(page),
                 });
             } catch (e) {
+                logger.error(e.message);
                 res.status(500).json({
                     ok: false,
                     data: "Internal Server Error",
@@ -67,6 +69,12 @@ async function handler(req, res) {
             break;
 
         case 'POST':
+            if (req.user.role !== 'operator') {
+                return res.status(401).json({
+                    ok: false,
+                    data: "Role must be Operator"
+                });
+            }
             const { kode } = req.body;
             try {
                 const pallet = await Pallet.findOne({
@@ -109,15 +117,20 @@ async function handler(req, res) {
                     });
                 }
             } catch (e) {
+                logger.error(e.message);
                 res.status(500).json({
                     ok: false,
                     data: "Internal Server Error"
                 });
             }
             break;
+        default:
+            res.status(405).json({
+                ok: false,
+                data: "Method Not Allowed"
+            });
     }
 }
 
 const protectedAPIHandler = checkCookieMiddleware(handler);
-
 export default protectedAPIHandler;
