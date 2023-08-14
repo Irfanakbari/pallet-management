@@ -185,6 +185,7 @@ async function handler(req, res) {
                                 [Op.lt]: moment().subtract(1, 'week').toDate(),
                             },
                             '$Pallet.Vehicle.department$': { [Op.in]: allowedDepartments },
+                            masuk: null
                         },
                         include: [
                             {
