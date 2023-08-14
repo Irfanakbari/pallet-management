@@ -476,7 +476,7 @@ async function handler(req, res) {
                    });
                }
             } catch (error) {
-                logger.error(e.message);
+                logger.error(error.message);
                 res.status(500).json({ error: 'Internal Server Error' });
             }
             break;

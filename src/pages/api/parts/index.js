@@ -69,7 +69,7 @@ async function handler(req, res) {
                     vehicle: vehic.dataValues.kode
                 });
                 res.status(200).json({ success: true });
-            } catch (error) {
+            } catch (e) {
                 logger.error(e.message);
                 if (error.name === 'SequelizeUniqueConstraintError') {
                     const field = error.errors[0].path;

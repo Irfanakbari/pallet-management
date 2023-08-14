@@ -149,7 +149,7 @@ async function handler(req, res) {
 
                 res.status(200).json({ success: true });
 
-            } catch (error) {
+            } catch (e) {
                 logger.error(e.message);
                 res.status(500).json({ success: false, error: 'Failed to save Pallet' });
             }

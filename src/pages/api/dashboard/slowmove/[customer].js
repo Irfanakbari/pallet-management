@@ -59,14 +59,13 @@ async function handler(req, res) {
                             },
                             masuk: null
                         },
-                        attributes: ['id_pallet'],
                         include: [
                             {
                                 model: Pallet,
                                 where: {
                                     status: 0,
                                 },
-                                attributes: ['updated_at','part','name'],
+                                attributes: ['updated_at','part','name', 'Vehicle'],
                                 include: [
                                     {
                                         model: Customer,
@@ -80,6 +79,7 @@ async function handler(req, res) {
                                     },
                                     {
                                         model: Vehicle,
+                                        attributes: [],
                                         where: {
                                             department: { [Op.in]: allowedDepartments }, // Filter berdasarkan department_id
                                         },
@@ -93,7 +93,7 @@ async function handler(req, res) {
                     data : datas
                 });
             } catch (error) {
-                logger.error(e.message);
+                logger.error(error.message);
                 res.status(500).json({ error: 'Internal Server Error' });
             }
             break;
