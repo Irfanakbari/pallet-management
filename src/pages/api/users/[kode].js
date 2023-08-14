@@ -2,7 +2,6 @@ import User from "@/models/User";
 import bcrypt from "bcrypt";
 import checkCookieMiddleware from "@/pages/api/middleware";
 import logger from "@/utils/logger";
-
 async function handler(req, res) {
     switch (req.method) {
         case 'DELETE':

@@ -4,7 +4,6 @@ import checkCookieMiddleware from "@/pages/api/middleware";
 import connection from "@/config/database";
 import DepartmentUser from "@/models/DepartmentUsers";
 import logger from "@/utils/logger";
-
 async function handler(req, res) {
     switch (req.method) {
         case 'GET':

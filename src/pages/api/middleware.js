@@ -2,7 +2,6 @@ import {getCookie} from "cookies-next";
 import jwt from "jsonwebtoken";
 import User from "@/models/User";
 import DepartmentUser from "@/models/DepartmentUsers";
-import {where} from "sequelize";
 import Department from "@/models/Department";
 
 const checkCookieMiddleware = (handler) => async (req, res) => {

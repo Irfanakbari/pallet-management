@@ -53,7 +53,6 @@ export default function LapRiwayat() {
     };
 
     const handlePageChange = async (selectedPage) => {
-        // Lakukan perubahan halaman di sini
         const response3 = await axios.get(`/api/history?customer=${custFilterValue}&vehicle=${vehicleFilterValue}&part=${partFilterValue}&status=${statusFilterValue}&start=${startDateValue}&end=${endDateValue}&page=` + selectedPage);
         setDataHistory(response3.data);
         setFilters(response3.data['data'])
