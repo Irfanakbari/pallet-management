@@ -18,10 +18,14 @@ export default function Index() {
     const handleLogin = async (data) => {
         try {
             // Melakukan permintaan ke endpoint login
-            await axios.post('api/auth/login', data).then(() => {
+            const res = await axios.post('api/auth/login', data);
+            if(res.data['user']['role'] ==='operator'){
+                showErrorToast("Akun Anda Bukan Admin"); // Menampilkan pesan error jika login gagal
+                await axios.get('api/auth/logout');
+            } else {
                 showSuccessToast('Login Berhasil'); // Menampilkan pesan sukses
-                router.replace('/home'); // Mengarahkan pengguna ke halaman home setelah login
-            });
+                await router.replace('/home'); // Mengarahkan pengguna ke halaman home setelah login
+            }
         } catch (e) {
             showErrorToast(e.response.data['data']); // Menampilkan pesan error jika login gagal
         }

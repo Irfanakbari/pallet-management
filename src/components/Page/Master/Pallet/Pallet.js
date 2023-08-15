@@ -274,11 +274,23 @@ export default function Pallet() {
                                         <td>{'Produksi ' + e['Vehicle']['department']}</td>
                                         <td>
                                             <div className={'flex gap-2'}>
-                                                <Tooltip id="trash" />
-                                                <HiOutlineTrash data-tooltip-id="trash" data-tooltip-content="Hapus Pallet!" onClick={()=>{
-                                                    setSelectedCell(e)
-                                                    setModalDelete(true)
-                                                }} size={25} className={`hover:text-red-500 hover:cursor-pointer`} />
+                                                {
+                                                    user.role !== 'super' && user.role !== 'admin' ? null : (
+                                                        <>
+                                                            <Tooltip id="trash" />
+                                                            <HiOutlineTrash
+                                                                data-tooltip-id="trash"
+                                                                data-tooltip-content="Hapus Pallet!"
+                                                                onClick={() => {
+                                                                    setSelectedCell(e);
+                                                                    setModalDelete(true);
+                                                                }}
+                                                                size={25}
+                                                                className={`hover:text-red-500 hover:cursor-pointer`}
+                                                            />
+                                                        </>
+                                                    )
+                                                }
                                                 <Print data={e} />
                                                 <Tooltip id="qrcode" />
                                                 <BsQrCode data-tooltip-id="qrcode" data-tooltip-content="Lihat Barcode!" onClick={() => {

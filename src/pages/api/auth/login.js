@@ -52,7 +52,11 @@ export default async function handler(req, res) {
                         res.status(200).json({
                             ok: true,
                             data: "Login Successfully",
-                            token: token
+                            token: token,
+                            user: {
+                                id: user.id,
+                                role: user.role
+                            }
                         });
                     } else {
                         res.status(401).json({
