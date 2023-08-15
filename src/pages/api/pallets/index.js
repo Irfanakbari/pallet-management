@@ -85,7 +85,7 @@ async function handler(req, res) {
             break;
         case 'POST':
             if (req.user.role !== 'super' && req.user.role !== 'admin') {
-                res.status(401).json({
+                return res.status(401).json({
                     ok: false,
                     data: "Role must be admin"
                 });

@@ -1,5 +1,4 @@
-import {BiFilter, BiPrinter, BiRefresh, BiSolidUpArrow} from "react-icons/bi";
-import { ImCross } from "react-icons/im";
+import {BiFilter, BiPrinter, BiRefresh, BiSearch, BiSolidUpArrow} from "react-icons/bi";
 import { AiFillFileExcel } from "react-icons/ai";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
@@ -22,7 +21,6 @@ export default function LapRiwayat() {
         startDateValue,
         endDateValue,
     } = filterState();
-    const [selectedCell, setSelectedCell] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [filters, setFilters] = useState([]);
 
@@ -58,7 +56,8 @@ export default function LapRiwayat() {
         setFilters(response3.data['data'])
     };
 
-    const handleSearch = async () => {
+    const handleSearch = async (e) => {
+        e.preventDefault()
         const searchValueLowerCase = searchTerm.toLowerCase().split(' ').join('');
         const response = await axiosInstance.get(`/api/history?search=${searchValueLowerCase}`);
         setDataHistory(response.data);
@@ -219,25 +218,20 @@ export default function LapRiwayat() {
                     </div>
                 </div>
                 <div className="w-full gap-8 flex items-center bg-white px-3 py-2">
-                    <div className="flex flex-row items-center">
+                    <form onSubmit={handleSearch} className="flex flex-row items-center">
                         <label className="text-sm font-semibold mr-3">Cari :</label>
                         <input
-                            type="text"
-                            className="border border-gray-300 rounded mr-3"
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <ImCross
-                            className="hover:cursor-pointer text-blue-700 mr-4"
-                            onClick={getFilteredData}
+                            onChange={(e)=>setSearchTerm(e.target.value)}
+                            type="text"
+                            className="border border-gray-300 rounded mr-3 px-1"
                         />
                         <button
-                            className="bg-green-500 py-1 px-2 text-white font-semibold text-sm"
-                            onClick={handleSearch}
+                            type={'submit'}
                         >
-                            Dapatkan Data
+                            <BiSearch fontSize={25} />
                         </button>
-                    </div>
+                    </form>
                     {modalFilter&&
                         <FilterModal onSubmit={getFilteredData}/>
                     }
@@ -280,9 +274,8 @@ export default function LapRiwayat() {
                         {
                             filters.map((e, index) => (
                                 <tr
-                                    className={`${selectedCell === index ? 'bg-[#85d3ff]' : ''} ${isMoreThanAWeekAgoAndNoEntry(e['keluar'], e['masuk']) ? 'bg-red-500 text-white' : ''} text-sm font-semibold border-b border-gray-500`}
+                                    className={`${isMoreThanAWeekAgoAndNoEntry(e['keluar'], e['masuk']) ? 'bg-red-500 text-white' : ''} text-sm font-semibold border-b border-gray-500`}
                                     key={index}
-                                    onClick={() => setSelectedCell(index)}
                                 >
                                     <td className="text-center p-1.5">{index + 1}</td>
                                     <td>{e['id_pallet']}</td>

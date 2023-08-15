@@ -130,7 +130,7 @@ export default function Pallet() {
         ],
     })
 
-    const onClick = async (e) => {
+    const saveExcel = async (e) => {
         e.preventDefault();
         const data = filters.map((item, index) => ({
             no: index + 1,
@@ -233,7 +233,7 @@ export default function Pallet() {
                                 </div>
                                 <PrintAll data={filters} />
                                 <div
-                                    onClick={onClick}
+                                    onClick={saveExcel}
                                     className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
                                     <AiFillFileExcel size={12} />
                                     <p className="text-white font-bold text-sm">Excel</p>

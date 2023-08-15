@@ -6,7 +6,7 @@ async function handler(req, res) {
     switch (req.method) {
         case 'DELETE':
             if (req.user.role !== 'super') {
-                res.status(401).json({
+                return res.status(401).json({
                     ok: false,
                     data: "Role must be admin"
                 });
@@ -32,7 +32,7 @@ async function handler(req, res) {
             break;
         case 'PUT':
             if (req.user.role !== 'super') {
-                res.status(401).json({
+                return res.status(401).json({
                     ok: false,
                     data: "Role must be admin"
                 });

@@ -17,7 +17,6 @@ import axiosInstance from "@/utils/interceptor";
 export default function LapMaintenance() {
     const [dataMaintenance, setDataMaintenance] = useState([])
     const {listCustomer, listVehicle} = dataState()
-    const [selectedCell, setSelectedCell] = useState(null)
     const [searchTerm, setSearchTerm] = useState('');
     const [filters, setFilters] = useState([])
     const selectKodeCust = useRef(null);
@@ -247,7 +246,7 @@ export default function LapMaintenance() {
                         {
                             filters.map((e, index) =>(
                                 <>
-                                    <tr className={`${selectedCell === index ? 'bg-[#85d3ff]': ''} text-sm font-semibold border-b border-gray-500`} key={index} onClick={()=>setSelectedCell(index)}>
+                                    <tr className={`text-sm font-semibold border-b border-gray-500`} key={index}>
                                         <td className="text-center p-1.5">{index+1}</td>
                                         <td className="px-4">{e['kode']}</td>
                                         <td className="px-4">{e['customer']}</td>
