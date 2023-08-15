@@ -1,9 +1,7 @@
-import {BiPlusMedical, BiRefresh, BiSolidUpArrow} from "react-icons/bi";
-import {ImCross} from "react-icons/im";
-import {BsFillTrashFill, BsQrCode} from "react-icons/bs";
+import {BiPlusMedical, BiRefresh, BiSearch, BiSolidUpArrow} from "react-icons/bi";
+import {BsQrCode} from "react-icons/bs";
 import {AiFillFileExcel} from "react-icons/ai";
 import {useEffect, useRef, useState} from "react";
-import axios from "axios";
 import DeleteModal from "@/components/Modal/DeleteModal";
 import {showErrorToast, showSuccessToast} from "@/utils/toast";
 import Print from "@/components/print/label";
@@ -15,6 +13,9 @@ import AddModalLayout from "@/components/Page/Master/Pallet/AddModal";
 import QRModalLayout from "@/components/Page/Master/Pallet/QRModal";
 import PrintAll from "@/components/print/printall";
 import Head from "next/head";
+import {HiOutlineTrash} from "react-icons/hi";
+import {Tooltip} from "react-tooltip";
+import axiosInstance from "@/utils/interceptor";
 export default function Pallet() {
     const {listCustomer, listVehicle, listPallet, setPallet, listPart,user} = dataState()
     const {setModalAdd, modalAdd,  modalDelete,setModalDelete, modalQr, setModalQR} = modalState()
@@ -36,7 +37,7 @@ export default function Pallet() {
 
     const fetchData = () => {
         const searchValueLowerCase = searchTerm.toLowerCase().split(' ').join('');
-        axios.get(`/api/pallets?search=${searchValueLowerCase}&customer=${custFilter.current.value??''}&vehicle=${vehicleFilter.current.value??''}&part=${partFilter.current.value??''}&page=1`).then(response=>{
+        axiosInstance.get(`/api/pallets?search=${searchValueLowerCase}&customer=${custFilter.current.value??''}&vehicle=${vehicleFilter.current.value??''}&part=${partFilter.current.value??''}&page=1`).then(response=>{
            setPallet(response.data);
            setFilters(response.data['data'])
        }).catch(()=>{
@@ -44,17 +45,17 @@ export default function Pallet() {
        })
     };
 
-    const handleSearch = async () => {
+    const handleSearch = async (e) => {
+        e.preventDefault()
         const searchValueLowerCase = searchTerm.toLowerCase().split(' ').join('');
-        const response = await axios.get(`/api/pallets?search=${searchValueLowerCase}`);
+        const response = await axiosInstance.get(`/api/pallets?search=${searchValueLowerCase}`);
         setPallet(response.data);
         setFilters(response.data['data']);
     };
 
     const submitData = (data) => {
-        axios.post('/api/pallets',data).then(() =>{
+        axiosInstance.post('/api/pallets',data).then(() =>{
             showSuccessToast("Sukses Simpan Data")
-            getFilter()
         }).catch(()=>{
             showErrorToast("Gagal Simpan Data")
         }).finally(()=>{
@@ -64,20 +65,20 @@ export default function Pallet() {
     }
 
     const deleteData = (e) => {
-        axios.delete('/api/pallets/' + e).then(()=>{
+        axiosInstance.delete('/api/pallets/' + e).then(()=>{
             showSuccessToast("Sukses Hapus Data")
         }).catch(()=>{
             showErrorToast("Gagal Hapus Data")
         }).finally(()=>{
             setModalDelete(false)
-            getFilter()
+            fetchData()
         })
     }
 
     const handlePageChange = (selectedPage) => {
         const searchValueLowerCase = searchTerm.toLowerCase().split(' ').join('');
         // Lakukan perubahan halaman di sini
-        axios.get(`/api/pallets?search=${searchValueLowerCase}&customer=${custFilter.current.value??''}&vehicle=${vehicleFilter.current.value??''}&part=${partFilter.current.value??''}&page=` + selectedPage).then(response=>{
+        axiosInstance.get(`/api/pallets?search=${searchValueLowerCase}&customer=${custFilter.current.value??''}&vehicle=${vehicleFilter.current.value??''}&part=${partFilter.current.value??''}&page=` + selectedPage).then(response=>{
             setPallet(response.data);
             setFilters(response.data['data'])
         })
@@ -143,15 +144,6 @@ export default function Pallet() {
         await excel.download(data)
     }
 
-    const getFilter = () => {
-        axios.get(`/api/pallets?customer=${custFilter.current.value??''}&vehicle=${vehicleFilter.current.value??''}&part=${partFilter.current.value??''}&page=1`).then(response=>{
-            setPallet(response.data);
-            setFilters(response.data['data']);
-        }).catch(()=>{
-            showErrorToast("Gagal Fetch Data");
-        })
-    };
-
     return (
         <>
             <Head>
@@ -168,25 +160,20 @@ export default function Pallet() {
                     </div>
                 </div>
                 <div className="w-full gap-8 flex items-center bg-white px-3 py-2">
-                    <div className="flex flex-row items-center">
+                    <form onSubmit={handleSearch} className="flex flex-row items-center">
                         <label className="text-sm font-semibold mr-3">Cari :</label>
                         <input
-                            type="text"
-                            className="border border-gray-300 rounded mr-3"
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <ImCross
-                            className="hover:cursor-pointer text-blue-700 mr-4"
-                            onClick={() => setSearchTerm('')}
+                            onChange={(e)=>setSearchTerm(e.target.value)}
+                            type="text"
+                            className="border border-gray-300 rounded mr-3 px-1"
                         />
                         <button
-                            className="bg-green-500 py-1 px-2 text-white font-semibold text-sm"
-                            onClick={handleSearch}
+                            type={'submit'}
                         >
-                            Dapatkan Data
+                            <BiSearch fontSize={25} />
                         </button>
-                    </div>
+                    </form>
                     <div className="flex flex-row items-center">
                         <label className="text-sm font-semibold mr-3">Customer :</label>
                         <select ref={custFilter} className="border border-gray-300 rounded p-1 text-sm">
@@ -227,7 +214,7 @@ export default function Pallet() {
                         </select>
                         <button
                             className="ml-3 bg-green-500 py-1 px-2 text-white font-semibold text-sm"
-                            onClick={getFilter}
+                            onClick={fetchData}
                         >
                             Dapatkan Data
                         </button>
@@ -244,25 +231,12 @@ export default function Pallet() {
                                     <BiPlusMedical size={12} />
                                     <p className="text-white font-bold text-sm">Baru</p>
                                 </div>
-                                <div
-                                    onClick={() => setModalDelete(true)}
-                                    className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
-                                    <BsFillTrashFill size={12} />
-                                    <p className="text-white font-bold text-sm">Hapus</p>
-                                </div>
-                                <Print data={selectedCell} />
                                 <PrintAll data={filters} />
                                 <div
                                     onClick={onClick}
                                     className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
                                     <AiFillFileExcel size={12} />
                                     <p className="text-white font-bold text-sm">Excel</p>
-                                </div>
-                                <div
-                                    onClick={() => setModalQR(true)}
-                                    className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
-                                    <BsQrCode size={12} />
-                                    <p className="text-white font-bold text-sm">QR Code</p>
                                 </div>
                             </>
                         )}
@@ -283,15 +257,14 @@ export default function Pallet() {
                             <th className="py-2 bg-gray-100 text-left">Vehicle</th>
                             <th className="py-2 bg-gray-100 text-left">Part</th>
                             <th className="py-2 bg-gray-100 text-left">Department</th>
+                            <th className="py-2 bg-gray-100 text-left">Aksi</th>
                         </tr>
                         </thead>
                         <tbody className={`overflow-y-scroll`}>
                         {
                             filters.map((e, index) =>(
                                 <>
-                                    <tr className={`${selectedCell.kode === e['kode'] ? 'bg-[#85d3ff]': ''} text-sm font-semibold border-b border-gray-500`} key={index} onClick={()=>{
-                                        setSelectedCell(e)
-                                    }}>
+                                    <tr className={`text-sm font-semibold border-b border-gray-500`} key={index}>
                                         <td className="text-center p-1.5">{index+1}</td>
                                         <td>{e['kode']}</td>
                                         <td>{e['name'] ?? '-'}</td>
@@ -299,6 +272,21 @@ export default function Pallet() {
                                         <td>{e['vehicle'] + ' - ' + e['Vehicle']['name']}</td>
                                         <td>{e['part'] + ' - ' + e['Part']['name']}</td>
                                         <td>{'Produksi ' + e['Vehicle']['department']}</td>
+                                        <td>
+                                            <div className={'flex gap-2'}>
+                                                <Tooltip id="trash" />
+                                                <HiOutlineTrash data-tooltip-id="trash" data-tooltip-content="Hapus Pallet!" onClick={()=>{
+                                                    setSelectedCell(e)
+                                                    setModalDelete(true)
+                                                }} size={25} className={`hover:text-red-500 hover:cursor-pointer`} />
+                                                <Print data={e} />
+                                                <Tooltip id="qrcode" />
+                                                <BsQrCode data-tooltip-id="qrcode" data-tooltip-content="Lihat Barcode!" onClick={() => {
+                                                    setSelectedCell(e)
+                                                    setModalQR(true)
+                                                }} size={25} className={`hover:text-green-500 hover:cursor-pointer`} />
+                                            </div>
+                                        </td>
                                     </tr>
                                 </>
                             ))

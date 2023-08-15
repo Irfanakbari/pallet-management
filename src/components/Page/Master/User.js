@@ -1,7 +1,6 @@
 import {BiEdit, BiPlusMedical, BiRefresh, BiSolidUpArrow} from "react-icons/bi";
 import {ImCross} from "react-icons/im";
 import {BsFillTrashFill} from "react-icons/bs";
-import axios from "axios";
 import {useEffect, useState} from "react";
 import DeleteModal from "@/components/Modal/DeleteModal";
 import {FaRegWindowMaximize} from "react-icons/fa";
@@ -9,6 +8,7 @@ import {showErrorToast, showSuccessToast} from "@/utils/toast";
 import {useForm} from "react-hook-form";
 import {dataState} from "@/context/states";
 import Head from "next/head";
+import axiosInstance from "@/utils/interceptor";
 
 export default function User() {
     const [dataUser, setDataUser] = useState([])
@@ -29,7 +29,7 @@ export default function User() {
 
     const fetchData = async () => {
         try {
-            const response = await axios.get('/api/users',{
+            const response = await axiosInstance.get('/api/users',{
                 withCredentials: true,
             });
             setDataUser(response.data['data']);
@@ -40,7 +40,7 @@ export default function User() {
 
     const submitData = async (data) => {
         try {
-            await axios.post('/api/users',data).then(() =>{
+            await axiosInstance.post('/api/users',data).then(() =>{
                 showSuccessToast("Sukses Simpan Data");
                 fetchData()
             })
@@ -54,7 +54,7 @@ export default function User() {
 
     const editData = async (data) => {
         try {
-            await axios.put('/api/users/' + selectedCell.id,data).then(() =>{
+            await axiosInstance.put('/api/users/' + selectedCell.id,data).then(() =>{
                 showSuccessToast("Sukses Edit Data");
                 fetchData()
             })
@@ -68,7 +68,7 @@ export default function User() {
 
     const deleteData = async (e) => {
         try {
-            await axios.delete('/api/users/' + e)
+            await axiosInstance.delete('/api/users/' + e)
             showSuccessToast("Sukses Hapus Data");
         } catch (e) {
             showErrorToast("Gagal Hapus Data");

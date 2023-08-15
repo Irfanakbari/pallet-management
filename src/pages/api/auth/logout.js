@@ -5,7 +5,7 @@ export default async function handler(req, res) {
     switch (req.method) {
         case 'GET':
             try {
-                deleteCookie('@vuteq-token',{req, res});
+                deleteCookie('vuteq-token',{req, res});
                 res.status(200).json({
                     ok: true,
                     data: 'Logout Berhasil'

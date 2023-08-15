@@ -1,7 +1,6 @@
 import {BiEdit, BiPlusMedical, BiRefresh, BiSolidUpArrow} from "react-icons/bi";
 import {ImCross} from "react-icons/im";
 import {BsFillTrashFill} from "react-icons/bs";
-import axios from "axios";
 import {useEffect, useState} from "react";
 import DeleteModal from "@/components/Modal/DeleteModal";
 import {showErrorToast, showSuccessToast} from "@/utils/toast";
@@ -10,6 +9,7 @@ import {useForm} from "react-hook-form";
 import AddModalLayout from "@/components/Page/Master/Part/AddModal";
 import EditModalLayout from "@/components/Page/Master/Part/EditModal";
 import Head from "next/head";
+import axiosInstance from "@/utils/interceptor";
 
 export default function Part() {
     const {setPart, listPart} = dataState()
@@ -28,7 +28,7 @@ export default function Part() {
     },[])
 
     const fetchData = () => {
-        axios.get('/api/parts').then(response => {
+        axiosInstance.get('/api/parts').then(response => {
             setPart(response.data['data']);
             setFilters(response.data['data'])
         }).catch(()=>{
@@ -38,7 +38,7 @@ export default function Part() {
     };
 
     const submitData =  (data) => {
-        axios.post('/api/parts',data).then(() =>{
+        axiosInstance.post('/api/parts',data).then(() =>{
             showSuccessToast("Sukses Simpan Data");
             fetchData()
         }).catch((e)=>{
@@ -50,7 +50,7 @@ export default function Part() {
     }
 
     const deleteData = (e) => {
-        axios.delete('/api/parts/' + e).then(()=>{
+        axiosInstance.delete('/api/parts/' + e).then(()=>{
             showSuccessToast("Sukses Hapus Data");
         }).catch(()=>{
             showErrorToast("Gagal Hapus Data");
@@ -61,7 +61,7 @@ export default function Part() {
     }
 
     const editData = (data) => {
-        axios.put('/api/parts/' + selectedCell.kode, data).then(() =>{
+        axiosInstance.put('/api/parts/' + selectedCell.kode, data).then(() =>{
             showSuccessToast("Sukses Edit Data");
             fetchData()
         }).catch(()=>{

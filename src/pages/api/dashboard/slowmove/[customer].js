@@ -10,7 +10,7 @@ import Vehicle from "@/models/Vehicle";
 async function handler(req, res) {
     switch (req.method) {
         case 'GET':
-            if (req.user.role !== 'super' && req.user.role !== 'admin') {
+            if (req.user.role === 'operator') {
                 return res.status(401).json({
                     ok: false,
                     data: "Role must be admin"
@@ -65,7 +65,7 @@ async function handler(req, res) {
                                 where: {
                                     status: 0,
                                 },
-                                attributes: ['updated_at','part','name', 'Vehicle'],
+                                // attributes: ['updated_at','part','name', 'Vehicle'],
                                 include: [
                                     {
                                         model: Customer,

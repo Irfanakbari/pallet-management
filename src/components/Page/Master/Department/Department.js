@@ -1,6 +1,5 @@
 import { BiEdit, BiPlusMedical, BiRefresh, BiSolidUpArrow } from "react-icons/bi";
 import { BsFillTrashFill } from "react-icons/bs";
-import axios from "axios";
 import { useEffect, useState } from "react";
 import DeleteModal from "@/components/Modal/DeleteModal";
 import {showErrorToast, showSuccessToast} from "@/utils/toast";
@@ -9,6 +8,7 @@ import {useForm} from "react-hook-form";
 import AddModalLayout from "@/components/Page/Master/Department/AddModal";
 import EditModalLayout from "@/components/Page/Master/Department/EditModal";
 import Head from "next/head";
+import axiosInstance from "@/utils/interceptor";
 export default function Department() {
     const {setListDepartment, listDepartment} = dataState()
     const {setModalAdd, modalAdd, modalEdit, setModalEdit, modalDelete,setModalDelete} = modalState()
@@ -24,7 +24,7 @@ export default function Department() {
     }, []);
 
     const fetchData =  () => {
-        axios.get('/api/departments').then(response => {
+        axiosInstance.get('/api/departments').then(response => {
             setListDepartment(response.data['data']);
         }).catch(()=>{
             showErrorToast("Gagal Fetch Data");
@@ -32,7 +32,7 @@ export default function Department() {
     };
 
     const submitData = (data) => {
-        axios.post('/api/departments', data).then(() => {
+        axiosInstance.post('/api/departments', data).then(() => {
             showSuccessToast("Sukses Simpan Data");
             fetchData();
         }).catch(()=>{
@@ -44,7 +44,7 @@ export default function Department() {
     };
 
     const deleteData = (e) => {
-        axios
+        axiosInstance
             .delete('/api/departments/' + e)
             .then(() => {
                 showSuccessToast("Sukses Hapus Data");
@@ -59,7 +59,7 @@ export default function Department() {
     };
 
     const editData = (data) => {
-        axios
+        axiosInstance
             .put('/api/departments/' + selectedCell.kode, data)
             .then(() => {
                 showSuccessToast("Sukses Edit Data");

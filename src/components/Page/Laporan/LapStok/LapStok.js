@@ -2,7 +2,6 @@ import {BiPrinter, BiRefresh, BiSolidUpArrow} from "react-icons/bi";
 import {ImCross} from "react-icons/im";
 import {AiFillFileExcel} from "react-icons/ai";
 import {useCallback, useEffect, useRef, useState} from "react";
-import axios from "axios";
 import {showErrorToast} from "@/utils/toast";
 import {dataState} from "@/context/states";
 import ExcelJS from "exceljs";
@@ -11,6 +10,7 @@ import {useReactToPrint} from "react-to-print";
 import {FaRegWindowMaximize} from "react-icons/fa";
 import Image from "next/image";
 import Head from "next/head";
+import axiosInstance from "@/utils/interceptor";
 
 export default function LapStok() {
     const [dataStok, setDataStok] = useState([])
@@ -25,7 +25,7 @@ export default function LapStok() {
 
     const fetchData = async () => {
         try {
-            const response = await axios.get('/api/stok');
+            const response = await axiosInstance.get('/api/stok');
             setDataStok(response.data['data']);
         } catch (error) {
             showErrorToast("Gagal Fetch Data");
@@ -33,7 +33,7 @@ export default function LapStok() {
     };
 
     const getFilter = () => {
-        axios.get(`/api/stok?customer=${custFilter.current.value??''}&department=${deptFilter.current.value??''}`).then(response=>{
+        axiosInstance.get(`/api/stok?customer=${custFilter.current.value??''}&department=${deptFilter.current.value??''}`).then(response=>{
             setDataStok(response.data['data']);
         }).catch(()=>{
             showErrorToast("Gagal Fetch Data");

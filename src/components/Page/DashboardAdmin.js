@@ -1,6 +1,5 @@
 import {BiFullscreen} from "react-icons/bi";
 import React, {useEffect, useRef, useState} from "react";
-import axios from "axios";
 import {showErrorToast} from "@/utils/toast";
 import {Card, Metric, Text} from "@tremor/react";
 import Chart1 from "@/components/Chart/DashboardChart1";
@@ -10,6 +9,7 @@ import Image from "next/image";
 import Head from "next/head";
 import {modalState} from "@/context/states";
 import DetailPalletSlow from "@/components/Modal/DetailPalletSlow";
+import axiosInstance from "@/utils/interceptor";
 
 export default function DashboardAdmin() {
     const [history, setHistory] = useState([])
@@ -38,22 +38,23 @@ export default function DashboardAdmin() {
         };
     },[])
 
-    const fetchData = () => {
-        axios.get('/api/dashboard').then(response =>{
+    const fetchData = async () => {
+        try {
+            const response = await axiosInstance.get('/api/dashboard');
             setCardInfo({
                 stok: response.data['data']['totalStokPallet'] ?? '-',
                 total: response.data['data']['totalPallet'] ?? '-',
                 keluar: response.data['data']['totalPalletKeluar'] ?? '-',
                 repair: response.data['data']['totalPalletRepair'] ?? '-',
-                totalMendep:response.data['data']['totalPaletMendep'] ?? 0,
+                totalMendep: response.data['data']['totalPaletMendep'] ?? 0,
                 mendep: response.data['data']['paletMendep'] ?? []
             })
             setHistory(response.data['data']['historyPallet'] ?? [])
             setDataChart1(response.data.data['stokPart'] ?? [])
             setDataChart2(response.data.data['chartStok'] ?? [])
-        }).catch(() =>{
+        } catch (e) {
             showErrorToast("Gagal Fetch Data");
-        })
+        }
     }
     const enterFullscreen = () => {
         if (document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {

@@ -47,7 +47,9 @@ async function handler(req, res) {
                 if (search) {
                     whereClause = {
                         ...whereClause,
-                        kode: search,
+                        kode: {
+                            [Op.like]: `%${search}%`
+                        }
                     };
                 }
 

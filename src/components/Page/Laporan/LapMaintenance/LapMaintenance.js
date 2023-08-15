@@ -2,7 +2,6 @@ import {BiPrinter, BiRefresh, BiSolidUpArrow} from "react-icons/bi";
 import {ImCross} from "react-icons/im";
 import {AiFillFileExcel} from "react-icons/ai";
 import {useCallback, useEffect, useRef, useState} from "react";
-import axios from "axios";
 import { useExcelJS } from "react-use-exceljs"
 import PaginationSelect from "@/components/PaginationSelect";
 import {showErrorToast} from "@/utils/toast";
@@ -12,6 +11,7 @@ import {useReactToPrint} from "react-to-print";
 import {FaRegWindowMaximize} from "react-icons/fa";
 import Image from "next/image";
 import Head from "next/head";
+import axiosInstance from "@/utils/interceptor";
 
 
 export default function LapMaintenance() {
@@ -31,7 +31,7 @@ export default function LapMaintenance() {
     // Fungsi get data dari API
     const fetchData = async () => {
         try {
-            const response = await axios.get('/api/repairs?page=1');
+            const response = await axiosInstance.get('/api/repairs?page=1');
             setDataMaintenance(response.data);
             setFilters(response.data['data'])
         } catch (error) {
@@ -105,7 +105,7 @@ export default function LapMaintenance() {
     // Fungsi untuk menghandle perubahan halaman
     const handlePageChange = async (selectedPage) => {
         // Lakukan perubahan halaman di sini
-        const response3 = await axios.get(`/api/repairs?page=` + selectedPage);
+        const response3 = await axiosInstance.get(`/api/repairs?page=` + selectedPage);
         setDataMaintenance(response3.data);
         setFilters(response3.data['data'])
     };
@@ -128,7 +128,7 @@ export default function LapMaintenance() {
     const getFilteredData = async (e) => {
         e.preventDefault()
         try {
-            const response = await axios.get(`/api/filters?customer=${selectKodeCust.current.value}&vehicle=${selectKodeProj.current.value}&page=1`);
+            const response = await axiosInstance.get(`/api/filters?customer=${selectKodeCust.current.value}&vehicle=${selectKodeProj.current.value}&page=1`);
             setDataMaintenance(response.data);
             setFilters(response.data['data']);
         } catch (error) {

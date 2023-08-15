@@ -22,11 +22,33 @@ export default async function handler(req, res) {
                 } else {
                     const isValid = await bcrypt.compare(credential.password, user.password)
                     if (isValid) {
+                        let expiresIn;
+
+                        if (user.role === 'super') {
+                            expiresIn = '2h'; // 2 jam
+                        } else if (user.role === 'admin') {
+                            expiresIn = '6h'; // 6 jam
+                        } else if (user.role === 'viewer') {
+                            expiresIn = '3d'; // 2 hari
+                        } else if (user.role === 'operator') {
+                            expiresIn = '1d'; // 1 hari
+                        } else {
+                            expiresIn = '1d'; // 1 hari
+                        }
+
                         const token = jwt.sign({
                             id: user.id,
                             role: user.role
-                        }, 'vuteqcorp',{ expiresIn: '1y' });
-                        setCookie('@vuteq-token', token,{req, res, httpOnly: true, maxAge: 60 * 60 * 24 * 90});
+                        }, 'vuteqcorp', { expiresIn });
+
+                        setCookie('vuteq-token', token, {
+                            req,
+                            res,
+                            httpOnly: true,
+                            maxAge: expiresIn === '2d' ? 60 * 60 * 48 : (expiresIn === '2h' ? 60 * 60 * 2 : (expiresIn === '6h' ? 60 * 60 * 6 : 60 * 60 * 24))
+                        });
+
+
                         res.status(200).json({
                             ok: true,
                             data: "Login Successfully",

@@ -2,7 +2,6 @@ import {BiFilter, BiPrinter, BiRefresh, BiSolidUpArrow} from "react-icons/bi";
 import { ImCross } from "react-icons/im";
 import { AiFillFileExcel } from "react-icons/ai";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import dayjs from "dayjs";
 import ExcelJS from "exceljs"
 import PaginationSelect from "@/components/PaginationSelect";
@@ -10,6 +9,7 @@ import {showErrorToast} from "@/utils/toast";
 import FilterModal from "@/components/Page/Laporan/LapRiwayat/FilterModal";
 import {filterState, modalState} from "@/context/states";
 import Head from "next/head";
+import axiosInstance from "@/utils/interceptor";
 
 export default function LapRiwayat() {
     const [dataHistory, setDataHistory] = useState([]);
@@ -33,7 +33,7 @@ export default function LapRiwayat() {
     const getFilteredData = async (e) => {
         e.preventDefault()
         try {
-            const response = await axios.get(`/api/history?customer=${custFilterValue}&vehicle=${vehicleFilterValue}&part=${partFilterValue}&status=${statusFilterValue}&start=${startDateValue}&end=${endDateValue}&page=1`);
+            const response = await axiosInstance.get(`/api/history?customer=${custFilterValue}&vehicle=${vehicleFilterValue}&part=${partFilterValue}&status=${statusFilterValue}&start=${startDateValue}&end=${endDateValue}&page=1`);
             setDataHistory(response.data);
             setFilters(response.data['data']);
         } catch (error) {
@@ -44,7 +44,7 @@ export default function LapRiwayat() {
     };
 
     const fetchData =  () => {
-        axios.get(`/api/history?page=1`).then(response=>{
+        axiosInstance.get(`/api/history?page=1`).then(response=>{
             setDataHistory(response.data);
             setFilters(response.data['data']);
         }).catch(()=>{
@@ -53,14 +53,14 @@ export default function LapRiwayat() {
     };
 
     const handlePageChange = async (selectedPage) => {
-        const response3 = await axios.get(`/api/history?customer=${custFilterValue}&vehicle=${vehicleFilterValue}&part=${partFilterValue}&status=${statusFilterValue}&start=${startDateValue}&end=${endDateValue}&page=` + selectedPage);
+        const response3 = await axiosInstance.get(`/api/history?customer=${custFilterValue}&vehicle=${vehicleFilterValue}&part=${partFilterValue}&status=${statusFilterValue}&start=${startDateValue}&end=${endDateValue}&page=` + selectedPage);
         setDataHistory(response3.data);
         setFilters(response3.data['data'])
     };
 
     const handleSearch = async () => {
         const searchValueLowerCase = searchTerm.toLowerCase().split(' ').join('');
-        const response = await axios.get(`/api/history?search=${searchValueLowerCase}`);
+        const response = await axiosInstance.get(`/api/history?search=${searchValueLowerCase}`);
         setDataHistory(response.data);
         setFilters(response.data['data']);
     };

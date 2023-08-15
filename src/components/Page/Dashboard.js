@@ -1,6 +1,5 @@
 import {BiFullscreen} from "react-icons/bi";
 import React, {useEffect, useRef, useState} from "react";
-import axios from "axios";
 import {showErrorToast} from "@/utils/toast";
 import {Card, Metric, Text} from "@tremor/react";
 import Chart1 from "@/components/Chart/DashboardChart1";
@@ -11,6 +10,7 @@ import Chart3 from "@/components/Chart/DashboardChart3";
 import DetailPalletSlow from "@/components/Modal/DetailPalletSlow";
 import {modalState} from "@/context/states";
 import Head from "next/head";
+import axiosInstance from "@/utils/interceptor";
 
 export default function Dashboard() {
     const [history, setHistory] = useState([])
@@ -40,23 +40,24 @@ export default function Dashboard() {
         };
     },[])
 
-    const fetchData = () => {
-        axios.get('/api/dashboard').then(response =>{
+    const fetchData = async () => {
+        try {
+            const response = await axiosInstance.get('/api/dashboard');
             setCardInfo({
                 stok: response.data['data']['totalStokPallet'] ?? '-',
                 total: response.data['data']['totalPallet'] ?? '-',
                 keluar: response.data['data']['totalPalletKeluar'] ?? '-',
                 repair: response.data['data']['totalPalletRepair'] ?? '-',
-                totalMendep:response.data['data']['totalPaletMendep'] ?? 0,
+                totalMendep: response.data['data']['totalPaletMendep'] ?? 0,
                 mendep: response.data['data']['paletMendep'] ?? []
             })
             setHistory(response.data['data']['historyPallet'] ?? [])
             setDataChart1(response.data.data['stokPart'] ?? [])
             setDataChart2(response.data.data['chartStok'] ?? [])
             setDataChart3(response.data.data['stokDepartment'] ?? [])
-        }).catch(() =>{
+        } catch (e) {
             showErrorToast("Gagal Fetch Data");
-        })
+        }
     }
     const enterFullscreen = () => {
         if (document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {

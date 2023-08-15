@@ -1,7 +1,6 @@
 import { BiEdit, BiPlusMedical, BiRefresh, BiSolidUpArrow } from "react-icons/bi";
 import { ImCross } from "react-icons/im";
 import { BsFillTrashFill } from "react-icons/bs";
-import axios from "axios";
 import { useEffect, useState } from "react";
 import DeleteModal from "@/components/Modal/DeleteModal";
 import {showErrorToast, showSuccessToast} from "@/utils/toast";
@@ -10,6 +9,7 @@ import {useForm} from "react-hook-form";
 import AddModalLayout from "@/components/Page/Master/Customer/AddModal";
 import EditModalLayout from "@/components/Page/Master/Customer/EditModal";
 import Head from "next/head";
+import axiosInstance from "@/utils/interceptor";
 
 export default function Customer() {
     const {setCustomer, listCustomer} = dataState()
@@ -28,7 +28,7 @@ export default function Customer() {
     }, []);
 
     const fetchData =  () => {
-        axios.get('/api/customers').then(response => {
+        axiosInstance.get('/api/customers').then(response => {
             setCustomer(response.data['data']);
             setFilters(response.data['data']);
         }).catch(()=>{
@@ -37,7 +37,7 @@ export default function Customer() {
     };
 
     const submitData = (data) => {
-        axios.post('/api/customers', data).then(() => {
+        axiosInstance.post('/api/customers', data).then(() => {
             showSuccessToast("Sukses Simpan Data");
             fetchData();
         }).catch(()=>{
@@ -49,7 +49,7 @@ export default function Customer() {
     };
 
     const deleteData = (e) => {
-        axios
+        axiosInstance
             .delete('/api/customers/' + e)
             .then(() => {
                 showSuccessToast("Sukses Hapus Data");
@@ -64,7 +64,7 @@ export default function Customer() {
     };
 
     const editData = (data) => {
-        axios
+        axiosInstance
             .put('/api/customers/' + selectedCell.kode, data)
             .then(() => {
                 showSuccessToast("Sukses Edit Data");

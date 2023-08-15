@@ -1,4 +1,4 @@
-import {toast} from "react-toastify";
+import {Slide, toast} from "react-toastify";
 
 const showErrorToast = (message) => {
     toast.error(message, {
@@ -6,10 +6,12 @@ const showErrorToast = (message) => {
         autoClose: 2000,
         hideProgressBar: true,
         closeOnClick: true,
-        pauseOnHover: true,
+        pauseOnHover: false,
+        transition: Slide,
         draggable: true,
-        progress: undefined,
+        progress: false,
         theme: "colored",
+        limit:2,
     });
 };
 
@@ -19,10 +21,12 @@ const showSuccessToast = (message) => {
         autoClose: 2000,
         hideProgressBar: true,
         closeOnClick: true,
-        pauseOnHover: true,
+        pauseOnHover: false,
         draggable: true,
-        progress: undefined,
+        transition: Slide,
+        progress: false,
         theme: "colored",
+        limit:2,
     });
 };
 

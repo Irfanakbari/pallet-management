@@ -19,6 +19,9 @@ const User = connection.define('User', {
     },
     password: {
         type: DataTypes.STRING
+    },
+    last_login: {
+        type: DataTypes.STRING
     }
 }, {
     tableName: 'users',

@@ -2,7 +2,6 @@ import {BiEdit, BiPlusMedical, BiRefresh, BiSolidUpArrow} from "react-icons/bi";
 import {ImCross} from "react-icons/im";
 import {BsFillTrashFill} from "react-icons/bs";
 import {useEffect, useState} from "react";
-import axios from "axios";
 import DeleteModal from "@/components/Modal/DeleteModal";
 import {showErrorToast, showSuccessToast} from "@/utils/toast";
 import {dataState, modalState} from "@/context/states";
@@ -10,6 +9,7 @@ import {useForm} from "react-hook-form";
 import AddModalLayout from "@/components/Page/Master/Vehicle/AddModal";
 import EditModalLayout from "@/components/Page/Master/Vehicle/EditModal";
 import Head from "next/head";
+import axiosInstance from "@/utils/interceptor";
 
 export default function Vehicle() {
     const {setVehicle, listVehicle} = dataState()
@@ -28,7 +28,7 @@ export default function Vehicle() {
     }, [])
 
     const fetchData =  () => {
-        axios.get('/api/vehicle').then(response =>{
+        axiosInstance.get('/api/vehicle').then(response =>{
             setVehicle(response.data['data']);
             setFilters(response.data['data'])
         }).catch(()=>{
@@ -37,7 +37,7 @@ export default function Vehicle() {
     };
 
     const submitData = async (data) => {
-        axios.post('/api/vehicle',data).then(() =>{
+        axiosInstance.post('/api/vehicle',data).then(() =>{
             showSuccessToast("Sukses Simpan Data");
             fetchData()
         }).catch(()=>{
@@ -49,7 +49,7 @@ export default function Vehicle() {
     }
 
     const deleteData = async (e) => {
-        axios.delete('/api/vehicle/' + e).then(()=>{
+        axiosInstance.delete('/api/vehicle/' + e).then(()=>{
             showSuccessToast("Sukses Hapus Data");
         }).catch (()=>{
             showErrorToast("Gagal Hapus Data");
@@ -60,7 +60,7 @@ export default function Vehicle() {
     }
 
     const editData = (data) => {
-        axios.put('/api/vehicle/' + selectedCell.kode,data).then(() =>{
+        axiosInstance.put('/api/vehicle/' + selectedCell.kode,data).then(() =>{
             showSuccessToast("Sukses Edit Data");
             fetchData()
         }).catch(()=>{

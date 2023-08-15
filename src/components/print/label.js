@@ -3,6 +3,7 @@ import ReactToPrint from 'react-to-print';
 import html2canvas from 'html2canvas';
 import { QRCode } from 'react-qrcode-logo';
 import {BiPrinter} from "react-icons/bi";
+import {Tooltip} from "react-tooltip";
 
 class LabelComponent extends React.Component {
     render() {
@@ -55,11 +56,12 @@ class PrintPage extends React.Component {
         return (
             <div>
                 <ReactToPrint
-                    trigger={() => <div
-                        className={`flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer`}>
-                        <BiPrinter size={12} />
-                        <p className={`text-white font-bold text-sm`}>Cetak QR</p>
-                    </div>}
+                    trigger={() =>
+                       <div>
+                           <Tooltip id="label" />
+                           <BiPrinter data-tooltip-id="qrcode" data-tooltip-content="Lihat Barcode!" size={25} className={`hover:text-blue-500 hover:cursor-pointer`} />
+                       </div>
+                    }
                     content={() => this.labelRef}
                     onBeforeGetContent={() => html2canvas(document.body)}
                 />

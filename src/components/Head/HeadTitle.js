@@ -17,7 +17,7 @@ export default function HeadTitle({ user }) {
         try {
             await axios.get('/api/auth/logout').then(async () => {
                 showSuccessToast('Logout Berhasil');
-                await router.replace('/').then(() => router.reload());
+                await router.reload()
             });
         } catch (error) {
             showErrorToast(error.response.data['data']);

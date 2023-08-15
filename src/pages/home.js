@@ -3,13 +3,9 @@ import { ImCross } from "react-icons/im";
 import axios from "axios";
 import { getCookie } from "cookies-next";
 import { useRouter } from "next/router";
-
-// Import State
 import { dataState, useStoreTab } from "@/context/states";
 import { showErrorToast, showSuccessToast } from "@/utils/toast";
 import { laporan, master } from "@/utils/constants";
-
-// Import Component
 import HeadTitle from "@/components/Head/HeadTitle";
 import Customer from "@/components/Page/Master/Customer/Customer";
 import Dashboard from "@/components/Page/Dashboard";
@@ -23,6 +19,7 @@ import MainMenu from "@/components/MainMenu/MainMenu";
 import Department from "@/components/Page/Master/Department/Department";
 import DashboardAdmin from "@/components/Page/DashboardAdmin";
 import LapStok from "@/components/Page/Laporan/LapStok/LapStok";
+import axiosInstance from "@/utils/interceptor";
 
 export default function Home() {
     const { listTab, setCloseTab, activeMenu, setActiveMenu } = useStoreTab();
@@ -46,26 +43,22 @@ export default function Home() {
     }
 
     const fetchData = async () => {
-        try {
-            const [response1, response2, response3, response4] = await Promise.all([
-                axios.get('/api/customers'),
-                axios.get('/api/departments'),
-                axios.get('/api/vehicle'),
-                axios.get('/api/parts'),
-            ]);
-
-            setCustomer(response1.data['data']);
-            setListDepartment(response2.data['data']);
-            setVehicle(response3.data['data']);
-            setPart(response4.data['data']);
-            // Lakukan pemrosesan lain yang diperlukan di sini
-        } catch (error) {
+        const [response1, response2, response3, response4] = await Promise.all([
+            axiosInstance.get('/api/customers'),
+            axiosInstance.get('/api/departments'),
+            axiosInstance.get('/api/vehicle'),
+            axiosInstance.get('/api/parts'),
+        ]).catch(e=>{
             showErrorToast("Gagal Mengambil Data");
-        }
+        })
+        setCustomer(response1.data['data']);
+        setListDepartment(response2.data['data']);
+        setVehicle(response3.data['data']);
+        setPart(response4.data['data']);
     };
 
     function getCurrentUser() {
-        axios.get('/api/auth/user')
+        axiosInstance.get('/api/auth/user')
             .then(response => {
                 if (response.data['data'] === null) {
                     axios.get('/api/auth/logout')
@@ -143,7 +136,7 @@ export default function Home() {
 
 // Fungsi untuk mengizinkan akses hanya jika ada cookie token
 export const getServerSideProps = async ({ req, res }) => {
-    const cookie = getCookie('@vuteq-token', { req, res });
+    const cookie = getCookie('vuteq-token', { req, res });
 
     if (!cookie) {
         res.writeHead(302, { Location: '/' });
