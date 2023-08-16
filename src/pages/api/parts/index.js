@@ -62,8 +62,14 @@ async function handler(req, res) {
             try {
                 const { name, customer, kode, vehicle } = req.body;
                 const vehic = await Vehicle.findByPk(vehicle);
+                let code;
+                if (vehic.dataValues.department !== 'A') {
+                    code = customer + vehic.dataValues.department + kode;
+                } else {
+                    code = customer + kode;
+                }
                 await Part.create({
-                    kode: customer + vehic.dataValues.department + kode,
+                    kode:code,
                     name: name,
                     customer: customer,
                     vehicle: vehic.dataValues.kode

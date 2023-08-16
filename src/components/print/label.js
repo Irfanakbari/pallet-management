@@ -4,6 +4,8 @@ import html2canvas from 'html2canvas';
 import { QRCode } from 'react-qrcode-logo';
 import {BiPrinter} from "react-icons/bi";
 import {Tooltip} from "react-tooltip";
+import Image from "next/image";
+
 
 class LabelComponent extends React.Component {
     render() {
@@ -11,12 +13,15 @@ class LabelComponent extends React.Component {
         return (
             <div className="flex w-full p-1 mt-2 h-full">
                 <div className={`w-full flex flex-col border-2 border-black text-[12px]`}>
-                    <div className={`w-full p-0.5 text-center font-bold`}>PT VUTEQ INDONESIA</div>
+                    <div className={`w-full flex flex-row p-0.5`}>
+                        <Image src="/logo.png" alt="Logo" width={60} height={20} />
+                        <div className={`w-full text-center font-bold`}>PT VUTEQ INDONESIA</div>
+                    </div>
                     <div className={`grow flex text-center font-normal`}>
                         <table className={`w-full grow`}>
                             <tbody className={`border-t border-black text-[10px]`}>
                             <tr className={`w-full text-left`}>
-                                <td className={`border border-black bg-black text-white`}>Asset Name</td>
+                                <td className={`border border-black bg-black text-white`}>Pallet Name</td>
                                 <td className={`text-center border border-black border-r-0`}>{assetName}</td>
                             </tr>
                             <tr className={`w-full text-left`}>
@@ -38,8 +43,8 @@ class LabelComponent extends React.Component {
                 <div className={`grow border-2 flex items-center justify center border-l-0 border-black`}>
                    <center>
                        <QRCode
-                           ecLevel={'H'}
-                           size={68}
+                           ecLevel={'Q'}
+                           size={71}
                            value={palletID}
                            qrStyle={'dots'}
                        />
