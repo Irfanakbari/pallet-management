@@ -14,7 +14,7 @@ class LabelComponent extends React.Component {
             <div className="flex w-full p-1 mt-2 h-full">
                 <div className={`w-full flex flex-col border-2 border-black text-[12px]`}>
                     <div className={`w-full flex flex-row p-0.5`}>
-                        <Image src="/logo.png" alt="Logo" width={60} height={20} />
+                        <img src="/logo.png" alt="Logo" width={61} />
                         <div className={`w-full text-center font-bold`}>PT VUTEQ INDONESIA</div>
                     </div>
                     <div className={`grow flex text-center font-normal`}>
