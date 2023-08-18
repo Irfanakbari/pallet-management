@@ -91,11 +91,6 @@ export default function LapMaintenance() {
                         key: "part",
                         width: 32,
                     },
-                    {
-                        header: "Status",
-                        key: "status",
-                        width: 32,
-                    },
                 ],
             },
         ],
@@ -115,10 +110,9 @@ export default function LapMaintenance() {
         const data = filters.map((item, index) => ({
             no: index + 1,
             id: item.kode,
-            customer: item.customer,
-            vehicle: item.vehicle,
-            part: item.part,
-            status: "Maintenance"
+            customer: item.customer + ' - '+  item['Customer']['name'],
+            vehicle: item.vehicle + ' - '+  item['Vehicle']['name'],
+            part: item.part + ' - '+  item['Part']['name'],
         }));
         await excel.download(data)
     }
@@ -239,7 +233,7 @@ export default function LapMaintenance() {
                             <th className="p-2 bg-gray-100 text-left">Kode Pallet</th>
                             <th className="p-2 bg-gray-100 text-left">Customer</th>
                             <th className="p-2 bg-gray-100 text-left">Vehicle</th>
-                            <th className="p-2 bg-gray-100 text-left">Status</th>
+                            <th className="p-2 bg-gray-100 text-left">Part</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -248,10 +242,10 @@ export default function LapMaintenance() {
                                 <>
                                     <tr className={`text-sm font-semibold border-b border-gray-500`} key={index}>
                                         <td className="text-center p-1.5">{index+1}</td>
-                                        <td className="px-4">{e['kode']}</td>
-                                        <td className="px-4">{e['customer']}</td>
-                                        <td className="px-4">{e['vehicle']}</td>
-                                        <td className="px-4">Maintenance</td>
+                                        <td className="px-4">{e['kode'] }</td>
+                                        <td className="px-4">{e['customer']+ ' - ' + e['Customer']['name']}</td>
+                                        <td className="px-4">{e['vehicle']+ ' - ' + e['Vehicle']['name']}</td>
+                                        <td className="px-4">{e['part']+ ' - ' + e['Part']['name']}</td>
                                     </tr>
                                 </>
                             ))

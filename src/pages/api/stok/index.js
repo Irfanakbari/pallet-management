@@ -81,7 +81,7 @@ async function handler(req, res) {
                             }
                         })
                         return {
-                            part: `${part['kode']} - ${part['kode']}`,
+                            part: `${part['kode']} - ${part['name']}`,
                             Total: palletCounts.total,
                             Keluar:palletCounts.keluar,
                             Maintenance:palletCounts.maintenance,
@@ -136,7 +136,7 @@ async function handler(req, res) {
                             }
                         })
                         return {
-                            part: `${part['kode']} - ${part['kode']}`,
+                            part: `${part['kode']} - ${part['name']}`,
                             Total: palletCounts.total,
                             Keluar: palletCounts.keluar,
                             Maintenance: palletCounts.maintenance,
