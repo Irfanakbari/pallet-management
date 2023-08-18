@@ -91,7 +91,7 @@ async function handler(req, res) {
                 });
             }
             try {
-                const { part, name, total } = req.body;
+                const { part, name, total, jenis } = req.body;
                 const parts = await Part.findOne({
                     where: {
                         kode: part
@@ -112,6 +112,7 @@ async function handler(req, res) {
                 const pallets = await Pallet.findAll({ where: { kode: { [Op.like]: `${parts.customer}${parts.vehicle}${part}%` } } });
 
                 let nextId;
+                let palletKode;
                 if (pallets.length > 0) {
                     const palletNumbers = pallets.map(palet => {
                         const palletId = palet['kode'];
@@ -138,7 +139,11 @@ async function handler(req, res) {
 
                 for (let i = 0; i < total; i++) {
                     const nextIdFormatted = (nextId + i).toString().padStart(3, '0');
-                    const palletKode = parts.customer + parts.vehicle + part + nextIdFormatted;
+                    if (vehicles.department !== 'A') {
+                        palletKode = jenis + '-'+ parts.customer + parts.vehicle + part + nextIdFormatted;
+                    } else {
+                        palletKode = parts.customer + parts.vehicle + part + nextIdFormatted;
+                    }
 
                     await Pallet.create({
                         kode: palletKode,
