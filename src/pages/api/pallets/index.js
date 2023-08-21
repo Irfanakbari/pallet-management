@@ -109,14 +109,24 @@ async function handler(req, res) {
                 }
 
                 // Dapatkan daftar valet berdasarkan kode_project untuk mencari urutan kosong
-                const pallets = await Pallet.findAll({ where: { kode: { [Op.like]: `${parts.customer}${parts.vehicle}${part}%` } } });
+                let pallets;
+                if (vehicles.department !== 'A') {
+                    pallets = await Pallet.findAll({ where: { kode: { [Op.like]: `${jenis}-${parts.customer}${parts.vehicle}${part}%` } } });
+                } else {
+                    pallets = await Pallet.findAll({ where: { kode: { [Op.like]: `${parts.customer}${parts.vehicle}${part}%` } } });
+                }
 
                 let nextId;
                 let palletKode;
                 if (pallets.length > 0) {
                     const palletNumbers = pallets.map(palet => {
                         const palletId = palet['kode'];
-                        const numberString = palletId.slice(parts.customer.length + parts.vehicle.length + part.length);
+                        let numberString;
+                        if (vehicles.department !== 'A') {
+                            numberString = palletId.slice(jenis.length+1+parts.customer.length + parts.vehicle.length + part.length);
+                        } else {
+                            numberString= palletId.slice(parts.customer.length + parts.vehicle.length + part.length);
+                        }
                         return parseInt(numberString);
                     });
 
