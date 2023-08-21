@@ -294,7 +294,7 @@ export default function LapRiwayat() {
                     <br/>
                     <PaginationSelect
                         totalPages={dataHistory['totalPages']}
-                        currentPage={dataHistory['currentPage']}
+                        currentPage={1}
                         onPageChange={handlePageChange}
                     />
                 </div>

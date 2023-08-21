@@ -1,4 +1,4 @@
-import {BiPlusMedical, BiRefresh, BiSearch, BiSolidUpArrow} from "react-icons/bi";
+import {BiPlusMedical, BiRefresh, BiSearch, BiSolidUpArrow, BiTrash} from "react-icons/bi";
 import {BsQrCode} from "react-icons/bs";
 import {AiFillFileExcel} from "react-icons/ai";
 import {useEffect, useRef, useState} from "react";
@@ -16,10 +16,12 @@ import Head from "next/head";
 import {HiOutlineTrash} from "react-icons/hi";
 import {Tooltip} from "react-tooltip";
 import axiosInstance from "@/utils/interceptor";
+import DeleteModal2 from "@/components/Modal/DeleteModal2";
 export default function Pallet() {
     const {listCustomer, listVehicle, listPallet, setPallet, listPart,user} = dataState()
-    const {setModalAdd, modalAdd,  modalDelete,setModalDelete, modalQr, setModalQR} = modalState()
+    const {setModalAdd, modalAdd,  modalDelete, modalDelete2,setModalDelete2,setModalDelete, modalQr, setModalQR} = modalState()
     const [selectedCell, setSelectedCell] = useState({})
+    const [selectedItems, setSelectedItems] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [filters, setFilters] = useState([])
     const custFilter = useRef(null);
@@ -32,12 +34,13 @@ export default function Pallet() {
     } = useForm()
 
     useEffect(() => {
-        fetchData();
+        setPallet([]); // Reset the selected page when the component unmounts
+        fetchData()
     }, [])
 
-    const fetchData = () => {
+    const fetchData = (selectedPage=1) => {
         const searchValueLowerCase = searchTerm.toLowerCase().split(' ').join('');
-        axiosInstance.get(`/api/pallets?search=${searchValueLowerCase}&customer=${custFilter.current.value??''}&vehicle=${vehicleFilter.current.value??''}&part=${partFilter.current.value??''}&page=1`).then(response=>{
+        axiosInstance.get(`/api/pallets?search=${searchValueLowerCase}&customer=${custFilter.current.value??''}&vehicle=${vehicleFilter.current.value??''}&part=${partFilter.current.value??''}&page=${selectedPage}`).then(response=>{
            setPallet(response.data);
            setFilters(response.data['data'])
        }).catch(()=>{
@@ -76,12 +79,8 @@ export default function Pallet() {
     }
 
     const handlePageChange = (selectedPage) => {
-        const searchValueLowerCase = searchTerm.toLowerCase().split(' ').join('');
         // Lakukan perubahan halaman di sini
-        axiosInstance.get(`/api/pallets?search=${searchValueLowerCase}&customer=${custFilter.current.value??''}&vehicle=${vehicleFilter.current.value??''}&part=${partFilter.current.value??''}&page=` + selectedPage).then(response=>{
-            setPallet(response.data);
-            setFilters(response.data['data'])
-        })
+        fetchData(selectedPage)
     };
 
     const excel = useExcelJS({
@@ -144,6 +143,30 @@ export default function Pallet() {
         await excel.download(data)
     }
 
+    const handleItemSelection = (itemId) => {
+        if (selectedItems.includes(itemId)) {
+            setSelectedItems(selectedItems.filter(kode => kode !== itemId));
+        } else {
+            setSelectedItems([...selectedItems, itemId]);
+        }
+    };
+
+    const handleMultiDelete = () => {
+        Promise.all(selectedItems.map(itemId => axiosInstance.delete(`/api/pallets/${itemId}`)))
+            .then(() => {
+                showSuccessToast("Sukses Hapus Data");
+            })
+            .catch(() => {
+                showErrorToast("Gagal Hapus Data");
+            })
+            .finally(() => {
+                setSelectedItems([]);
+                fetchData()
+            });
+    };
+
+
+
     return (
         <>
             <Head>
@@ -151,6 +174,7 @@ export default function Pallet() {
             </Head>
             <div className={`h-full bg-white`}>
                 {modalDelete && (<DeleteModal data={selectedCell} setCloseModal={setModalDelete} action={deleteData} />)}
+                {modalDelete2 && (<DeleteModal2 data={selectedItems} setCloseModal={setModalDelete2} action={handleMultiDelete} />)}
                 {modalAdd && (<AddModalLayout onSubmit={handleSubmit(submitData)} reset={reset} register={register} />)}
                 {modalQr && (<QRModalLayout selectedCell={selectedCell} />) }
                 <div className={`bg-[#2589ce] py-1.5 px-2 text-white flex flex-row justify-between`}>
@@ -246,11 +270,20 @@ export default function Pallet() {
                             <BiRefresh size={12} />
                             <p className={`text-white font-bold text-sm`}>Refresh</p>
                         </div>
+                        {user.role !== 'super' && user.role !== 'admin' ? null : (
+                            <div
+                                onClick={()=> setModalDelete2(true)}
+                                className={`flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer`}>
+                                <BiTrash size={12} />
+                                <p className={`text-white font-bold text-sm`}>Hapus Pilihan</p>
+                            </div>
+                        )}
                     </div>
                     <table className="w-full overflow-y-scroll">
                         <thead>
                         <tr>
-                            <th className="py-2 bg-gray-100 text-left w-10">#</th>
+                            <th className="py-2 bg-gray-100 text-left w-5"></th>
+                            <th className="py-2 bg-gray-100 text-center w-10">#</th>
                             <th className="py-2 bg-gray-100 text-left">Kode Pallet</th>
                             <th className="py-2 bg-gray-100 text-left">Nama Pallet</th>
                             <th className="py-2 bg-gray-100 text-left">Customer</th>
@@ -265,7 +298,14 @@ export default function Pallet() {
                             filters.map((e, index) =>(
                                 <>
                                     <tr className={`text-sm font-semibold border-b border-gray-500`} key={index}>
-                                        <td className="text-center p-1.5">{index+1}</td>
+                                        <td className="text-center p-1.5">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedItems.includes(e.kode)}
+                                                onChange={() => handleItemSelection(e.kode)}
+                                            />
+                                        </td>
+                                        <td className="text-center p-1.5">{index + 1 + (listPallet['currentPage'] - 1) * 20}</td>
                                         <td>{e['kode']}</td>
                                         <td>{e['name'] ?? '-'}</td>
                                         <td>{e['customer'] + ' - ' + e['Customer']['name']}</td>
@@ -308,7 +348,7 @@ export default function Pallet() {
                     <br/>
                     <PaginationSelect
                         totalPages={listPallet['totalPages']}
-                        currentPage={listPallet['currentPage']}
+                        currentPage={1}
                         onPageChange={handlePageChange}
                     />
                 </div>

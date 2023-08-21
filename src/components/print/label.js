@@ -64,7 +64,7 @@ class PrintPage extends React.Component {
                     trigger={() =>
                        <div>
                            <Tooltip id="label" />
-                           <BiPrinter data-tooltip-id="qrcode" data-tooltip-content="Lihat Barcode!" size={25} className={`hover:text-blue-500 hover:cursor-pointer`} />
+                           <BiPrinter data-tooltip-id="qrcode" data-tooltip-content="Print Label!" size={25} className={`hover:text-blue-500 hover:cursor-pointer`} />
                        </div>
                     }
                     content={() => this.labelRef}
