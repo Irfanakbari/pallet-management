@@ -264,6 +264,7 @@ export default function LapRiwayat() {
                             <th className="py-2 bg-gray-100 text-left">Customer</th>
                             <th className="py-2 bg-gray-100 text-left">Vehicle</th>
                             <th className="py-2 bg-gray-100 text-left">Part</th>
+                            <th className="py-2 bg-gray-100 text-left">Destinasi</th>
                             <th className="py-2 bg-gray-100 text-left">Keluar</th>
                             <th className="py-2 bg-gray-100 text-left">Operator Out</th>
                             <th className="py-2 bg-gray-100 text-left">Masuk</th>
@@ -277,11 +278,12 @@ export default function LapRiwayat() {
                                     className={`${isMoreThanAWeekAgoAndNoEntry(e['keluar'], e['masuk']) ? 'bg-red-500 text-white' : ''} text-sm font-semibold border-b border-gray-500`}
                                     key={index}
                                 >
-                                    <td className="text-center p-1.5">{index + 1}</td>
+                                    <td className="text-center p-1.5">{index + 1 + (dataHistory['currentPage'] - 1) * 20}</td>
                                     <td>{e['id_pallet']}</td>
                                     <td>{e['Pallet']['Customer']['kode'] + ' - ' + e['Pallet']['Customer']['name']}</td>
                                     <td>{e['Pallet']['Vehicle']['kode'] + ' - ' + e['Pallet']['Vehicle']['name']}</td>
                                     <td>{e['Pallet']['Part']['kode'] + ' - ' + e['Pallet']['Part']['name']}</td>
+                                    <td>{e['destination']?? '-'}</td>
                                     <td>{e['keluar'] ? dayjs(e['keluar']).locale('id').format('DD MMMM YYYY HH:mm') : '-'}</td>
                                     <td>{e['user_out'] ?? '-'}</td>
                                     <td>{e['masuk'] ? dayjs(e['masuk']).locale('id').format('DD MMMM YYYY HH:mm') : '-'}</td>

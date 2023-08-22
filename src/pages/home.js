@@ -20,6 +20,7 @@ import Department from "@/components/Page/Master/Department/Department";
 import DashboardAdmin from "@/components/Page/DashboardAdmin";
 import LapStok from "@/components/Page/Laporan/LapStok/LapStok";
 import axiosInstance from "@/utils/interceptor";
+import Destination from "@/components/Page/Master/Destination/Destination";
 
 export default function Home() {
     const { listTab, setCloseTab, activeMenu, setActiveMenu } = useStoreTab();
@@ -83,7 +84,7 @@ export default function Home() {
                     <div className={`p-2`}>
                         <div className={`w-full flex bg-[#EBEBEB] text-sm font-bold`}>
                             <MainMenu data={master} title={'Master Data'}/>
-                            <MainMenu data={laporan} title={'Transaksi'}/>
+                            <MainMenu data={laporan} title={'Laporan'}/>
                         </div>
                     </div>
                     <div className={`bg-base w-full mt-2 flex pt-1 px-1`}>
@@ -111,6 +112,7 @@ export default function Home() {
                                     {activeMenu === "Customer" && <Customer />}
                                     {activeMenu === "Vehicle" && <Vehicle />}
                                     {activeMenu === "Part" && <Part />}
+                                    {activeMenu === "Destination" && <Destination />}
                                     {activeMenu === "Pallet" && <Pallet />}
                                     {activeMenu === "Lap. Riwayat Pallet" && <LapRiwayat />}
                                     {activeMenu === "Lap. Maintenance Pallet" && <LapMaintenance />}

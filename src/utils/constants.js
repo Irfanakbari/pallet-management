@@ -15,6 +15,9 @@ const master = [
         name: "Pallet"
     },
     {
+        name: "Destination"
+    },
+    {
         name: "Users"
     },
 ]

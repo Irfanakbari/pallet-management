@@ -20,6 +20,9 @@ const History = connection.define('History', {
     masuk: {
         type: DataTypes.DATE
     },
+    destination: {
+        type: DataTypes.STRING
+    },
 }, {
     tableName: 'history',
     updatedAt: 'updated_at',

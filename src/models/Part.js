@@ -2,6 +2,7 @@ import connection from "@/config/database";
 import {DataTypes} from "sequelize";
 import Customer from "@/models/Customer";
 import Pallet from "@/models/Pallet";
+import Destination from "@/models/Destination";
 
 
 const Part = connection.define('Part', {
@@ -28,5 +29,6 @@ Part.belongsTo(Customer, { foreignKey: 'customer' });
 Part.hasMany(Pallet, { foreignKey: 'part' });
 Pallet.belongsTo(Part, { foreignKey: 'part' });
 
-
+Part.hasMany(Destination, { foreignKey: 'part' });
+Destination.belongsTo(Part, { foreignKey: 'part' })
 export default Part;

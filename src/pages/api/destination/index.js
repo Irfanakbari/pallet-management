@@ -1,9 +1,9 @@
 import checkCookieMiddleware from "@/pages/api/middleware";
-import Customer from "@/models/Customer";
 import Part from "@/models/Part";
 import {Op} from "sequelize";
-import Vehicle from "@/models/Vehicle";
 import logger from "@/utils/logger";
+import Destination from "@/models/Destination";
+import Vehicle from "@/models/Vehicle";
 
 async function handler(req, res) {
     switch (req.method) {
@@ -15,34 +15,41 @@ async function handler(req, res) {
                 });
             }
             try {
-                let parts;
+                let destinatios
                 if (req.user.role === 'super') {
                     // Jika user memiliki role 'super', tampilkan semua data Part tanpa batasan departemen
-                    parts = await Part.findAll({
-                        include: [Customer, Vehicle]
+                    destinatios = await Destination.findAll({
+                        include:[
+                            {
+                                model: Part,
+                                attributes:['name']
+                            }
+                        ]
                     });
                 } else if (req.user.role === 'admin' || req.user.role === 'viewer') {
                     // Jika user memiliki role 'admin', tampilkan data Part dengan departemen yang sesuai
                     const allowedDepartments = req.department.map((department) => department.department_id);
 
-                    parts = await Part.findAll({
+                    destinatios = await Destination.findAll({
+                        where: {
+                            '$department$': { [Op.in]: allowedDepartments }
+                        },
                         include: [
                             {
-                                model: Vehicle,
-                                where: {
-                                    '$department$': { [Op.in]: allowedDepartments }
-                                }
+                                model: Part,
+                                include: [
+                                    {
+                                        model: Vehicle,
+                                    }
+                                ]
                             },
-                            {
-                                model: Customer
-                            }
                         ]
                     });
                 }
 
                 res.status(200).json({
                     ok: true,
-                    data: parts
+                    data: destinatios
                 });
             } catch (e) {
                 logger.error(e.message);
@@ -60,30 +67,15 @@ async function handler(req, res) {
                 });
             }
             try {
-                const { name, customer, kode, vehicle } = req.body;
-                const vehic = await Vehicle.findByPk(vehicle);
-                let code;
-                if (vehic.dataValues.department !== 'A') {
-                    code = customer + vehic.dataValues.department + kode;
-                } else {
-                    code = customer + kode;
-                }
-                await Part.create({
-                    kode:code,
+                const { name, part } = req.body;
+                await Destination.create({
                     name: name,
-                    customer: customer,
-                    vehicle: vehic.dataValues.kode
+                    part: part
                 });
                 res.status(200).json({ success: true });
             } catch (error) {
                 logger.error(error.message);
-                if (error.name === 'SequelizeUniqueConstraintError') {
-                    const field = error.errors[0].path;
-                    const message = `Duplikat data pada kolom ${field}`;
-                    res.status(400).json({ success: false, error: message });
-                } else {
-                    res.status(500).json({ success: false, error: error.message });
-                }
+                res.status(500).json({ success: false, error: error.message });
             }
             break;
         default:

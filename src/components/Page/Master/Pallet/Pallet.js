@@ -17,8 +17,12 @@ import {HiOutlineTrash} from "react-icons/hi";
 import {Tooltip} from "react-tooltip";
 import axiosInstance from "@/utils/interceptor";
 import DeleteModal2 from "@/components/Modal/DeleteModal2";
+import '@inovua/reactdatagrid-community/index.css'
+
+
 export default function Pallet() {
-    const {listCustomer, listVehicle, listPallet, setPallet, listPart,user} = dataState()
+    const {listCustomer, listVehicle, listPart,user} = dataState()
+    const [listPallet, setPallet] = useState([])
     const {setModalAdd, modalAdd,  modalDelete, modalDelete2,setModalDelete2,setModalDelete, modalQr, setModalQR} = modalState()
     const [selectedCell, setSelectedCell] = useState({})
     const [selectedItems, setSelectedItems] = useState([]);
@@ -27,6 +31,7 @@ export default function Pallet() {
     const custFilter = useRef(null);
     const vehicleFilter = useRef(null);
     const partFilter = useRef(null);
+
     const {
         register,
         handleSubmit,
@@ -51,9 +56,13 @@ export default function Pallet() {
     const handleSearch = async (e) => {
         e.preventDefault()
         const searchValueLowerCase = searchTerm.toLowerCase().split(' ').join('');
-        const response = await axiosInstance.get(`/api/pallets?search=${searchValueLowerCase}`);
-        setPallet(response.data);
-        setFilters(response.data['data']);
+        if (searchValueLowerCase) {
+            const response = await axiosInstance.get(`/api/pallets?search=${searchValueLowerCase}`);
+            setPallet(response.data);
+            setFilters(response.data['data']);
+        } else {
+            fetchData(listPallet['currentPage'])
+        }
     };
 
     const submitData = (data) => {
@@ -62,7 +71,7 @@ export default function Pallet() {
         }).catch(()=>{
             showErrorToast("Gagal Simpan Data")
         }).finally(()=>{
-            fetchData()
+            fetchData(listPallet['currentPage'])
             setModalAdd(false)
         })
     }
@@ -74,7 +83,7 @@ export default function Pallet() {
             showErrorToast("Gagal Hapus Data")
         }).finally(()=>{
             setModalDelete(false)
-            fetchData()
+            fetchData(listPallet['currentPage'])
         })
     }
 
@@ -345,10 +354,40 @@ export default function Pallet() {
                         }
                         </tbody>
                     </table>
+                    {/*<div className="flex">*/}
+                    {/*    <ReactDataGrid*/}
+                    {/*        idProperty="kode"*/}
+                    {/*        style={{*/}
+                    {/*            minHeight: "calc(100vh - 320px)", // Adjust as needed based on other elements on your page*/}
+                    {/*        }}*/}
+                    {/*        defaultFilterValue={[*/}
+                    {/*            { name: 'kode', operator: 'contains', type: 'string', value: '' },*/}
+                    {/*            { name: 'name', operator: 'contains', type: 'string', value: '' },*/}
+                    {/*        ]}*/}
+                    {/*        columns={[*/}
+                    {/*            { name: 'kode', header: 'Kode Pallet' ,defaultWidth:100},*/}
+                    {/*            { name: 'name', header: 'Nama Pallet', },*/}
+                    {/*            { name: 'customer', header: 'Customer', },*/}
+                    {/*            { name: 'vehicle', header: 'Vehicle', },*/}
+                    {/*            { name: 'part', header: 'Part', },*/}
+                    {/*            { name: 'department', header: 'Department',*/}
+                    {/*                render: (row) => row['Vehicle']department || 'N/A', // Ambil data department dari objek Vehicle*/}
+
+                    {/*            },*/}
+                    {/*            { name: '', header: 'Aksi',  },*/}
+                    {/*        ]}*/}
+                    {/*        pagination*/}
+                    {/*        dataSource={filters}*/}
+                    {/*        selected={selected}*/}
+                    {/*        checkboxColumn*/}
+                    {/*        onSelectionChange={onSelectionChange}*/}
+                    {/*    />*/}
+                    {/*</div>*/}
+
                     <br/>
                     <PaginationSelect
                         totalPages={listPallet['totalPages']}
-                        currentPage={1}
+                        currentPage={listPallet['currentPage']}
                         onPageChange={handlePageChange}
                     />
                 </div>

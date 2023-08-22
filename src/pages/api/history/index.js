@@ -170,11 +170,10 @@ async function handler(req, res) {
                 });
             }
             try {
-                const { kode } = req.body;
+                const { kode, destination } = req.body;
                 const pallet = await Pallet.findOne({
                     where: { kode: kode }
                 });
-
                 if (pallet.status === 0) {
                     return res.status(400).json({
                         ok: false,
@@ -191,7 +190,8 @@ async function handler(req, res) {
                     await History.create(
                         {
                             id_pallet: kode,
-                            user_out: req.user.username
+                            user_out: req.user.username,
+                            destination: destination
                         },
                         {transaction: t}
                     );
