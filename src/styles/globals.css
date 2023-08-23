@@ -2,8 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-    background-color: #EBEBEB
+/*body {*/
+/*    background-color: #EBEBEB*/
+/*}*/
+
+.ant-btn-primary {
+    background-color: dodgerblue;
 }
 @media print {
     @page {
@@ -34,4 +38,7 @@ body {
 
 ::-webkit-scrollbar-thumb {
     background-color: #888; /* Warna thumb (bagian yang dapat di-drag) */
+}
+.page-break {
+    page-break-before: always;
 }

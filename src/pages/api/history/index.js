@@ -19,7 +19,12 @@ async function handler(req, res) {
                 });
             }
             try {
-                const { customer, vehicle, page, start, end, search, part, status } = req.query;
+                const { customer, vehicle, keluarStart, keluarEnd,masukEnd,masukStart, search, part, status } = req.query;
+                const page = parseInt(req.query.page) || 1; // Halaman saat ini (default: 1)
+                const limit = parseInt(req.query.limit) || 50; // Batasan data per halaman (default: 10)
+                // Menghitung offset berdasarkan halaman dan batasan data
+                const offset = (page - 1) * limit;
+
                 let histories;
                 let whereClause = {}; // Inisialisasi objek kosong untuk kondisi where
 
@@ -49,10 +54,10 @@ async function handler(req, res) {
                     }
                 }
 
-                if (start && end) {
-                    const startDate = new Date(start);
+                if (keluarStart && keluarEnd) {
+                    const startDate = new Date(keluarStart);
                     startDate.setHours(0, 0, 0, 0); // Set start time to 00:00:00
-                    const endDate = new Date(end);
+                    const endDate = new Date(keluarEnd);
                     endDate.setHours(23, 59, 59, 999); // Set end time to 23:59:59.999
 
                     whereClause = {
@@ -61,8 +66,8 @@ async function handler(req, res) {
                             [Op.between]: [startDate.toISOString(), endDate.toISOString()],
                         },
                     };
-                } else if (start) {
-                    const startDate = new Date(start);
+                } else if (keluarStart) {
+                    const startDate = new Date(keluarStart);
                     startDate.setHours(0, 0, 0, 0); // Set start time to 00:00:00
 
                     whereClause = {
@@ -71,8 +76,8 @@ async function handler(req, res) {
                             [Op.gte]: startDate.toISOString(),
                         },
                     };
-                } else if (end) {
-                    const endDate = new Date(end);
+                } else if (keluarEnd) {
+                    const endDate = new Date(keluarEnd);
                     endDate.setHours(23, 59, 59, 999); // Set end time to 23:59:59.999
 
                     whereClause = {
@@ -82,9 +87,39 @@ async function handler(req, res) {
                         },
                     };
                 }
+                if (masukStart && masukEnd) {
+                    const startDate = new Date(masukStart);
+                    startDate.setHours(0, 0, 0, 0); // Set start time to 00:00:00
+                    const endDate = new Date(masukEnd);
+                    endDate.setHours(23, 59, 59, 999); // Set end time to 23:59:59.999
 
-                // Menghitung offset berdasarkan halaman dan batasan data
-                const offset = (parseInt(page || 1) - 1) * 20;
+                    whereClause = {
+                        ...whereClause,
+                        masuk: {
+                            [Op.between]: [startDate.toISOString(), endDate.toISOString()],
+                        },
+                    };
+                } else if (masukStart) {
+                    const startDate = new Date(masukStart);
+                    startDate.setHours(0, 0, 0, 0); // Set start time to 00:00:00
+
+                    whereClause = {
+                        ...whereClause,
+                        masuk: {
+                            [Op.gte]: startDate.toISOString(),
+                        },
+                    };
+                } else if (masukEnd) {
+                    const endDate = new Date(masukEnd);
+                    endDate.setHours(23, 59, 59, 999); // Set end time to 23:59:59.999
+
+                    whereClause = {
+                        ...whereClause,
+                        masuk: {
+                            [Op.lte]: endDate.toISOString(),
+                        },
+                    };
+                }
 
                 if (req.user.role === 'super') {
                     // Jika user memiliki role 'super', tampilkan semua data Part tanpa batasan departemen
@@ -109,7 +144,7 @@ async function handler(req, res) {
                                 ],
                             },
                         ],
-                        limit: 20,
+                        limit,
                         offset: offset,
                     });
                 } else if (req.user.role === 'admin' || req.user.role === 'viewer') {
@@ -140,17 +175,17 @@ async function handler(req, res) {
                                 ],
                             },
                         ],
-                        limit: 20,
+                        limit,
                         offset: offset,
                     });
                 }
 
-                const totalPages = Math.ceil(histories.count / parseInt(20));
+                const totalData = histories.count;
 
                 res.status(200).json({
                     ok: true,
                     data: histories.rows,
-                    totalPages,
+                    totalData,
                     currentPage: parseInt(page),
                 });
             } catch (e) {

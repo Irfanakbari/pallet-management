@@ -19,7 +19,7 @@ async function handler(req, res) {
                 const { customer, vehicle, part, search } = req.query;
                 // Menentukan parameter halaman dan batasan data
                 const page = parseInt(req.query.page) || 1; // Halaman saat ini (default: 1)
-                const limit = parseInt(req.query.limit) || 20; // Batasan data per halaman (default: 10)
+                const limit = parseInt(req.query.limit); // Batasan data per halaman (default: 10)
 
                 // Menghitung offset berdasarkan halaman dan batasan data
                 const offset = (page - 1) * limit;
@@ -38,10 +38,10 @@ async function handler(req, res) {
                         '$Vehicle.kode$': vehicle,
                     };
                 }
-                if (part) {
+                if (Array.isArray(part)) {
                     whereClause = {
                         ...whereClause,
-                        '$Part.kode$': part,
+                        '$Part.kode$': { [Op.in]: part },
                     };
                 }
                 if (search) {
@@ -59,20 +59,29 @@ async function handler(req, res) {
                     whereClause['$Vehicle.department$'] = { [Op.in]: allowedDepartments };
                 }
 
-                const pallets = await Pallet.findAndCountAll({
-                    where: whereClause,
-                    include: [Vehicle, Customer, Part],
-                    limit,
-                    offset,
-                });
+                let pallets;
+                if (limit && page){
+                    pallets = await Pallet.findAndCountAll({
+                        where: whereClause,
+                        include: [Vehicle, Customer, Part],
+                        limit,
+                        offset,
+                    });
+                } else {
+                    pallets = await Pallet.findAndCountAll({
+                        where: whereClause,
+                        include: [Vehicle, Customer, Part],
+                    });
+                }
 
                 // Menghitung total halaman berdasarkan jumlah data dan batasan per halaman
-                const totalPages = Math.ceil(pallets.count / limit);
+                const totalData = pallets.count;
 
                 res.status(200).json({
                     ok: true,
                     data: pallets.rows,
-                    totalPages,
+                    totalData,
+                    limit,
                     currentPage: page,
                 });
             } catch (e) {

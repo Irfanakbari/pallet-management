@@ -78,58 +78,56 @@ export default function Home() {
 
     return (
         <>
-            <div className={`p-2 min-h-screen flex overflow-x-scroll`}>
-                <div className={`w-full bg-white border border-gray-500 h-full`}>
-                    <HeadTitle user={user} />
-                    <div className={`p-2`}>
-                        <div className={`w-full flex bg-[#EBEBEB] text-sm font-bold`}>
-                            <MainMenu data={master} title={'Master Data'}/>
-                            <MainMenu data={laporan} title={'Laporan'}/>
-                        </div>
+            <div className={`overflow-x-scroll border p-1.5 border-gray-500 flex flex-col h-screen`}>
+                <HeadTitle user={user} />
+                <div className={`py-2`}>
+                    <div className={`w-full flex bg-[#EBEBEB] text-sm font-bold`}>
+                        <MainMenu data={master} title={'Master Data'}/>
+                        <MainMenu data={laporan} title={'Laporan'}/>
                     </div>
-                    <div className={`bg-base w-full mt-2 flex pt-1 px-1`}>
-                        {
-                            listTab.map((e, index)=>{
-                                return (
-                                    <div
-                                        key={index}
-                                        onClick={() => setActiveMenu(e)}
-                                        className={`${activeMenu === e ? "bg-white text-black" : "text-white"} flex items-center bg-[#2589ce] py-1 px-5 text-sm font-bold mr-2 hover:bg-white hover:text-black hover:cursor-pointer`}>
-                                        {e} {
-                                            e !== 'Dashboard' && <ImCross className={`ml-2`} size={10} onClick={()=>setCloseTab(e)} />
-                                    }
-                                    </div>
-                                )
-                            })
-                        }
-                    </div>
-                    <div className="w-full bg-white p-2 h-full overflow-y-scroll">
-                        {
-                            (user.role !== 'operator') ? <div className="bg-[#EBEBEB] p-2 h-full">
-                                    {activeMenu === "Dashboard" && user.role === 'super' && <Dashboard />}
-                                    {(activeMenu === "Dashboard" && (user.role === 'admin' || user.role === 'viewer') ) && <DashboardAdmin />}
-                                    {activeMenu === "Department" && <Department />}
-                                    {activeMenu === "Customer" && <Customer />}
-                                    {activeMenu === "Vehicle" && <Vehicle />}
-                                    {activeMenu === "Part" && <Part />}
-                                    {activeMenu === "Destination" && <Destination />}
-                                    {activeMenu === "Pallet" && <Pallet />}
-                                    {activeMenu === "Lap. Riwayat Pallet" && <LapRiwayat />}
-                                    {activeMenu === "Lap. Maintenance Pallet" && <LapMaintenance />}
-                                    {activeMenu === "Lap. Stok Pallet" && <LapStok />}
-                                    {activeMenu === "Users" && <User />}
-                            </div>
-                                :
+                </div>
+                <div className={`bg-base w-full mt-2 flex pt-1 px-1`}>
+                    {
+                        listTab.map((e, index)=>{
+                            return (
                                 <div
-                                    className="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-75">
-                                    <div className="bg-red-500 p-4 rounded-md shadow-lg text-white text-xl">
-                                        <p className="text-2xl font-semibold mb-2">Error!</p>
-                                        <p>Hanya Role Admin yang Dapat Mengakses Halaman Ini</p>
-                                        <button onClick={logoutHandle} className={`bg-green-400 rounded px-5 py-1 text-lg mt-8`}>Logout</button>
-                                    </div>
+                                    key={index}
+                                    onClick={() => setActiveMenu(e)}
+                                    className={`${activeMenu === e ? "bg-white text-black" : "text-white"} flex items-center bg-[#2589ce] py-1 px-5 text-sm font-bold mr-2 hover:bg-white hover:text-black hover:cursor-pointer`}>
+                                    {e} {
+                                    e !== 'Dashboard' && <ImCross className={`ml-2`} size={10} onClick={()=>setCloseTab(e)} />
+                                }
                                 </div>
-                        }
-                    </div>
+                            )
+                        })
+                    }
+                </div>
+                <div className="w-full bg-white p-2 h-full">
+                    {
+                        (user.role !== 'operator') ? <div className="bg-[#EBEBEB] p-2 h-full">
+                                {activeMenu === "Dashboard" && user.role === 'super' && <Dashboard />}
+                                {(activeMenu === "Dashboard" && (user.role === 'admin' || user.role === 'viewer') ) && <DashboardAdmin />}
+                                {activeMenu === "Department" && <Department />}
+                                {activeMenu === "Customer" && <Customer />}
+                                {activeMenu === "Vehicle" && <Vehicle />}
+                                {activeMenu === "Part" && <Part />}
+                                {activeMenu === "Destinasi" && <Destination />}
+                                {activeMenu === "Pallet" && <Pallet />}
+                                {activeMenu === "Lap. Riwayat Pallet" && <LapRiwayat />}
+                                {activeMenu === "Lap. Maintenance Pallet" && <LapMaintenance />}
+                                {activeMenu === "Lap. Stok Pallet" && <LapStok />}
+                                {activeMenu === "Users" && <User />}
+                            </div>
+                            :
+                            <div
+                                className="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-75">
+                                <div className="bg-red-500 p-4 rounded-md shadow-lg text-white text-xl">
+                                    <p className="text-2xl font-semibold mb-2">Error!</p>
+                                    <p>Hanya Role Admin yang Dapat Mengakses Halaman Ini</p>
+                                    <button onClick={logoutHandle} className={`bg-green-400 rounded px-5 py-1 text-lg mt-8`}>Logout</button>
+                                </div>
+                            </div>
+                    }
                 </div>
             </div>
         </>

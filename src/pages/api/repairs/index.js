@@ -6,6 +6,7 @@ import Customer from "@/models/Customer";
 import Vehicle from "@/models/Vehicle";
 import Part from "@/models/Part";
 import logger from "@/utils/logger";
+import {Op} from "sequelize";
 
 async function handler(req, res) {
     switch (req.method) {
@@ -17,12 +18,46 @@ async function handler(req, res) {
                 });
             }
             try {
-                const { page } = req.query;
+                const { customer, vehicle, part, search } = req.query;
+                // Menentukan parameter halaman dan batasan data
+                const page = parseInt(req.query.page) || 1; // Halaman saat ini (default: 1)
+                const limit = parseInt(req.query.limit); // Batasan data per halaman (default: 10)
                 // Menghitung offset berdasarkan halaman dan batasan data
-                const offset = (parseInt(page) - 1) * parseInt('20');
+                const offset = (page - 1) * limit;
+
+
+                let whereClause = {}; // Inisialisasi objek kosong untuk kondisi where
+
+                if (customer) {
+                    whereClause = {
+                        ...whereClause,
+                        '$Customer.kode$': customer,
+                    };
+                }
+                if (vehicle) {
+                    whereClause = {
+                        ...whereClause,
+                        '$Vehicle.kode$': vehicle,
+                    };
+                }
+                if (Array.isArray(part)) {
+                    whereClause = {
+                        ...whereClause,
+                        '$Part.kode$': { [Op.in]: part },
+                    };
+                }
+                if (search) {
+                    whereClause = {
+                        ...whereClause,
+                        kode: {
+                            [Op.like]: `%${search}%`
+                        }
+                    };
+                }
 
                 const pallets = await Pallet.findAndCountAll({
                     where: {
+                        ...whereClause,
                         status: 3,
                     },
                     order: [
@@ -47,16 +82,16 @@ async function handler(req, res) {
                     attributes:{
                       exclude: ['status']
                     },
-                    limit: parseInt('20'),
+                    limit,
                     offset: offset,
                 });
 
-                const totalPages = Math.ceil(pallets.count / parseInt('20'));
+                const totalData = pallets.count;
 
                 res.status(200).json({
                     ok: true,
                     data: pallets.rows,
-                    totalPages,
+                    totalData,
                     currentPage: parseInt(page),
                 });
             } catch (e) {

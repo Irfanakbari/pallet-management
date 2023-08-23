@@ -37,6 +37,9 @@ export default function AddModalLayout({ onSubmit, reset, register }) {
                         <option value={"K"}>
                             Kayu
                         </option>
+                        <option value={"T"}>
+                            Trolley
+                        </option>
                     </select>
                 </div>
                 <div className="flex flex-row w-full justify-between items-center gap-2">

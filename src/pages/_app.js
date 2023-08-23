@@ -5,6 +5,7 @@ import {useEffect, useState} from "react";
 import {useRouter} from "next/router";
 import LoadingOverlay from '@speedy4all/react-loading-overlay';
 import 'react-tooltip/dist/react-tooltip.css'
+// import 'antd/dist/reset.css';
 
 export default function App({ Component, pageProps }) {
     const [loading, setLoading] = useState(false)

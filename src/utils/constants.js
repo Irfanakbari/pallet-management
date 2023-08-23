@@ -12,10 +12,10 @@ const master = [
         name: "Part"
     },
     {
-        name: "Pallet"
+        name: "Destinasi"
     },
     {
-        name: "Destination"
+        name: "Pallet"
     },
     {
         name: "Users"

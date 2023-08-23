@@ -1,68 +1,148 @@
-import {BiPlusMedical, BiRefresh, BiSearch, BiSolidUpArrow, BiTrash} from "react-icons/bi";
-import {BsQrCode} from "react-icons/bs";
+import {
+    BiEdit,
+    BiPlusMedical,
+    BiPrinter,
+    BiQr,
+    BiRefresh,
+    BiSave,
+    BiTrash,
+    BiX
+} from "react-icons/bi";
 import {AiFillFileExcel} from "react-icons/ai";
 import {useEffect, useRef, useState} from "react";
-import DeleteModal from "@/components/Modal/DeleteModal";
 import {showErrorToast, showSuccessToast} from "@/utils/toast";
-import Print from "@/components/print/label";
 import {useExcelJS} from "react-use-exceljs";
-import PaginationSelect from "@/components/PaginationSelect";
 import {dataState, modalState} from "@/context/states";
 import {useForm} from "react-hook-form";
 import AddModalLayout from "@/components/Page/Master/Pallet/AddModal";
 import QRModalLayout from "@/components/Page/Master/Pallet/QRModal";
 import PrintAll from "@/components/print/printall";
 import Head from "next/head";
-import {HiOutlineTrash} from "react-icons/hi";
-import {Tooltip} from "react-tooltip";
 import axiosInstance from "@/utils/interceptor";
+import {Button, Form, Input, Popconfirm, Popover, Space, Spin, Table, QRCode} from "antd";
+import EditableCell from "@/components/Page/Master/Customer/EditCell";
+import { SearchOutlined} from "@ant-design/icons";
+import {LabelComponent} from "@/components/print/label";
+import {useReactToPrint} from "react-to-print";
 import DeleteModal2 from "@/components/Modal/DeleteModal2";
-import '@inovua/reactdatagrid-community/index.css'
 
 
 export default function Pallet() {
-    const {listCustomer, listVehicle, listPart,user} = dataState()
+    const {listCustomer, listVehicle, listPart,user,listDepartment} = dataState()
     const [listPallet, setPallet] = useState([])
-    const {setModalAdd, modalAdd,  modalDelete, modalDelete2,setModalDelete2,setModalDelete, modalQr, setModalQR} = modalState()
-    const [selectedCell, setSelectedCell] = useState({})
-    const [selectedItems, setSelectedItems] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filters, setFilters] = useState([])
-    const custFilter = useRef(null);
-    const vehicleFilter = useRef(null);
-    const partFilter = useRef(null);
-
+    const {setModalAdd, modalAdd,  setModalDelete2,setModalDelete, modalQr,modalDelete2} = modalState()
+    const [form] = Form.useForm();
+    const [editingKey, setEditingKey] = useState('');
+    const [confirmLoading] = useState(false);
+    const [loading,setLoading] = useState(true)
+    const isEditing = (record) => record.kode === editingKey;
+    const [selected, setSelected] = useState([]);
+    const searchInput = useRef(null);
+    const componentRef = useRef();
+    const handlePrint = useReactToPrint({
+        content: () => componentRef.current,
+    });
     const {
         register,
         handleSubmit,
         reset
     } = useForm()
+    const handleSearch = (selectedKeys, confirm) => {
+        confirm();
+    };
+    const handleReset = (clearFilters) => {
+        clearFilters();
+    };
+    const getColumnSearchProps = (dataIndex) => ({
+        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+            <div
+                style={{
+                    padding: 8,
+                }}
+                onKeyDown={(e) => e.stopPropagation()}
+            >
+                <Input
+                    ref={searchInput}
+                    placeholder={`Search ${dataIndex}`}
+                    value={selectedKeys[0]}
+                    onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                    onPressEnter={() => handleSearch(selectedKeys, confirm)}
+                    style={{
+                        marginBottom: 8,
+                        display: 'block',
+                    }}
+                />
+                <Space>
+                    <Button
+                        size="small"
+                        style={{
+                            width: 90,
+                        }}
+                        onClick={() => handleSearch(selectedKeys, confirm)}
+                    >
+                        Search
+                    </Button>
+                    <Button
+                        onClick={() => clearFilters && handleReset(clearFilters)}
+                        size="small"
+                        style={{
+                            width: 90,
+                        }}
+                    >
+                        Reset
+                    </Button>
+                    <Button
+                        type="link"
+                        size="small"
+                        onClick={() => {
+                            confirm({
+                                closeDropdown: false,
+                            });
+                        }}
+                    >
+                        Filter
+                    </Button>
+                    <Button
+                        type="link"
+                        size="small"
+                        onClick={() => {
+                            close();
+                        }}
+                    >
+                        close
+                    </Button>
+                </Space>
+            </div>
+        ),
+        filterIcon: (filtered) => (
+            <SearchOutlined
+                style={{
+                    color: filtered ? '#1890ff' : undefined,
+                }}
+            />
+        ),
+        onFilter: (value, record) =>
+            record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+        onFilterDropdownOpenChange: (visible) => {
+            if (visible) {
+                setTimeout(() => searchInput.current?.select(), 100);
+            }
+        },
+    });
 
     useEffect(() => {
         setPallet([]); // Reset the selected page when the component unmounts
         fetchData()
     }, [])
 
-    const fetchData = (selectedPage=1) => {
-        const searchValueLowerCase = searchTerm.toLowerCase().split(' ').join('');
-        axiosInstance.get(`/api/pallets?search=${searchValueLowerCase}&customer=${custFilter.current.value??''}&vehicle=${vehicleFilter.current.value??''}&part=${partFilter.current.value??''}&page=${selectedPage}`).then(response=>{
+    const fetchData = () => {
+        axiosInstance.get(`/api/pallets?page=1&limit=50`).then(response=>{
            setPallet(response.data);
-           setFilters(response.data['data'])
        }).catch(()=>{
            showErrorToast("Gagal Fetch Data")
-       })
-    };
-
-    const handleSearch = async (e) => {
-        e.preventDefault()
-        const searchValueLowerCase = searchTerm.toLowerCase().split(' ').join('');
-        if (searchValueLowerCase) {
-            const response = await axiosInstance.get(`/api/pallets?search=${searchValueLowerCase}`);
-            setPallet(response.data);
-            setFilters(response.data['data']);
-        } else {
-            fetchData(listPallet['currentPage'])
-        }
+       }).finally(()=>{
+            setLoading(false)
+        })
     };
 
     const submitData = (data) => {
@@ -71,7 +151,7 @@ export default function Pallet() {
         }).catch(()=>{
             showErrorToast("Gagal Simpan Data")
         }).finally(()=>{
-            fetchData(listPallet['currentPage'])
+            fetchData()
             setModalAdd(false)
         })
     }
@@ -83,14 +163,9 @@ export default function Pallet() {
             showErrorToast("Gagal Hapus Data")
         }).finally(()=>{
             setModalDelete(false)
-            fetchData(listPallet['currentPage'])
+            fetchData()
         })
     }
-
-    const handlePageChange = (selectedPage) => {
-        // Lakukan perubahan halaman di sini
-        fetchData(selectedPage)
-    };
 
     const excel = useExcelJS({
         filename: "data_pallet.xlsx",
@@ -140,7 +215,7 @@ export default function Pallet() {
 
     const saveExcel = async (e) => {
         e.preventDefault();
-        const data = filters.map((item, index) => ({
+        const data = listPallet.data.map((item, index) => ({
             no: index + 1,
             id: item.kode,
             name: item.name,
@@ -152,16 +227,255 @@ export default function Pallet() {
         await excel.download(data)
     }
 
-    const handleItemSelection = (itemId) => {
-        if (selectedItems.includes(itemId)) {
-            setSelectedItems(selectedItems.filter(kode => kode !== itemId));
-        } else {
-            setSelectedItems([...selectedItems, itemId]);
+    const onChange = (pagination, filters, sorter, extra) => {
+        setLoading(true)
+        const searchParam = (filters?.kode && filters?.kode[0]) || '';
+        const customerParam = (filters?.customer && filters?.customer[0]) || '';
+        const vehicleParam = (filters?.vehicle && filters?.vehicle[0]) || '';
+        const partParam = (filters?.part && filters?.part[0]) || '';
+        const url = `/api/pallets?search=${searchParam}&customer=${customerParam || ''}&vehicle=${vehicleParam || ''}&part=${partParam || ''}&page=${pagination.current}&limit=${pagination.pageSize}`;
+        axiosInstance.get(url)
+            .then(response => {
+                setPallet(response.data);
+            })
+            .catch(() => {
+                showErrorToast("Gagal Fetch Data");
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+
+    };
+
+    const handleRowSelection = (selectedRowKeys, selectedRows) => {
+        setSelected(selectedRows);
+    };
+
+    const edit = (record) => {
+        form.setFieldsValue({
+            name: '',
+            ...record
+        });
+        setEditingKey(record.kode);
+    };
+
+    const cancel = () => {
+        setEditingKey('');
+    };
+
+    const save = async (key) => {
+        try {
+            const row = await form.validateFields();
+            const newData = [...listPallet.data];
+            const index = newData.findIndex((item) => key === item.kode);
+            if (index > -1) {
+                const item = newData[index];
+                newData.splice(index, 1, {
+                    ...item,
+                    ...row
+                });
+                await axiosInstance.put(`/api/pallets/${item.kode}`, row);
+                showSuccessToast('Sukses Edit Data');
+                await fetchData();
+            } else {
+                newData.push(row);
+                setPallet({
+                    ...listPallet,
+                    data: newData
+                });
+            }
+        } catch (errInfo) {
+            console.log('Validate Failed:', errInfo);
+        } finally {
+            setEditingKey('');
         }
     };
 
+    const columns = [
+        {
+            title: '#',
+            dataIndex: 'index',
+            width: '5%',
+            render: (_, __, index) => (listPallet.currentPage - 1) * listPallet.limit + index + 1
+        },
+        {
+            title: 'Kode Pallet',
+            dataIndex: 'kode',
+            sorter: (a, b) => a.kode.localeCompare(b.kode),
+            // width: '30%'
+            ...getColumnSearchProps('kode'),
+
+        },
+        {
+            title: 'Nama Pallet',
+            dataIndex: 'name',
+            // width: '40%',
+            editable: true,
+        },
+        {
+            title: 'Customer',
+            dataIndex: 'customer',
+            // width: '40%',
+            sorter: (a, b) => a.customer.localeCompare(b.customer),
+            // editable: true,
+            filters: listCustomer.map(e=>(
+                {
+                    text: e.name,
+                    value: e.kode
+                }
+            )),
+            filterMultiple: false,
+
+            onFilter: (value, record) => record.customer.indexOf(value) === 0,
+            render: (_, record) => record.customer + " - " + record['Customer'].name
+        },
+        {
+            title: 'Vehicle',
+            dataIndex: 'vehicle',
+            // width: '40%',
+            sorter: (a, b) => a.vehicle.localeCompare(b.vehicle),
+            // editable: true,
+            filterMultiple: false,
+            filters: listVehicle.map(e=>(
+                {
+                    text: e.name,
+                    value: e.kode
+                }
+            )),
+            onFilter: (value, record) => record.vehicle.indexOf(value) === 0,
+            render: (_, record) => record.vehicle + " - " + record['Vehicle'].name
+        },
+        {
+            title: 'Part',
+            dataIndex: 'part',
+            // width: '40%',
+            sorter: (a, b) => a.part.localeCompare(b.part),
+            // editable: true,
+            filterMultiple: false,
+            filters: listPart.map(e=>(
+                {
+                    text: e.name,
+                    value: e.kode
+                }
+            )),
+            onFilter: (value, record) => record.part.indexOf(value) === 0,
+            render: (_, record) => record.part + " - " + record['Part'].name
+        },
+        {
+            title: 'Department',
+            dataIndex: 'department',
+            // width: '40%',
+            filterMultiple: false,
+            sorter: (a, b) => a['Vehicle'].department.localeCompare(b['Vehicle'].department),
+            filters: listDepartment.map(e=>(
+                {
+                    text: e.name,
+                    value: e.kode
+                }
+            )),
+            onFilter: (value, record) => record['Vehicle'].department.indexOf(value) === 0,
+            // editable: true
+            render: (_, record) => "Produksi " + record['Vehicle'].department
+        },
+        {
+            title: 'Aksi',
+            dataIndex: 'operation',
+            render: (_, record) => {
+                const editable = isEditing(record);
+                return (
+                    <span>
+        {editable ? (
+            <span>
+            <button
+                onClick={() => save(record.kode)}
+                style={{
+                    marginRight: 8
+                }}
+            >
+              <BiSave size={16} color="green" />
+            </button>
+            <button
+                onClick={cancel}
+                style={{
+                    marginRight: 8
+                }}
+            >
+              <BiX size={16} color="red" />
+            </button>
+          </span>
+        ) : (
+            <span>
+            <button
+                disabled={editingKey !== ''}
+                onClick={() => edit(record)}
+                style={{
+                    marginRight: 8
+                }}
+            >
+              <BiEdit size={16} color="orange" />
+            </button>
+                <Popover content={()=>(
+                    <center>
+                        <QRCode value={record.kode} bordered={false} />
+                        <span>{record.kode}</span>
+                    </center>
+                )}>
+                    <span style={{
+                        marginRight: 8
+                    }}>
+                        <BiQr size={16} color="green" />
+                    </span>
+                </Popover>
+                 <button
+                     onClick={handlePrint}
+                     style={{
+                         marginRight: 8
+                     }}
+                 >
+              <BiPrinter size={16} color="blue" />
+            </button>
+                <div style={{ display: 'none' }}>
+                    <LabelComponent ref={componentRef} {...record} />
+                </div>
+            <Popconfirm
+                title="Apakah Anda yakin ingin menghapus?"
+                onConfirm={() => deleteData(record.kode)}
+                okType={'primary'}
+                okButtonProps={{
+                    loading: confirmLoading,
+                }}
+            >
+              <button>
+                <BiTrash size={16} color="red" />
+              </button>
+            </Popconfirm>
+          </span>
+        )}
+      </span>
+                );
+            }
+        }
+
+    ];
+
+    const mergedColumns = columns.map((col) => {
+        if (!col.editable) {
+            return col;
+        }
+        return {
+            ...col,
+            onCell: (record) => ({
+                record,
+                inputType: 'text',
+                dataIndex: col.dataIndex,
+                title: col.title,
+                editing: isEditing(record)
+            })
+        };
+    });
+
     const handleMultiDelete = () => {
-        Promise.all(selectedItems.map(itemId => axiosInstance.delete(`/api/pallets/${itemId}`)))
+        Promise.all(selected.map(itemId => axiosInstance.delete(`/api/pallets/${itemId.kode}`)))
             .then(() => {
                 showSuccessToast("Sukses Hapus Data");
             })
@@ -169,227 +483,89 @@ export default function Pallet() {
                 showErrorToast("Gagal Hapus Data");
             })
             .finally(() => {
-                setSelectedItems([]);
+                setSelected([]);
                 fetchData()
             });
     };
-
-
 
     return (
         <>
             <Head>
                 <title>Pallet | PT Vuteq Indonesia</title>
             </Head>
-            <div className={`h-full bg-white`}>
-                {modalDelete && (<DeleteModal data={selectedCell} setCloseModal={setModalDelete} action={deleteData} />)}
-                {modalDelete2 && (<DeleteModal2 data={selectedItems} setCloseModal={setModalDelete2} action={handleMultiDelete} />)}
+            <div className={`bg-white h-full flex flex-col`}>
+                {modalDelete2 && (<DeleteModal2 data={selected} setCloseModal={setModalDelete2} action={handleMultiDelete} />)}
                 {modalAdd && (<AddModalLayout onSubmit={handleSubmit(submitData)} reset={reset} register={register} />)}
                 {modalQr && (<QRModalLayout selectedCell={selectedCell} />) }
-                <div className={`bg-[#2589ce] py-1.5 px-2 text-white flex flex-row justify-between`}>
-                    <h2 className={`font-bold text-[14px]`}>Filter</h2>
-                    <div className={`flex items-center`}>
-                        <BiSolidUpArrow  size={10}/>
-                    </div>
-                </div>
-                <div className="w-full gap-8 flex items-center bg-white px-3 py-2">
-                    <form onSubmit={handleSearch} className="flex flex-row items-center">
-                        <label className="text-sm font-semibold mr-3">Cari :</label>
-                        <input
-                            value={searchTerm}
-                            onChange={(e)=>setSearchTerm(e.target.value)}
-                            type="text"
-                            className="border border-gray-300 rounded mr-3 px-1"
-                        />
-                        <button
-                            type={'submit'}
-                        >
-                            <BiSearch fontSize={25} />
-                        </button>
-                    </form>
-                    <div className="flex flex-row items-center">
-                        <label className="text-sm font-semibold mr-3">Customer :</label>
-                        <select ref={custFilter} className="border border-gray-300 rounded p-1 text-sm">
-                            <option className="text-sm" value="">
-                                Semua
-                            </option>
-                            {listCustomer.map((e, index) => (
-                                <option className="text-sm p-4" key={index} value={e['kode']}>
-                                    {`${e['kode']} - ${e['name']}`}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="flex flex-row items-center">
-                        <label className="text-sm font-semibold mr-3">Part :</label>
-                        <select ref={partFilter} className="border border-gray-300 rounded p-1 text-sm">
-                            <option className="text-sm" value="">
-                                Semua
-                            </option>
-                            {listPart.map((e, index) => (
-                                <option className="text-sm p-4" key={index} value={e['kode']}>
-                                    {`${e['kode']} - ${e['name']}`}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="flex flex-row items-center">
-                        <label className="text-sm font-semibold mr-3">Vehicle :</label>
-                        <select ref={vehicleFilter} className="border border-gray-300 rounded p-1 text-sm">
-                            <option className="text-sm" value="">
-                                Semua
-                            </option>
-                            {listVehicle.map((e, index) => (
-                                <option className="text-sm" key={index} value={e['kode']}>
-                                    {`${e['kode']} - ${e['name']}`}
-                                </option>
-                            ))}
-                        </select>
-                        <button
-                            className="ml-3 bg-green-500 py-1 px-2 text-white font-semibold text-sm"
-                            onClick={fetchData}
-                        >
-                            Dapatkan Data
-                        </button>
-                    </div>
-                </div>
-                <div className={`w-full bg-white h-4 border border-gray-500`} />
-                <div className={`w-full bg-white p-2`}>
-                    <div className={`w-full bg-base py-0.5 px-1 text-white flex flex-row`}>
-                        {user.role !== 'viewer' && (
-                            <>
-                                <div
-                                    onClick={() => setModalAdd(true)}
-                                    className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
-                                    <BiPlusMedical size={12} />
-                                    <p className="text-white font-bold text-sm">Baru</p>
-                                </div>
-                                <PrintAll data={filters} />
-                                <div
-                                    onClick={saveExcel}
-                                    className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
-                                    <AiFillFileExcel size={12} />
-                                    <p className="text-white font-bold text-sm">Excel</p>
-                                </div>
-                            </>
-                        )}
-                        <div
-                            onClick={()=> fetchData()}
-                            className={`flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer`}>
-                            <BiRefresh size={12} />
-                            <p className={`text-white font-bold text-sm`}>Refresh</p>
-                        </div>
-                        {user.role !== 'super' && user.role !== 'admin' ? null : (
+                {/*<div className={`w-full bg-white h-4 border border-gray-500`} />*/}
+                <div className={`w-full bg-base py-0.5 px-1 text-white flex flex-row`}>
+                    {user.role !== 'viewer' && (
+                        <>
                             <div
-                                onClick={()=> setModalDelete2(true)}
-                                className={`flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer`}>
-                                <BiTrash size={12} />
-                                <p className={`text-white font-bold text-sm`}>Hapus Pilihan</p>
+                                onClick={() => setModalAdd(true)}
+                                className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
+                                <BiPlusMedical size={12} />
+                                <p className="text-white font-bold text-sm">Baru</p>
                             </div>
-                        )}
+                            <div
+                                onClick={saveExcel}
+                                className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
+                                <AiFillFileExcel size={12} />
+                                <p className="text-white font-bold text-sm">Excel</p>
+                            </div>
+                        </>
+                    )}
+                    <div
+                        onClick={()=> fetchData()}
+                        className={`flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer`}>
+                        <BiRefresh size={12} />
+                        <p className={`text-white font-bold text-sm`}>Refresh</p>
                     </div>
-                    <table className="w-full overflow-y-scroll">
-                        <thead>
-                        <tr>
-                            <th className="py-2 bg-gray-100 text-left w-5"></th>
-                            <th className="py-2 bg-gray-100 text-center w-10">#</th>
-                            <th className="py-2 bg-gray-100 text-left">Kode Pallet</th>
-                            <th className="py-2 bg-gray-100 text-left">Nama Pallet</th>
-                            <th className="py-2 bg-gray-100 text-left">Customer</th>
-                            <th className="py-2 bg-gray-100 text-left">Vehicle</th>
-                            <th className="py-2 bg-gray-100 text-left">Part</th>
-                            <th className="py-2 bg-gray-100 text-left">Department</th>
-                            <th className="py-2 bg-gray-100 text-left">Aksi</th>
-                        </tr>
-                        </thead>
-                        <tbody className={`overflow-y-scroll`}>
-                        {
-                            filters.map((e, index) =>(
-                                <>
-                                    <tr className={`text-sm font-semibold border-b border-gray-500`} key={index}>
-                                        <td className="text-center p-1.5">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedItems.includes(e.kode)}
-                                                onChange={() => handleItemSelection(e.kode)}
-                                            />
-                                        </td>
-                                        <td className="text-center p-1.5">{index + 1 + (listPallet['currentPage'] - 1) * 20}</td>
-                                        <td>{e['kode']}</td>
-                                        <td>{e['name'] ?? '-'}</td>
-                                        <td>{e['customer'] + ' - ' + e['Customer']['name']}</td>
-                                        <td>{e['vehicle'] + ' - ' + e['Vehicle']['name']}</td>
-                                        <td>{e['part'] + ' - ' + e['Part']['name']}</td>
-                                        <td>{'Produksi ' + e['Vehicle']['department']}</td>
-                                        <td>
-                                            <div className={'flex gap-2'}>
-                                                {
-                                                    user.role !== 'super' && user.role !== 'admin' ? null : (
-                                                        <>
-                                                            <Tooltip id="trash" />
-                                                            <HiOutlineTrash
-                                                                data-tooltip-id="trash"
-                                                                data-tooltip-content="Hapus Pallet!"
-                                                                onClick={() => {
-                                                                    setSelectedCell(e);
-                                                                    setModalDelete(true);
-                                                                }}
-                                                                size={25}
-                                                                className={`hover:text-red-500 hover:cursor-pointer`}
-                                                            />
-                                                        </>
-                                                    )
-                                                }
-                                                <Print data={e} />
-                                                <Tooltip id="qrcode" />
-                                                <BsQrCode data-tooltip-id="qrcode" data-tooltip-content="Lihat Barcode!" onClick={() => {
-                                                    setSelectedCell(e)
-                                                    setModalQR(true)
-                                                }} size={25} className={`hover:text-green-500 hover:cursor-pointer`} />
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </>
-                            ))
-                        }
-                        </tbody>
-                    </table>
-                    {/*<div className="flex">*/}
-                    {/*    <ReactDataGrid*/}
-                    {/*        idProperty="kode"*/}
-                    {/*        style={{*/}
-                    {/*            minHeight: "calc(100vh - 320px)", // Adjust as needed based on other elements on your page*/}
-                    {/*        }}*/}
-                    {/*        defaultFilterValue={[*/}
-                    {/*            { name: 'kode', operator: 'contains', type: 'string', value: '' },*/}
-                    {/*            { name: 'name', operator: 'contains', type: 'string', value: '' },*/}
-                    {/*        ]}*/}
-                    {/*        columns={[*/}
-                    {/*            { name: 'kode', header: 'Kode Pallet' ,defaultWidth:100},*/}
-                    {/*            { name: 'name', header: 'Nama Pallet', },*/}
-                    {/*            { name: 'customer', header: 'Customer', },*/}
-                    {/*            { name: 'vehicle', header: 'Vehicle', },*/}
-                    {/*            { name: 'part', header: 'Part', },*/}
-                    {/*            { name: 'department', header: 'Department',*/}
-                    {/*                render: (row) => row['Vehicle']department || 'N/A', // Ambil data department dari objek Vehicle*/}
-
-                    {/*            },*/}
-                    {/*            { name: '', header: 'Aksi',  },*/}
-                    {/*        ]}*/}
-                    {/*        pagination*/}
-                    {/*        dataSource={filters}*/}
-                    {/*        selected={selected}*/}
-                    {/*        checkboxColumn*/}
-                    {/*        onSelectionChange={onSelectionChange}*/}
-                    {/*    />*/}
-                    {/*</div>*/}
-
-                    <br/>
-                    <PaginationSelect
-                        totalPages={listPallet['totalPages']}
-                        currentPage={listPallet['currentPage']}
-                        onPageChange={handlePageChange}
-                    />
+                    {user.role !== 'super' && user.role !== 'admin' ? null : (
+                        <div
+                            onClick={()=>setModalDelete2(true)}
+                            className={`flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer`}>
+                            <BiTrash size={12} />
+                            <p className={`text-white font-bold text-sm`}>Hapus Massal</p>
+                        </div>
+                    )}
+                    <PrintAll data={selected??[]} />
+                </div>
+                <div className={`w-full bg-white p-2 flex-grow overflow-hidden`}>
+                    <Form form={form} component={false}>
+                        <Table
+                            loading={
+                                loading && <Spin tip="Loading..." delay={1000}/>
+                            }
+                            bordered
+                            rowSelection={{
+                                checkStrictly:true,
+                                onChange: handleRowSelection,
+                                preserveSelectedRowKeys: true
+                            }}
+                            components={{
+                                body: {
+                                    cell: EditableCell,
+                                },
+                            }}
+                            scroll={{
+                                y: "68vh",
+                            }}
+                            style={{
+                                width: "100%"
+                            }}
+                            rowKey={'kode'}
+                            columns={mergedColumns}
+                            dataSource={listPallet.data}
+                            onChange={onChange}
+                            size={'small'} rowClassName="editable-row"
+                            pagination={{
+                                total:listPallet.totalData,
+                                defaultPageSize: 50,
+                                pageSizeOptions: [30, 50, 100],
+                                showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`
+                            }} />
+                    </Form>
                 </div>
             </div>
         </>

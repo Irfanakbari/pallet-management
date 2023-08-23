@@ -1,22 +1,25 @@
 import { BiEdit, BiPlusMedical, BiRefresh, BiSolidUpArrow } from "react-icons/bi";
 import { ImCross } from "react-icons/im";
 import { BsFillTrashFill } from "react-icons/bs";
-import { useEffect, useState } from "react";
-import DeleteModal from "@/components/Modal/DeleteModal";
+import React, { useEffect, useState } from "react";
 import {showErrorToast, showSuccessToast} from "@/utils/toast";
 import {dataState, modalState} from "@/context/states";
 import {useForm} from "react-hook-form";
 import AddModalLayout from "@/components/Page/Master/Customer/AddModal";
-import EditModalLayout from "@/components/Page/Master/Customer/EditModal";
 import Head from "next/head";
 import axiosInstance from "@/utils/interceptor";
+import {Form, Popconfirm, Spin, Table} from "antd";
+import EditableCell from "@/components/Page/Master/Customer/EditCell";
 
 export default function Customer() {
     const {setCustomer, listCustomer} = dataState()
-    const {setModalAdd, modalAdd, modalEdit, setModalEdit, modalDelete,setModalDelete} = modalState()
-    const [selectedCell, setSelectedCell] = useState({});
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filters, setFilters] = useState([]);
+    const {setModalAdd, modalAdd, setModalEdit, setModalDelete} = modalState()
+    const [form] = Form.useForm();
+    const [editingKey, setEditingKey] = useState('');
+    const [confirmLoading, setConfirmLoading] = useState(false);
+    const [loading, setLoading] = useState(true)
+    const isEditing = (record) => record.kode === editingKey;
+
     const {
         register,
         handleSubmit,
@@ -30,9 +33,10 @@ export default function Customer() {
     const fetchData =  () => {
         axiosInstance.get('/api/customers').then(response => {
             setCustomer(response.data['data']);
-            setFilters(response.data['data']);
         }).catch(()=>{
             showErrorToast("Gagal Fetch Data");
+        }).finally(()=>{
+            setLoading(false)
         })
     };
 
@@ -49,6 +53,7 @@ export default function Customer() {
     };
 
     const deleteData = (e) => {
+        setConfirmLoading(true)
         axiosInstance
             .delete('/api/customers/' + e)
             .then(() => {
@@ -58,137 +63,188 @@ export default function Customer() {
                 showErrorToast("Gagal Hapus Data");
             })
             .finally(() => {
-                setModalDelete(false);
                 fetchData();
+                setConfirmLoading(false)
             });
     };
 
-    const editData = (data) => {
-        axiosInstance
-            .put('/api/customers/' + selectedCell.kode, data)
-            .then(() => {
-                showSuccessToast("Sukses Edit Data");
-                fetchData();
-            })
-            .catch(() => {
-                showErrorToast("Gagal Edit Data");
-            })
-            .finally(() => {
-                reset();
-                setModalEdit(false);
-            });
+    const onChange = (pagination, filters, sorter, extra) => {
+        console.log('params', pagination, filters, sorter, extra);
     };
 
-    const searchValue = (value) => {
-        if (value.trim() === '') {
-            return listCustomer;
-        }
-        const searchValueLowerCase = value.toLowerCase().trim();
-        return listCustomer.filter((item) => {
-            for (let key in item) {
-                if (typeof item[key] === 'string' && item[key].toLowerCase().includes(searchValueLowerCase)) {
-                    return true;
-                }
-            }
-            return false;
+    const edit = (record) => {
+        form.setFieldsValue({
+            name: '',
+            ...record
         });
+        setEditingKey(record.kode);
     };
 
-    const handleSearch = () => {
-        const searchResult = searchValue(searchTerm);
-        setFilters(searchResult);
+    const cancel = () => {
+        setEditingKey('');
     };
+
+    const save = async (key) => {
+        try {
+            const row = await form.validateFields();
+            const newData = [...listCustomer];
+            const index = newData.findIndex((item) => key === item.kode);
+            if (index > -1) {
+                const item = newData[index];
+                newData.splice(index, 1, {
+                    ...item,
+                    ...row
+                });
+                await axiosInstance.put(`/api/customers/${item.kode}`, row);
+                showSuccessToast('Sukses Edit Data');
+                await fetchData();
+            } else {
+                newData.push(row);
+                setCustomer(newData);
+            }
+        } catch (errInfo) {
+            console.log('Validate Failed:', errInfo);
+        } finally {
+            setEditingKey('');
+        }
+    };
+
+    const columns = [
+        {
+            title: '#',
+            dataIndex: 'index',
+            width: '5%',
+            render: (_, __, index) => index + 1
+        },
+        {
+            title: 'Kode Customer',
+            dataIndex: 'kode',
+            sorter: (a, b) => a.kode.localeCompare(b.kode),
+            width: '30%'
+        },
+        {
+            title: 'Nama Customer',
+            dataIndex: 'name',
+            width: '40%',
+            editable: true
+        },
+        {
+            title: 'Aksi',
+            dataIndex: 'operation',
+            render: (_, record) => {
+                const editable = isEditing(record);
+                return (
+                    <span>
+                    {editable ? (
+                        <span>
+                            <button
+                                onClick={() => save(record.kode)}
+                                style={{
+                                    marginRight: 8
+                                }}
+                            >
+                                Save
+                            </button>
+                            <button
+                                onClick={cancel}
+                                style={{
+                                    marginRight: 8
+                                }}
+                            >
+                                Cancel
+                            </button>
+                        </span>
+                    ) : (
+                        <span>
+                            <button
+                                disabled={editingKey !== ''}
+                                onClick={() => edit(record)}
+                                style={{
+                                    marginRight: 8
+                                }}
+                            >
+                                Edit
+                            </button>
+                            <Popconfirm
+                                title="Apakah Anda yakin ingin menghapus?"
+                                onConfirm={() => deleteData(record.kode)}
+                                okType={'primary'}
+                                okButtonProps={{
+                                    loading: confirmLoading,
+                                }}
+                            >
+                                <button>
+                                    Hapus
+                                </button>
+                            </Popconfirm>
+                        </span>
+                    )}
+                </span>
+                );
+            }
+        }
+    ];
+
+
+    const mergedColumns = columns.map((col) => {
+        if (!col.editable) {
+            return col;
+        }
+        return {
+            ...col,
+            onCell: (record) => ({
+                record,
+                inputType: 'text',
+                dataIndex: col.dataIndex,
+                title: col.title,
+                editing: isEditing(record)
+            })
+        };
+    });
 
     return (
        <>
            <Head>
                <title>Customer | PT Vuteq Indonesia</title>
            </Head>
-           <div className="h-full bg-white">
-               {modalDelete && (<DeleteModal data={selectedCell} setCloseModal={setModalDelete} action={deleteData} />)}
+           <div className={`bg-white h-full flex flex-col`}>
                {modalAdd && (<AddModalLayout onSubmit={handleSubmit(submitData)} reset={reset} register={register} />)}
-               {modalEdit && (<EditModalLayout onSubmit={handleSubmit(editData)} reset={reset} register={register} selectedCell={selectedCell} />)}
-               <div className="bg-[#2589ce] py-1.5 px-2 text-white flex flex-row justify-between">
-                   <h2 className="font-bold text-[14px]">Filter</h2>
-                   <div className="flex items-center">
-                       <BiSolidUpArrow size={10} />
-                   </div>
-               </div>
-               <div className="w-full flex items-center px-3 py-2">
-                   <label className="text-sm font-semibold mr-3">Cari : </label>
-                   <input
-                       type="text"
-                       className="border border-gray-300 rounded mr-3"
-                       value={searchTerm}
-                       onChange={(e) => setSearchTerm(e.target.value)}
-                   />
-                   <ImCross
-                       className="hover:cursor-pointer text-blue-700 mr-4"
-                       onClick={() => setSearchTerm('')}
-                   />
-                   <button
-                       className="bg-green-500 py-1 px-2 text-white font-semibold text-sm"
-                       onClick={handleSearch}
+               <div className="w-full bg-base py-0.5 px-1 text-white flex flex-row">
+                   <div
+                       onClick={() => setModalAdd(true)}
+                       className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer"
                    >
-                       Dapatkan Data
-                   </button>
+                       <BiPlusMedical size={12} />
+                       <p className="text-white font-bold text-sm">Baru</p>
+                   </div>
+                   <div
+                       onClick={fetchData}
+                       className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer"
+                   >
+                       <BiRefresh size={12} />
+                       <p className="text-white font-bold text-sm">Refresh</p>
+                   </div>
                </div>
-               <div className="w-full h-4 border border-gray-500" />
-               <div className="w-full p-2">
-                   <div className="w-full bg-base py-0.5 px-1 text-white flex flex-row">
-                       <div
-                           onClick={() => setModalAdd(true)}
-                           className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer"
-                       >
-                           <BiPlusMedical size={12} />
-                           <p className="text-white font-bold text-sm">Baru</p>
-                       </div>
-                       <div
-                           onClick={() => setModalEdit(true)}
-                           className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer"
-                       >
-                           <BiEdit size={12} />
-                           <p className="text-white font-bold text-sm">Ubah</p>
-                       </div>
-                       <div
-                           onClick={() => setModalDelete(true)}
-                           className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer"
-                       >
-                           <BsFillTrashFill size={12} />
-                           <p className="text-white font-bold text-sm">Hapus</p>
-                       </div>
-                       <div
-                           onClick={fetchData}
-                           className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer"
-                       >
-                           <BiRefresh size={12} />
-                           <p className="text-white font-bold text-sm">Refresh</p>
-                       </div>
-                   </div>
-                   <div className="flex overflow-x-auto">
-                       <table className="w-full">
-                           <thead>
-                           <tr>
-                               <th className="py-2 bg-gray-100 text-center w-20">#</th>
-                               <th className="py-2 bg-gray-100 text-left">Kode Customer (A~Z)</th>
-                               <th className="py-2 bg-gray-100 text-left">Nama Customer</th>
-                           </tr>
-                           </thead>
-                           <tbody>
-                           {filters.map((e, index) => (
-                               <tr
-                                   className={`${selectedCell.kode === e['kode'] ? 'bg-[#85d3ff]' : ''} text-sm font-semibold border-b border-gray-500`}
-                                   key={e['kode']}
-                                   onClick={() => setSelectedCell(e)}
-                               >
-                                   <td className="text-center p-1.5">{index + 1}</td>
-                                   <td>{e['kode']}</td>
-                                   <td>{e['name']}</td>
-                               </tr>
-                           ))}
-                           </tbody>
-                       </table>
-                   </div>
+               <div className="w-full bg-white p-2 flex-grow overflow-hidden">
+                   <Form form={form} component={false}>
+                       <Table
+                           loading={
+                               loading && <Spin tip="Loading..." delay={1000}/>
+                           }
+                           bordered
+                           scroll={{
+                               y: "68vh"
+                           }}
+                           components={{
+                               body: {
+                                   cell: EditableCell,
+                               },
+                           }}
+                           style={{
+                               width: "100%"
+                           }} rowKey={'kode'} columns={mergedColumns} dataSource={listCustomer} onChange={onChange} size={'small'} rowClassName="editable-row"
+                           pagination={false} />
+                   </Form>
                </div>
            </div>
        </>

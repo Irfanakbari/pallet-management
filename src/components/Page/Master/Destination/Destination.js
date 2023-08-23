@@ -1,22 +1,22 @@
 import {BiPlusMedical, BiRefresh, BiSearch, BiSolidUpArrow, BiTrash} from "react-icons/bi";
-import {useEffect, useRef, useState} from "react";
-import DeleteModal from "@/components/Modal/DeleteModal";
+import React, {useEffect, useRef, useState} from "react";
 import {showErrorToast, showSuccessToast} from "@/utils/toast";
 import {dataState, modalState} from "@/context/states";
 import {useForm} from "react-hook-form";
 import Head from "next/head";
-import {HiOutlineTrash} from "react-icons/hi";
-import {Tooltip} from "react-tooltip";
 import axiosInstance from "@/utils/interceptor";
 import AddModalLayout from "@/components/Page/Master/Destination/AddModal";
-import DeleteModal2 from "@/components/Modal/DeleteModal2";
+import {Form, Popconfirm, Spin, Table} from "antd";
+import EditableCell from "@/components/Page/Master/Destination/EditCell";
 
 export default function Destination() {
-    const {user,setListDestination, modalDelete2, setModalDelete2} = dataState()
-    const {setModalAdd, modalAdd,  modalDelete,setModalDelete} = modalState()
-    const [selectedCell, setSelectedCell] = useState({})
-    const [selectedItems, setSelectedItems] = useState([]);
-    const [filters, setFilters] = useState([])
+    const {user,setListDestination, setModalDelete2, listDestination} = dataState()
+    const {setModalAdd, modalAdd} = modalState()
+    const [form] = Form.useForm();
+    const [editingKey, setEditingKey] = useState('');
+    const [confirmLoading, setConfirmLoading] = useState(false);
+    const [loading, setLoading] = useState(true)
+    const isEditing = (record) => record.id === editingKey;
     const {
         register,
         handleSubmit,
@@ -29,11 +29,12 @@ export default function Destination() {
 
     const fetchData = () => {
         axiosInstance.get(`/api/destination`).then(response=>{
-            setListDestination(response.data);
-            setFilters(response.data['data'])
+            setListDestination(response.data['data']);
        }).catch(()=>{
            showErrorToast("Gagal Fetch Data")
-       })
+       }).finally(()=>{
+            setLoading(false)
+        })
     };
 
     const submitData = (data) => {
@@ -48,142 +49,204 @@ export default function Destination() {
     }
 
     const deleteData = (e) => {
+        setConfirmLoading(true)
         axiosInstance.delete('/api/destination/' + e).then(()=>{
             showSuccessToast("Sukses Hapus Data")
         }).catch(()=>{
             showErrorToast("Gagal Hapus Data")
         }).finally(()=>{
-            setModalDelete(false)
             fetchData()
+            setConfirmLoading(false)
         })
     }
 
-    const handleItemSelection = (itemId) => {
-        if (selectedItems.includes(itemId)) {
-            setSelectedItems(selectedItems.filter(kode => kode !== itemId));
-        } else {
-            setSelectedItems([...selectedItems, itemId]);
+    const onChange = (pagination, filters, sorter, extra) => {
+        console.log('params', pagination, filters, sorter, extra);
+    };
+
+    const edit = (record) => {
+        form.setFieldsValue({
+            name: '',
+            ...record
+        });
+        setEditingKey(record.id);
+    };
+
+    const cancel = () => {
+        setEditingKey('');
+    };
+
+    const save = async (key) => {
+        try {
+            const row = await form.validateFields();
+            const newData = [...listDestination];
+            const index = newData.findIndex((item) => key === item.id);
+            if (index > -1) {
+                const item = newData[index];
+                newData.splice(index, 1, {
+                    ...item,
+                    ...row
+                });
+                await axiosInstance.put(`/api/destination/${item.id}`, row);
+                showSuccessToast('Sukses Edit Data');
+                await fetchData();
+            } else {
+                newData.push(row);
+                setListDestination(newData);
+            }
+        } catch (errInfo) {
+            console.log('Validate Failed:', errInfo);
+        } finally {
+            setEditingKey('');
         }
     };
 
-    const handleMultiDelete = () => {
-        Promise.all(selectedItems.map(itemId => axiosInstance.delete(`/api/destination/${itemId}`)))
-            .then(() => {
-                showSuccessToast("Sukses Hapus Data");
-            })
-            .catch(() => {
-                showErrorToast("Gagal Hapus Data");
-            })
-            .finally(() => {
-                setSelectedItems([]);
-                fetchData()
-            });
-    };
+    const columns = [
+        {
+            title: '#',
+            dataIndex: 'index',
+            width: '5%',
+            render: (_, __, index) => index + 1
+        },
+        {
+            title: 'Nama Destinasi',
+            dataIndex: 'name',
+            width: '40%',
+            editable: true
+        },
+        {
+            title: 'Part',
+            dataIndex: 'part',
+            render: (_, record) => record.part + " - " + record['Part'].name
+        },
+        {
+            title: 'Aksi',
+            dataIndex: 'operation',
+            render: (_, record) => {
+                const editable = isEditing(record);
+                return (
+                    <span>
+                    {editable ? (
+                        <span>
+                            <button
+                                onClick={() => save(record.id)}
+                                style={{
+                                    marginRight: 8
+                                }}
+                            >
+                                Save
+                            </button>
+                            <button
+                                onClick={cancel}
+                                style={{
+                                    marginRight: 8
+                                }}
+                            >
+                                Cancel
+                            </button>
+                        </span>
+                    ) : (
+                        <span>
+                            <button
+                                disabled={editingKey !== ''}
+                                onClick={() => edit(record)}
+                                style={{
+                                    marginRight: 8
+                                }}
+                            >
+                                Edit
+                            </button>
+                            <Popconfirm
+                                title="Apakah Anda yakin ingin menghapus?"
+                                onConfirm={() => deleteData(record.id)}
+                                okType={'primary'}
+                                okButtonProps={{
+                                    loading: confirmLoading,
+                                }}
+                            >
+                                <button>
+                                    Hapus
+                                </button>
+                            </Popconfirm>
+                        </span>
+                    )}
+                </span>
+                );
+            }
+        }
+    ];
 
-
+    const mergedColumns = columns.map((col) => {
+        if (!col.editable) {
+            return col;
+        }
+        return {
+            ...col,
+            onCell: (record) => ({
+                record,
+                inputType: 'text',
+                dataIndex: col.dataIndex,
+                title: col.title,
+                editing: isEditing(record)
+            })
+        };
+    });
 
     return (
         <>
             <Head>
-                <title>Destination | PT Vuteq Indonesia</title>
+                <title>Destinasi | PT Vuteq Indonesia</title>
             </Head>
-            <div className={`h-full bg-white`}>
-                {modalDelete && (<DeleteModal data={selectedCell} setCloseModal={setModalDelete} action={deleteData} />)}
-                {modalDelete2 && (<DeleteModal2 data={selectedItems} setCloseModal={setModalDelete2} action={handleMultiDelete} />)}
+            <div className={`bg-white h-full flex flex-col`}>
                 {modalAdd && (<AddModalLayout onSubmit={handleSubmit(submitData)} reset={reset} register={register} />)}
-                <div className={`bg-[#2589ce] py-1.5 px-2 text-white flex flex-row justify-between`}>
-                    <h2 className={`font-bold text-[14px]`}>Filter</h2>
-                    <div className={`flex items-center`}>
-                        <BiSolidUpArrow  size={10}/>
-                    </div>
-                </div>
-                <div className={`w-full bg-white h-4 border border-gray-500`} />
-                <div className={`w-full bg-white p-2`}>
-                    <div className={`w-full bg-base py-0.5 px-1 text-white flex flex-row`}>
-                        {user.role !== 'viewer' && (
-                            <>
-                                <div
-                                    onClick={() => setModalAdd(true)}
-                                    className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
-                                    <BiPlusMedical size={12} />
-                                    <p className="text-white font-bold text-sm">Baru</p>
-                                </div>
-                            </>
-                        )}
-                        <div
-                            onClick={()=> fetchData()}
-                            className={`flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer`}>
-                            <BiRefresh size={12} />
-                            <p className={`text-white font-bold text-sm`}>Refresh</p>
-                        </div>
-                        {user.role !== 'super' && user.role !== 'admin' ? null : (
+                <div className={`w-full bg-base py-0.5 px-1 text-white flex flex-row`}>
+                    {user.role !== 'viewer' && (
+                        <>
                             <div
-                                onClick={()=> setModalDelete2(true)}
-                                className={`flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer`}>
-                                <BiTrash size={12} />
-                                <p className={`text-white font-bold text-sm`}>Hapus Pilihan</p>
+                                onClick={() => setModalAdd(true)}
+                                className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
+                                <BiPlusMedical size={12} />
+                                <p className="text-white font-bold text-sm">Baru</p>
                             </div>
-                        )}
+                        </>
+                    )}
+                    <div
+                        onClick={()=> fetchData()}
+                        className={`flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer`}>
+                        <BiRefresh size={12} />
+                        <p className={`text-white font-bold text-sm`}>Refresh</p>
                     </div>
-                    <table className="w-full overflow-y-scroll">
-                        <thead>
-                        <tr>
-                            <th className="py-2 bg-gray-100 text-left w-5"></th>
-                            <th className="py-2 bg-gray-100 text-center w-10">#</th>
-                            <th className="py-2 bg-gray-100 text-left">Destinasi</th>
-                            <th className="py-2 bg-gray-100 text-left">Part</th>
-                            <th className="py-2 bg-gray-100 text-left">Aksi</th>
-                        </tr>
-                        </thead>
-                        <tbody className={`overflow-y-scroll`}>
-                        {
-                            filters.map((e, index) =>(
-                                <>
-                                    <tr className={`text-sm font-semibold border-b border-gray-500`} key={index}>
-                                        <td className="text-center p-1.5">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedItems.includes(e.id)}
-                                                onChange={() => handleItemSelection(e.id)}
-                                            />
-                                        </td>
-                                        <td className={'text-center'}>{index+1}</td>
-                                        <td>{e['name'] ?? '-'}</td>
-                                        <td>{e['part'] + ' - ' + e['Part']['name']}</td>
-                                        <td>
-                                            <div className={'flex gap-2'}>
-                                                {
-                                                    user.role !== 'super' && user.role !== 'admin' ? null : (
-                                                        <>
-                                                            <Tooltip id="trash" />
-                                                            <HiOutlineTrash
-                                                                data-tooltip-id="trash"
-                                                                data-tooltip-content="Hapus Pallet!"
-                                                                onClick={() => {
-                                                                    setSelectedCell(e);
-                                                                    setModalDelete(true);
-                                                                }}
-                                                                size={25}
-                                                                className={`hover:text-red-500 hover:cursor-pointer`}
-                                                            />
-                                                        </>
-                                                    )
-                                                }
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </>
-                            ))
-                        }
-                        </tbody>
-                    </table>
-                    <br/>
-                    {/*<PaginationSelect*/}
-                    {/*    totalPages={listPallet['totalPages']}*/}
-                    {/*    currentPage={1}*/}
-                    {/*    onPageChange={handlePageChange}*/}
-                    {/*/>*/}
+                    {user.role !== 'super' && user.role !== 'admin' ? null : (
+                        <div
+                            onClick={()=> setModalDelete2(true)}
+                            className={`flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer`}>
+                            <BiTrash size={12} />
+                            <p className={`text-white font-bold text-sm`}>Hapus Pilihan</p>
+                        </div>
+                    )}
                 </div>
+                <div className="w-full bg-white p-2 flex-grow overflow-hidden">
+                    <Form form={form} component={false}>
+                        <Table
+                            loading={
+                                loading && <Spin tip="Loading..." delay={1000}/>
+                            }
+                            bordered
+                            scroll={{
+                                y: "68vh"
+                            }}
+                            components={{
+                                body: {
+                                    cell: EditableCell,
+                                },
+                            }}
+                            style={{
+                                width: "100%"
+                            }} rowKey={'id'} columns={mergedColumns} dataSource={listDestination} onChange={onChange} size={'small'} rowClassName="editable-row"
+                            pagination={false} />
+                    </Form>
+                </div>
+
             </div>
         </>
     )

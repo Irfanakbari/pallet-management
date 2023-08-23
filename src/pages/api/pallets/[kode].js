@@ -39,6 +39,35 @@ async function handler(req, res) {
                 });
             }
             break;
+        case 'PUT':
+            if (req.user.role !== 'super' && req.user.role !== 'admin') {
+                return res.status(401).json({
+                    ok: false,
+                    data: "Role must be admin"
+                });
+            }
+            try {
+                const palletId = req.query.kode; // Anggap req.body.id berisi ID pelanggan yang akan dihapus
+                const {name} = req.body; // Anggap req.body berisi data pelanggan baru
+                await Pallet.update({
+                    name
+                },{
+                    where: {
+                        kode : palletId
+                    }
+                });
+                res.status(201).json({
+                    ok: true,
+                    data: "Success"
+                });
+            } catch (e) {
+                logger.error(e.message);
+                res.status(500).json({
+                    ok: false,
+                    data: "Internal Server Error"
+                });
+            }
+            break;
         default:
             res.status(405).json({
                 ok: false,

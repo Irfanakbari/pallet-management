@@ -1,7 +1,7 @@
 import {BiPrinter, BiRefresh, BiSolidUpArrow} from "react-icons/bi";
 import {ImCross} from "react-icons/im";
 import {AiFillFileExcel} from "react-icons/ai";
-import {useCallback, useEffect, useRef, useState} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import { useExcelJS } from "react-use-exceljs"
 import PaginationSelect from "@/components/PaginationSelect";
 import {showErrorToast} from "@/utils/toast";
@@ -12,13 +12,13 @@ import {FaRegWindowMaximize} from "react-icons/fa";
 import Image from "next/image";
 import Head from "next/head";
 import axiosInstance from "@/utils/interceptor";
+import {Spin, Table} from "antd";
 
 
 export default function LapMaintenance() {
     const [dataMaintenance, setDataMaintenance] = useState([])
-    const {listCustomer, listVehicle} = dataState()
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filters, setFilters] = useState([])
+    const {listCustomer, listVehicle,listPart} = dataState()
+    const [loading, setLoading] = useState(true)
     const selectKodeCust = useRef(null);
     const selectKodeProj = useRef(null);
 
@@ -29,36 +29,16 @@ export default function LapMaintenance() {
 
     // Fungsi get data dari API
     const fetchData = async () => {
+        setLoading(true)
         try {
-            const response = await axiosInstance.get('/api/repairs?page=1');
+            const response = await axiosInstance.get('/api/repairs?page=1&limit=50');
             setDataMaintenance(response.data);
-            setFilters(response.data['data'])
         } catch (error) {
             showErrorToast("Gagal Fetch Data");
+        } finally {
+            setLoading(false)
         }
     };
-
-    // Fungsi menghandle search data
-    const handleSearch = () => {
-        const searchResult = searchValue(searchTerm);
-        setFilters(searchResult);
-    };
-
-    // Fungsi Untuk melakukan search data
-    function searchValue(value) {
-        if (value.trim() === '') {
-            return dataMaintenance.data;
-        }
-        const searchValueLowerCase = value.toLowerCase();
-        return dataMaintenance.data.filter((item) => {
-            for (let key in item) {
-                if (typeof item[key] === 'string' && item[key].toLowerCase().includes(searchValueLowerCase)) {
-                    return true;
-                }
-            }
-            return false;
-        });
-    }
 
     const excel = useExcelJS({
         filename: "lap_maintenance.xlsx",
@@ -96,18 +76,10 @@ export default function LapMaintenance() {
         ],
     })
 
-    // Fungsi untuk menghandle perubahan halaman
-    const handlePageChange = async (selectedPage) => {
-        // Lakukan perubahan halaman di sini
-        const response3 = await axiosInstance.get(`/api/repairs?page=` + selectedPage);
-        setDataMaintenance(response3.data);
-        setFilters(response3.data['data'])
-    };
-
     // Fungsi untuk melakukan save/export data ke excel
     const saveExcel = async (e) => {
         e.preventDefault();
-        const data = filters.map((item, index) => ({
+        const data = dataMaintenance.data.map((item, index) => ({
             no: index + 1,
             id: item.kode,
             customer: item.customer + ' - '+  item['Customer']['name'],
@@ -117,17 +89,82 @@ export default function LapMaintenance() {
         await excel.download(data)
     }
 
-    // Fungsi untuk melakukan filter pencarian
-    const getFilteredData = async (e) => {
-        e.preventDefault()
-        try {
-            const response = await axiosInstance.get(`/api/filters?customer=${selectKodeCust.current.value}&vehicle=${selectKodeProj.current.value}&page=1`);
-            setDataMaintenance(response.data);
-            setFilters(response.data['data']);
-        } catch (error) {
-            showErrorToast("Gagal Fetch Data");
-        }
+    const onChange = (pagination, filters, sorter, extra) => {
+        setLoading(true)
+        const searchParam = (filters?.kode && filters?.kode[0]) || '';
+        const customerParam = (filters?.customer && filters?.customer[0]) || '';
+        const vehicleParam = (filters?.vehicle && filters?.vehicle[0]) || '';
+        const partParam = (filters?.part && filters?.part[0]) || '';
+        const url = `/api/repairs?search=${searchParam}&customer=${customerParam || ''}&vehicle=${vehicleParam || ''}&part=${partParam || ''}&page=${pagination.current}&limit=${pagination.pageSize}`;
+        axiosInstance.get(url)
+            .then(response => {
+                setDataMaintenance(response.data);
+            })
+            .catch(() => {
+                showErrorToast("Gagal Fetch Data");
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+
     };
+
+    const columns = [
+        {
+            title: '#',
+            dataIndex: 'index',
+            width: '5%',
+            render: (_, __, index) => index + 1
+        },
+        {
+            title: 'Kode Pallet',
+            dataIndex: 'kode',
+            sorter: (a, b) => a.kode.localeCompare(b.kode),
+            width: '30%'
+        },
+        {
+            title: 'Customer',
+            dataIndex: 'customer',
+            sorter: (a, b) => a.customer.localeCompare(b.customer),
+            filters: listCustomer.map(e=>(
+                {
+                    text: e.name,
+                    value: e.kode
+                }
+            )),
+            filterMultiple: false,
+            onFilter: (value, record) => record.customer.indexOf(value) === 0,
+            render: (_, record) => record.customer + " - " + record['Customer'].name
+        },
+        {
+            title: 'Vehicle',
+            dataIndex: 'vehicle',
+            sorter: (a, b) => a.vehicle.localeCompare(b.vehicle),
+            filterMultiple: false,
+            filters: listVehicle.map(e=>(
+                {
+                    text: e.name,
+                    value: e.kode
+                }
+            )),
+            onFilter: (value, record) => record.vehicle.indexOf(value) === 0,
+            render: (_, record) => record.vehicle + " - " + record['Vehicle'].name
+        },
+        {
+            title: 'Part',
+            dataIndex: 'part',
+            sorter: (a, b) => a.part.localeCompare(b.part),
+            filterMultiple: false,
+            filters: listPart.map(e=>(
+                {
+                    text: e.name,
+                    value: e.kode
+                }
+            )),
+            onFilter: (value, record) => record.part.indexOf(value) === 0,
+            render: (_, record) => record.part + " - " + record['Part'].name
+        },
+    ];
 
 
     return(
@@ -135,129 +172,45 @@ export default function LapMaintenance() {
             <Head>
                 <title>Laporan Maintenance | PT Vuteq Indonesia</title>
             </Head>
-            <div className={`h-full bg-white`}>
-                <div className={`bg-[#2589ce] py-1.5 px-2 text-white flex flex-row justify-between`}>
-                    <h2 className={`font-bold text-[14px]`}>Filter</h2>
-                    <div className={`flex items-center`}>
-                        <BiSolidUpArrow  size={10}/>
+            <div className={`bg-white h-full flex flex-col`}>
+                <div className={`w-full bg-base py-0.5 px-1 text-white flex flex-row`}>
+                    <PrintAll data={dataMaintenance} />
+                    <div
+                        onClick={saveExcel}
+                        className={`flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer`}>
+                        <AiFillFileExcel size={12} />
+                        <p className={`text-white font-bold text-sm`}>Excel</p>
+                    </div>
+                    <div
+                        onClick={()=> fetchData()}
+                        className={`flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer`}>
+                        <BiRefresh size={12} />
+                        <p className={`text-white font-bold text-sm`}>Refresh</p>
                     </div>
                 </div>
-                <div className={`w-full gap-8 flex items-center bg-white px-3 py-2`}>
-                    <div className={`flex flex-row items-center`}>
-                        <label className={`text-sm font-semibold mr-3`}>Cari : </label>
-                        <input
-                            type="text"
-                            className="h-6 border-gray-500 mr-3"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <ImCross
-                            className="hover:cursor-pointer text-blue-700 mr-4"
-                            onClick={() => setSearchTerm('')}
-                        />
-                        <button
-                            className="bg-green-500 py-1 px-2 text-white font-semibold text-sm"
-                            onClick={handleSearch}
-                        >
-                            Dapatkan Data
-                        </button>
-                    </div>
-                    <div className={`flex flex-row items-center`}>
-                        <label className={`text-sm font-semibold mr-3`}>Customer : </label>
-                        <select
-                            ref={selectKodeCust}
-                            className="border border-gray-300 rounded p-1 text-sm"
-                        >
-                            <option className={`text-sm`} value={''}>
-                                Semua
-                            </option>
-                            {
-                                listCustomer.map((e,index) =>(
-                                    <option className={`text-sm`} key={index} value={e['kode']}>
-                                        {
-                                            `${e['kode']} - ${e['name']}`
-                                        }
-                                    </option>
-                                ))
-                            }
-                        </select>
-                    </div>
-                    <div className={`flex flex-row items-center`}>
-                        <label className={`text-sm font-semibold mr-3`}>Project/Line : </label>
-                        <select
-                            ref={selectKodeProj}
-                            className="border border-gray-300 rounded p-1 text-sm"
-                        >
-                            <option className={`text-sm`} value={''}>
-                                Semua
-                            </option>
-                            {
-                                listVehicle.map((e,index) =>(
-                                    <option className={`text-sm`} key={index} value={e['kode']}>
-                                        {
-                                            `${e['kode']} - ${e['name']}`
-                                        }
-                                    </option>
-                                ))
-                            }
-                        </select>
-                    </div>
-                    <button
-                        className="ml-3 bg-green-500 py-1 px-2 text-white font-semibold text-sm"
-                        onClick={getFilteredData}
-                    >
-                        Dapatkan Data
-                    </button>
-                </div>
-                <div className={`w-full bg-white h-4 border border-gray-500`} />
-                <div className={`w-full bg-white p-2`}>
-                    <div className={`w-full bg-base py-0.5 px-1 text-white flex flex-row`}>
-                        <PrintAll data={dataMaintenance} />
-                        <div
-                            onClick={saveExcel}
-                            className={`flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer`}>
-                            <AiFillFileExcel size={12} />
-                            <p className={`text-white font-bold text-sm`}>Excel</p>
-                        </div>
-                        <div
-                            onClick={()=> fetchData()}
-                            className={`flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer`}>
-                            <BiRefresh size={12} />
-                            <p className={`text-white font-bold text-sm`}>Refresh</p>
-                        </div>
-                    </div>
-                    <table className="w-full">
-                        <thead>
-                        <tr>
-                            <th className="p-2 bg-gray-100 text-left w-10">#</th>
-                            <th className="p-2 bg-gray-100 text-left">Kode Pallet</th>
-                            <th className="p-2 bg-gray-100 text-left">Customer</th>
-                            <th className="p-2 bg-gray-100 text-left">Vehicle</th>
-                            <th className="p-2 bg-gray-100 text-left">Part</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {
-                            filters.map((e, index) =>(
-                                <>
-                                    <tr className={`text-sm font-semibold border-b border-gray-500`} key={index}>
-                                        <td className="text-center p-1.5">{index+1}</td>
-                                        <td className="px-4">{e['kode'] }</td>
-                                        <td className="px-4">{e['customer']+ ' - ' + e['Customer']['name']}</td>
-                                        <td className="px-4">{e['vehicle']+ ' - ' + e['Vehicle']['name']}</td>
-                                        <td className="px-4">{e['part']+ ' - ' + e['Part']['name']}</td>
-                                    </tr>
-                                </>
-                            ))
+                <div className="w-full bg-white p-2 flex-grow overflow-hidden">
+                    <Table
+                        loading={
+                            loading && <Spin tip="Loading..." delay={1000}/>
                         }
-                        </tbody>
-                    </table>
-                    <br/>
-                    <PaginationSelect
-                        totalPages={dataMaintenance['totalPages']}
-                        currentPage={dataMaintenance['currentPage']}
-                        onPageChange={handlePageChange}
-                    />
+                        bordered
+                        scroll={{
+                            y: "68vh"
+                        }}
+                        style={{
+                            width: "100%"
+                        }}
+                        rowKey={'kode'}
+                        columns={columns}
+                        dataSource={dataMaintenance.data}
+                        onChange={onChange}
+                        size={'small'}
+                        pagination={{
+                            total:dataMaintenance.totalData,
+                            defaultPageSize: 50,
+                            pageSizeOptions: [30, 50, 100],
+                            showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`
+                        }} />
                 </div>
             </div>
         </>

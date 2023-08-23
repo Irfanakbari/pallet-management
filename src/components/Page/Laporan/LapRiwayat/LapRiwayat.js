@@ -1,67 +1,37 @@
-import {BiFilter, BiPrinter, BiRefresh, BiSearch, BiSolidUpArrow} from "react-icons/bi";
-import { AiFillFileExcel } from "react-icons/ai";
-import { useEffect, useState } from "react";
+import {BiPrinter, BiRefresh} from "react-icons/bi";
+import {AiFillFileExcel} from "react-icons/ai";
+import React, {useEffect, useState} from "react";
 import dayjs from "dayjs";
 import ExcelJS from "exceljs"
-import PaginationSelect from "@/components/PaginationSelect";
 import {showErrorToast} from "@/utils/toast";
-import FilterModal from "@/components/Page/Laporan/LapRiwayat/FilterModal";
-import {filterState, modalState} from "@/context/states";
+import {dataState} from "@/context/states";
 import Head from "next/head";
 import axiosInstance from "@/utils/interceptor";
+import {Button, DatePicker, Input, Space, Spin, Table} from "antd";
+import {CalendarOutlined, SearchOutlined} from "@ant-design/icons";
 
 export default function LapRiwayat() {
     const [dataHistory, setDataHistory] = useState([]);
-    const {modalFilter,setModalFilter} = modalState()
-    const {
-        custFilterValue,
-        vehicleFilterValue,
-        partFilterValue,
-        statusFilterValue,
-        startDateValue,
-        endDateValue,
-    } = filterState();
-    const [searchTerm, setSearchTerm] = useState('');
     const [filters, setFilters] = useState([]);
+    const {listCustomer, listVehicle,listPart} = dataState()
+    const [loading, setLoading] = useState(true)
+    const { RangePicker } = DatePicker;
 
     useEffect(() => {
         fetchData();
     }, []);
 
-    const getFilteredData = async (e) => {
-        e.preventDefault()
-        try {
-            const response = await axiosInstance.get(`/api/history?customer=${custFilterValue}&vehicle=${vehicleFilterValue}&part=${partFilterValue}&status=${statusFilterValue}&start=${startDateValue}&end=${endDateValue}&page=1`);
-            setDataHistory(response.data);
-            setFilters(response.data['data']);
-        } catch (error) {
-            showErrorToast("Gagal Fetch Data");
-        } finally {
-            setModalFilter(false)
-        }
-    };
 
     const fetchData =  () => {
+        setLoading(true)
         axiosInstance.get(`/api/history?page=1`).then(response=>{
             setDataHistory(response.data);
             setFilters(response.data['data']);
         }).catch(()=>{
             showErrorToast("Gagal Fetch Data");
+        }).finally(()=>{
+            setLoading(false)
         })
-    };
-
-    const handlePageChange = async (selectedPage) => {
-        const response3 = await axiosInstance.get(`/api/history?customer=${custFilterValue}&vehicle=${vehicleFilterValue}&part=${partFilterValue}&status=${statusFilterValue}&start=${startDateValue}&end=${endDateValue}&page=` + selectedPage);
-        setDataHistory(response3.data);
-        setFilters(response3.data['data'])
-    };
-
-    const handleSearch = async (e) => {
-        e.preventDefault()
-        const searchValueLowerCase = searchTerm.toLowerCase().split(' ').join('');
-        const response = await axiosInstance.get(`/api/history?search=${searchValueLowerCase}`);
-        setDataHistory(response.data);
-        setFilters(response.data['data']);
     };
 
     const isMoreThanAWeekAgoAndNoEntry = (keluar, masuk) => {
@@ -204,101 +174,348 @@ export default function LapRiwayat() {
         })
     };
 
+    const onChange = (pagination, filters, sorter, extra) => {
+        setLoading(true)
+        console.log('params', pagination, filters, sorter, extra);
+        const searchParam = (filters?.kode && filters?.kode[0]) || '';
+        const keluarStart = (filters?.keluar && filters?.keluar[0][0]) || '';
+        const keluarEnd = (filters?.keluar && filters?.keluar[0][1]) || '';
+        const masukStart = (filters?.masuk && filters?.masuk[0][0]) || '';
+        const masukEnd = (filters?.masuk && filters?.masuk[0][1]) || '';
+        const customerParam = (filters?.customer && filters?.customer[0]) || '';
+        const vehicleParam = (filters?.vehicle && filters?.vehicle[0]) || '';
+        const partParam = (filters?.part && filters?.part[0]) || '';
+        // Parse the original date strings
+        // Parse the original date strings
+        const parsedKeluarStart = dayjs(keluarStart);
+        const parsedKeluarEnd = dayjs(keluarEnd);
+        const parsedMasukStart = dayjs(masukStart);
+        const parsedMasukEnd = dayjs(masukEnd);
+
+// Check if the parsed dates are valid before formatting
+        const formattedKeluarStart = parsedKeluarStart.isValid() ? parsedKeluarStart.format('YYYY-MM-DD') : '';
+        const formattedKeluarEnd = parsedKeluarEnd.isValid() ? parsedKeluarEnd.format('YYYY-MM-DD') : '';
+        const formattedMasukStart = parsedMasukStart.isValid() ? parsedMasukStart.format('YYYY-MM-DD') : '';
+        const formattedMasukEnd = parsedMasukEnd.isValid() ? parsedMasukEnd.format('YYYY-MM-DD') : '';
+
+        const url = `/api/history?search=${searchParam}&customer=${customerParam || ''}&vehicle=${vehicleParam || ''}&part=${partParam || ''}&keluarStart=${formattedKeluarStart || ''}&keluarEnd=${formattedKeluarEnd || ''}&masukStart=${formattedMasukStart || ''}&masukEnd=${formattedMasukEnd || ''}&page=${pagination.current}&limit=${pagination.pageSize}`;
+        axiosInstance.get(url)
+            .then(response => {
+                setDataHistory(response.data);
+            })
+            .catch(() => {
+                showErrorToast("Gagal Fetch Data");
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+
+    };
+
+    const columns = [
+        {
+            title: '#',
+            dataIndex: 'index',
+            width: 100,
+            fixed:'left',
+            render: (_, __, index) => index + 1
+        },
+        {
+            title: 'Kode Pallet',
+            dataIndex: 'id_pallet',
+            ellipsis: true,
+            fixed:'left',
+            width: 200,
+
+            sorter: (a, b) => a.id_pallet.localeCompare(b.id_pallet),
+        },
+        {
+            title: 'Customer',
+            dataIndex: 'customer',
+            sorter: (a, b) => a.customer.localeCompare(b.customer),
+            filters: listCustomer.map(e=>(
+                {
+                    text: e.name,
+                    value: e.kode
+                }
+            )),
+            width: 400,
+            filterMultiple: false,
+            ellipsis: true,
+            onFilter: (value, record) => record['Pallet'].customer.indexOf(value) === 0,
+            render: (_, record) => record['Pallet']['Customer']['kode'] + ' - ' + record['Pallet']['Customer']['name']
+        },
+        {
+            title: 'Vehicle',
+            dataIndex: 'vehicle',
+            sorter: (a, b) => a.vehicle.localeCompare(b.vehicle),
+            filterMultiple: false,
+            ellipsis: true,
+            filters: listVehicle.map(e=>(
+                {
+                    text: e.name,
+                    value: e.kode
+                }
+            )),
+            width: 400,
+            onFilter: (value, record) => record['Pallet'].vehicle.indexOf(value) === 0,
+            render: (_, record) => record['Pallet']['Vehicle']['kode'] + ' - ' + record['Pallet']['Vehicle']['name']
+        },
+        {
+            title: 'Part',
+            dataIndex: 'part',
+            ellipsis: true,
+            sorter: (a, b) => a.part.localeCompare(b.part),
+            filterMultiple: false,
+            width: 700,
+            filters: listPart.map(e=>(
+                {
+                    text: e.name,
+                    value: e.kode
+                }
+            )),
+            onFilter: (value, record) => record['Pallet'].part.indexOf(value) === 0,
+            render: (_, record) => record['Pallet']['Part']['kode'] + ' - ' + record['Pallet']['Part']['name']
+        },
+        {
+            title: 'Destinasi',
+            dataIndex: 'destination',
+            ellipsis: true,
+            width: 300,
+            sorter: (a, b) => a.destination.localeCompare(b.destination),
+            render: (_, record) => record.destination ?? '-'
+        },
+        {
+            title: 'Keluar',
+            dataIndex: 'keluar',
+            ellipsis: true,
+            width: 400,
+            sorter: (a, b) => {
+                // Convert the 'keluar' values to Date objects for comparison
+                const dateA = a['keluar'] ? new Date(a['keluar']) : null;
+                const dateB = b['keluar'] ? new Date(b['keluar']) : null;
+
+                // Handle cases when one of the dates is null
+                if (!dateA && dateB) return -1;
+                if (dateA && !dateB) return 1;
+                if (!dateA && !dateB) return 0;
+
+                // Compare the dates
+                return dateA.getTime() - dateB.getTime();
+            },
+            filterDropdown: ({ setSelectedKeys,selectedKeys, confirm, clearFilters,close }) => (
+                <div
+                    style={{
+                        padding: 8,
+                    }}
+                    onKeyDown={(e) => e.stopPropagation()}
+                >
+                    <RangePicker
+                        style={{
+                            marginBottom: 8,
+                            width: "100%",
+                        }}
+                        value={selectedKeys[0]}
+                        onChange={newDateRange => {
+                            setSelectedKeys(newDateRange? [newDateRange] : [])
+                        }}
+                    />
+                    <Space>
+                        <Button
+                            type="primary"
+                            size="small"
+                            style={{
+                                width: 90,
+                            }}
+                            onClick={() => {
+                                confirm({
+                                    closeDropdown: true,
+                                });
+                            }}
+                        >
+                            Filter
+                        </Button>
+                        <Button
+                            onClick={() => clearFilters}
+                            size="small"
+                            style={{
+                                width: 90,
+                            }}
+                        >
+                            Reset
+                        </Button>
+                        <Button
+                            type="link"
+                            size="small"
+                            onClick={() => {
+                                close();
+                            }}
+                        >
+                            close
+                        </Button>
+                    </Space>
+                </div>
+            ),
+            filterIcon: filtered => (
+                <CalendarOutlined
+                    style={{
+                        color: filtered ? '#1890ff' : undefined,
+                    }}
+                />
+            ),
+            render: (_, record) => {
+                return record['keluar']
+                    ? dayjs(record['keluar']).locale('id').format('DD MMMM YYYY HH:mm')
+                    : '-'
+            }
+        },
+        {
+            title: 'Operator Out',
+            dataIndex: 'user_out',
+            ellipsis: true,
+            width: 200,
+            sorter: (a, b) => a.user_out.localeCompare(b.user_out),
+            render: (_, record) => record['user_out'] ?? '-'
+        },
+        {
+            title: 'Masuk',
+            dataIndex: 'masuk',
+            ellipsis: true,
+            width: 400,
+            sorter: (a, b) => {
+                // Convert the 'keluar' values to Date objects for comparison
+                const dateA = a['masuk'] ? new Date(a['masuk']) : null;
+                const dateB = b['masuk'] ? new Date(b['masuk']) : null;
+
+                // Handle cases when one of the dates is null
+                if (!dateA && dateB) return -1;
+                if (dateA && !dateB) return 1;
+                if (!dateA && !dateB) return 0;
+
+                // Compare the dates
+                return dateA.getTime() - dateB.getTime();
+            },
+            filterDropdown: ({ setSelectedKeys,selectedKeys, confirm, clearFilters,close }) => (
+                <div
+                    style={{
+                        padding: 8,
+                    }}
+                    onKeyDown={(e) => e.stopPropagation()}
+                >
+                    <RangePicker
+                        style={{
+                            marginBottom: 8,
+                            width: "100%",
+                        }}
+                        value={selectedKeys[0]}
+                        onChange={newDateRange => {
+                            setSelectedKeys(newDateRange? [newDateRange] : [])
+                        }}
+                    />
+                    <Space>
+                        <Button
+                            type="primary"
+                            size="small"
+                            style={{
+                                width: 90,
+                            }}
+                            onClick={() => {
+                                confirm({
+                                    closeDropdown: true,
+                                });
+                            }}
+                        >
+                            Filter
+                        </Button>
+                        <Button
+                            onClick={() => clearFilters}
+                            size="small"
+                            style={{
+                                width: 90,
+                            }}
+                        >
+                            Reset
+                        </Button>
+                        <Button
+                            type="link"
+                            size="small"
+                            onClick={() => {
+                                close();
+                            }}
+                        >
+                            close
+                        </Button>
+                    </Space>
+                </div>
+            ),
+            filterIcon: filtered => (
+                <CalendarOutlined
+                    style={{
+                        color: filtered ? '#1890ff' : undefined,
+                    }}
+                />
+            ),
+            render: (_, record) => {
+                return record['masuk']
+                    ? dayjs(record['masuk']).locale('id').format('DD MMMM YYYY HH:mm')
+                    : '-'
+            }
+        },
+        {
+            title: 'Operator In',
+            dataIndex: 'user_in',
+            ellipsis: true,
+            width: 200,
+            sorter: (a, b) => a.user_in.localeCompare(b.user_in),
+            render: (_, record) => record['user_in'] ?? '-'
+        },
+    ];
 
     return (
         <>
             <Head>
                 <title>Laporan Riwayat | PT Vuteq Indonesia</title>
             </Head>
-            <div className="h-full bg-white">
-                <div className="bg-[#2589ce] py-1.5 px-2 text-white flex flex-row justify-between">
-                    <h2 className="font-bold text-[14px]">Filter</h2>
-                    <div className="flex items-center">
-                        <BiSolidUpArrow size={10} />
+            <div className={`bg-white h-full flex flex-col`}>
+                <div className="w-full bg-base py-0.5 px-1 text-white flex flex-row">
+                    <div className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
+                        <BiPrinter size={12} />
+                        <p className="text-white font-bold text-sm">Cetak</p>
+                    </div>
+                    <div onClick={saveExcel} className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
+                        <AiFillFileExcel size={12} />
+                        <p className="text-white font-bold text-sm">Excel</p>
+                    </div>
+                    <div onClick={fetchData} className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
+                        <BiRefresh size={12} />
+                        <p className="text-white font-bold text-sm">Refresh</p>
                     </div>
                 </div>
-                <div className="w-full gap-8 flex items-center bg-white px-3 py-2">
-                    <form onSubmit={handleSearch} className="flex flex-row items-center">
-                        <label className="text-sm font-semibold mr-3">Cari :</label>
-                        <input
-                            value={searchTerm}
-                            onChange={(e)=>setSearchTerm(e.target.value)}
-                            type="text"
-                            className="border border-gray-300 rounded mr-3 px-1"
-                        />
-                        <button
-                            type={'submit'}
-                        >
-                            <BiSearch fontSize={25} />
-                        </button>
-                    </form>
-                    {modalFilter&&
-                        <FilterModal onSubmit={getFilteredData}/>
-                    }
-                </div>
-                <div className="w-full bg-white h-4 border border-gray-500" />
-                <div className="w-full bg-white p-2">
-                    <div className="w-full bg-base py-0.5 px-1 text-white flex flex-row">
-                        <div className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
-                            <BiPrinter size={12} />
-                            <p className="text-white font-bold text-sm">Cetak</p>
-                        </div>
-                        <div onClick={saveExcel} className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
-                            <AiFillFileExcel size={12} />
-                            <p className="text-white font-bold text-sm">Excel</p>
-                        </div>
-                        <div onClick={fetchData} className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
-                            <BiRefresh size={12} />
-                            <p className="text-white font-bold text-sm">Refresh</p>
-                        </div>
-                        <div onClick={()=>setModalFilter(true)} className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
-                            <BiFilter size={12} />
-                            <p className="text-white font-bold text-sm">Filter</p>
-                        </div>
-                    </div>
-                    <table className="w-full">
-                        <thead>
-                        <tr>
-                            <th className="py-2 bg-gray-100 text-left w-10">#</th>
-                            <th className="py-2 bg-gray-100 text-left">Kode Pallet</th>
-                            <th className="py-2 bg-gray-100 text-left">Customer</th>
-                            <th className="py-2 bg-gray-100 text-left">Vehicle</th>
-                            <th className="py-2 bg-gray-100 text-left">Part</th>
-                            <th className="py-2 bg-gray-100 text-left">Destinasi</th>
-                            <th className="py-2 bg-gray-100 text-left">Keluar</th>
-                            <th className="py-2 bg-gray-100 text-left">Operator Out</th>
-                            <th className="py-2 bg-gray-100 text-left">Masuk</th>
-                            <th className="py-2 bg-gray-100 text-left">Operator In</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {
-                            filters.map((e, index) => (
-                                <tr
-                                    className={`${isMoreThanAWeekAgoAndNoEntry(e['keluar'], e['masuk']) ? 'bg-red-500 text-white' : ''} text-sm font-semibold border-b border-gray-500`}
-                                    key={index}
-                                >
-                                    <td className="text-center p-1.5">{index + 1 + (dataHistory['currentPage'] - 1) * 20}</td>
-                                    <td>{e['id_pallet']}</td>
-                                    <td>{e['Pallet']['Customer']['kode'] + ' - ' + e['Pallet']['Customer']['name']}</td>
-                                    <td>{e['Pallet']['Vehicle']['kode'] + ' - ' + e['Pallet']['Vehicle']['name']}</td>
-                                    <td>{e['Pallet']['Part']['kode'] + ' - ' + e['Pallet']['Part']['name']}</td>
-                                    <td>{e['destination']?? '-'}</td>
-                                    <td>{e['keluar'] ? dayjs(e['keluar']).locale('id').format('DD MMMM YYYY HH:mm') : '-'}</td>
-                                    <td>{e['user_out'] ?? '-'}</td>
-                                    <td>{e['masuk'] ? dayjs(e['masuk']).locale('id').format('DD MMMM YYYY HH:mm') : '-'}</td>
-                                    <td className="px-4">{e['user_in'] ?? '-'}</td>
-                                </tr>
-                            ))
+                <div className="w-full bg-white p-2 flex-grow overflow-hidden">
+                    <Table
+                        loading={
+                            loading && <Spin tip="Loading..." delay={1000}/>
                         }
-                        </tbody>
-                    </table>
-                    <br/>
-                    <PaginationSelect
-                        totalPages={dataHistory['totalPages']}
-                        currentPage={1}
-                        onPageChange={handlePageChange}
-                    />
+                        bordered
+                        scroll={{
+                            y: "68vh",
+                            x: "100vw",
+                        }}
+                        style={{
+                            width: "100%"
+                        }}
+                        rowKey={'index'}
+                        tableLayout={"fixed"}
+                        columns={columns}
+                        dataSource={dataHistory.data}
+                        onChange={onChange}
+                        size={'small'}
+                        pagination={{
+                            total:dataHistory.totalData,
+                            defaultPageSize: 50,
+                            pageSizeOptions: [30, 50, 100],
+                            showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`
+                        }} />
                 </div>
             </div>
         </>

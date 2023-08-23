@@ -6,11 +6,12 @@ module.exports = {
     "./node_modules/@tremor/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    transparent: "transparent",
-    current: "currentColor",
+    // transparent: "transparent",
+    // current: "currentColor",
     extend: {
       colors: {
         // light mode
+        primary: '#0074D9', // Replace with your desired primary color
         'base': '#3da0e3',
         tremor: {
           brand: {

@@ -1,4 +1,4 @@
-import {BiFullscreen} from "react-icons/bi";
+import {BiExitFullscreen, BiFullscreen} from "react-icons/bi";
 import React, {useEffect, useRef, useState} from "react";
 import {showErrorToast} from "@/utils/toast";
 import {Card, Metric, Text} from "@tremor/react";
@@ -10,6 +10,7 @@ import Head from "next/head";
 import {modalState} from "@/context/states";
 import DetailPalletSlow from "@/components/Modal/DetailPalletSlow";
 import axiosInstance from "@/utils/interceptor";
+import {FullScreen, useFullScreenHandle} from "react-full-screen";
 
 export default function DashboardAdmin() {
     const [history, setHistory] = useState([])
@@ -25,7 +26,7 @@ export default function DashboardAdmin() {
     })
     const [dataChart1, setDataChart1] = useState([])
     const [dataChart2, setDataChart2] = useState([])
-    const elemRef = useRef(null);
+    const handle = useFullScreenHandle();
 
 
     useEffect(()=>{
@@ -56,35 +57,6 @@ export default function DashboardAdmin() {
             showErrorToast("Gagal Fetch Data");
         }
     }
-    const enterFullscreen = () => {
-        if (document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {
-            // Saat ini dalam mode fullscreen, keluar dari fullscreen
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.mozCancelFullScreen) {
-                document.mozCancelFullScreen();
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-            } else if (document.msExitFullscreen) {
-                document.msExitFullscreen();
-            }
-        } else {
-            // Tidak dalam mode fullscreen, masuk ke fullscreen
-            const elem = elemRef.current;
-
-            if (elem) {
-                if (elem.requestFullscreen) {
-                    elem.requestFullscreen();
-                } else if (elem.mozRequestFullScreen) {
-                    elem.mozRequestFullScreen();
-                } else if (elem.webkitRequestFullscreen) {
-                    elem.webkitRequestFullscreen();
-                } else if (elem.msRequestFullscreen) {
-                    elem.msRequestFullscreen();
-                }
-            }
-        }
-    };
 
     return(
         <>
@@ -92,7 +64,7 @@ export default function DashboardAdmin() {
                 <title>Dashboard | PT Vuteq Indonesia</title>
             </Head>
             {modal && <DetailPalletSlow selected={selectedCustomer} />}
-            <div className={`bg-white h-full`} ref={elemRef}>
+            <FullScreen handle={handle} className="w-full bg-white p-2 flex-grow overflow-hidden">
                 <div className={`bg-[#2589ce] py-1.5 px-2 text-white flex flex-row justify-between`}>
                     <div className={`flex flex-row justify-between w-full mr-1 items-center`}>
                         <div className={`flex items-center gap-4`}>
@@ -101,13 +73,17 @@ export default function DashboardAdmin() {
                         </div>
                         <h2 className={`font-bold text-[14px]`}>Dasboard Status Pallet</h2>
                     </div>
-                    <div
-                        onClick={enterFullscreen}
+                    {handle.active ? <div
+                        onClick={handle.exit}
+                        className={`flex items-center`}>
+                        <BiExitFullscreen size={20}/>
+                    </div> : <div
+                        onClick={handle.enter}
                         className={`flex items-center`}>
                         <BiFullscreen size={20}/>
-                    </div>
+                    </div>}
                 </div>
-                <div className={`w-full p-5 h-full`}>
+                <div className={`w-full p-5`} style={{ maxHeight: handle.active ? '100vh' : '77vh', overflowY: 'auto' }}>
                     {
                         (cardInfo.totalMendep !== 0) && <div role="alert" className={`mb-3`}>
                             <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 text-2xl">
@@ -231,7 +207,7 @@ export default function DashboardAdmin() {
                         </div>
                     </div>
                 </div>
-            </div>
+            </FullScreen>
         </>
     )
 }
