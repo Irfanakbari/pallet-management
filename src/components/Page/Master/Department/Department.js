@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import {
+    BiEdit,
     BiPlusMedical,
-    BiRefresh,
-    BiSolidUpArrow
+    BiRefresh, BiSave, BiTrash, BiX
 } from 'react-icons/bi';
 import {
     showErrorToast,
@@ -26,15 +26,16 @@ const Department = () => {
     const [editingKey, setEditingKey] = useState('');
     const [confirmLoading, setConfirmLoading] = useState(false);
     const [loading, setLoading] = useState(true)
+    const isEditing = (record) => record.kode === editingKey;
     const {
         register,
         handleSubmit,
         reset
     } = useForm()
 
-    const isEditing = (record) => record.kode === editingKey;
 
     const fetchData = async () => {
+        setLoading(true)
         try {
             const response = await axiosInstance.get('/api/departments');
             setListDepartment(response.data.data);
@@ -42,7 +43,6 @@ const Department = () => {
             showErrorToast('Gagal Fetch Data');
         } finally {
             setLoading(false)
-
         }
     };
 
@@ -57,7 +57,6 @@ const Department = () => {
         } catch (error) {
             showErrorToast('Gagal Simpan Data');
         } finally {
-            form.resetFields();
             await fetchData();
             setModalAdd(false);
         }
@@ -74,10 +73,6 @@ const Department = () => {
             setConfirmLoading(false);
             await fetchData();
         }
-    };
-
-    const onChange = (pagination, filters, sorter, extra) => {
-        console.log('params', pagination, filters, sorter, extra);
     };
 
     const edit = (record) => {
@@ -141,53 +136,40 @@ const Department = () => {
             dataIndex: 'operation',
             render: (_, record) => {
                 const editable = isEditing(record);
+
                 return (
                     <span>
-                    {editable ? (
-                        <span>
-                            <button
-                                onClick={() => save(record.kode)}
-                                style={{
-                                    marginRight: 8
-                                }}
-                            >
-                                Save
+                {editable ? (
+                    <span>
+                        <button onClick={() => save(record.kode)} style={{ marginRight: 8 }}>
+                            <BiSave size={22} color="green" />
+                        </button>
+                        <button onClick={cancel} style={{ marginRight: 8 }}>
+                            <BiX size={22} color="red" />
+                        </button>
+                    </span>
+                ) : (
+                    <span className="flex">
+                        <button
+                            disabled={editingKey !== ''}
+                            onClick={() => edit(record)}
+                            style={{ marginRight: 8 }}
+                        >
+                            <BiEdit size={22} color="orange" />
+                        </button>
+                        <Popconfirm
+                            title="Apakah Anda yakin ingin menghapus?"
+                            onConfirm={() => deleteData(record.kode)}
+                            okType="primary"
+                            okButtonProps={{ loading: confirmLoading }}
+                        >
+                            <button>
+                                <BiTrash size={22} color="red" />
                             </button>
-                            <button
-                                onClick={cancel}
-                                style={{
-                                    marginRight: 8
-                                }}
-                            >
-                                Cancel
-                            </button>
-                        </span>
-                    ) : (
-                        <span>
-                            <button
-                                disabled={editingKey !== ''}
-                                onClick={() => edit(record)}
-                                style={{
-                                    marginRight: 8
-                                }}
-                            >
-                                Edit
-                            </button>
-                            <Popconfirm
-                                title="Apakah Anda yakin ingin menghapus?"
-                                onConfirm={() => deleteData(record.kode)}
-                                okType={'primary'}
-                                okButtonProps={{
-                                    loading: confirmLoading,
-                                }}
-                            >
-                                <button>
-                                    Hapus
-                                </button>
-                            </Popconfirm>
-                        </span>
-                    )}
-                </span>
+                        </Popconfirm>
+                    </span>
+                )}
+            </span>
                 );
             }
         }
@@ -250,7 +232,7 @@ const Department = () => {
                             }}
                             style={{
                                 width: "100%"
-                            }} rowKey={'kode'} columns={mergedColumns} dataSource={listDepartment} onChange={onChange} size={'small'} rowClassName="editable-row"
+                            }} rowKey={'kode'} columns={mergedColumns} dataSource={listDepartment} size={'small'} rowClassName="editable-row"
                             pagination={false} />
                     </Form>
                 </div>

@@ -38,10 +38,10 @@ async function handler(req, res) {
                         '$Vehicle.kode$': vehicle,
                     };
                 }
-                if (Array.isArray(part)) {
+                if (part) {
                     whereClause = {
                         ...whereClause,
-                        '$Part.kode$': { [Op.in]: part },
+                        '$Part.kode$': part,
                     };
                 }
                 if (search) {
@@ -119,60 +119,42 @@ async function handler(req, res) {
 
                 // Dapatkan daftar valet berdasarkan kode_project untuk mencari urutan kosong
                 let pallets;
+                let existingCodes = [];
+
                 if (vehicles.department !== 'A') {
                     pallets = await Pallet.findAll({ where: { kode: { [Op.like]: `${jenis}-${parts.customer}${parts.vehicle}${part}%` } } });
                 } else {
                     pallets = await Pallet.findAll({ where: { kode: { [Op.like]: `${parts.customer}${parts.vehicle}${part}%` } } });
                 }
 
-                let nextId;
-                let palletKode;
-                if (pallets.length > 0) {
-                    const palletNumbers = pallets.map(palet => {
-                        const palletId = palet['kode'];
-                        let numberString;
-                        if (vehicles.department !== 'A') {
-                            numberString = palletId.slice(jenis.length+1+parts.customer.length + parts.vehicle.length + part.length);
-                        } else {
-                            numberString= palletId.slice(parts.customer.length + parts.vehicle.length + part.length);
-                        }
-                        return parseInt(numberString);
-                    });
+                // Mendapatkan semua kode yang sudah ada
+                existingCodes = pallets.map(pallet => pallet.kode);
 
-                    for (let i = 1; i <= pallets.length + 1; i++) {
-                        if (!palletNumbers.includes(i)) {
-                            nextId = i;
-                            break;
-                        }
+                const palletsToCreate = [];
+                let nextId = 1;
+
+                for (let i = 0; i < parseInt(total); i++) {
+                    // Mencari slot kosong dalam urutan kode
+                    while (existingCodes.includes(`${vehicles.department !== 'A' ? `${jenis}-${parts.customer}${parts.vehicle}${part}` : `${parts.customer}${parts.vehicle}${part}`}${nextId.toString().padStart(3, '0')}`)) {
+                        nextId++;
                     }
 
-                    // Jika tidak ada urutan kosong, gunakan urutan terakhir + 1
-                    if (!nextId) {
-                        const lastNumber = Math.max(...palletNumbers);
-                        nextId = lastNumber + 1;
-                    }
-                } else {
-                    // Jika tidak ada valet sebelumnya, gunakan urutan awal yaitu 1
-                    nextId = 1;
-                }
+                    const nextIdFormatted = nextId.toString().padStart(3, '0');
+                    const palletKode = vehicles.department !== 'A'
+                        ? `${jenis}-${parts.customer}${parts.vehicle}${part}${nextIdFormatted}`
+                        : `${parts.customer}${parts.vehicle}${part}${nextIdFormatted}`;
 
-                for (let i = 0; i < total; i++) {
-                    const nextIdFormatted = (nextId + i).toString().padStart(3, '0');
-                    if (vehicles.department !== 'A') {
-                        palletKode = jenis + '-'+ parts.customer + parts.vehicle + part + nextIdFormatted;
-                    } else {
-                        palletKode = parts.customer + parts.vehicle + part + nextIdFormatted;
-                    }
-
-                    await Pallet.create({
+                    palletsToCreate.push({
                         kode: palletKode,
                         name,
                         vehicle: parts.vehicle,
                         part: part,
                         customer: parts.customer
                     });
-                }
 
+                    nextId++;
+                }
+                await Pallet.bulkCreate(palletsToCreate);
                 res.status(200).json({ success: true });
 
             } catch (e) {

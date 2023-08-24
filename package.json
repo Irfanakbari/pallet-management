@@ -1,6 +1,6 @@
 {
   "name": "valet-management",
-  "version": "2.5.1",
+  "version": "2.7.4",
   "private": true,
   "scripts": {
     "dev": "next dev",

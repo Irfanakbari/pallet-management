@@ -145,6 +145,7 @@ async function handler(req, res) {
                             },
                         ],
                         limit,
+                        order: [['keluar', 'DESC']],
                         offset: offset,
                     });
                 } else if (req.user.role === 'admin' || req.user.role === 'viewer') {
@@ -186,6 +187,7 @@ async function handler(req, res) {
                     ok: true,
                     data: histories.rows,
                     totalData,
+                    limit,
                     currentPage: parseInt(page),
                 });
             } catch (e) {

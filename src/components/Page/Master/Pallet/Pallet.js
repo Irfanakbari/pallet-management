@@ -37,8 +37,18 @@ export default function Pallet() {
     const [loading,setLoading] = useState(true)
     const isEditing = (record) => record.kode === editingKey;
     const [selected, setSelected] = useState([]);
-    const searchInput = useRef(null);
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const componentRef = useRef();
+    const [filterParams, setFilterParams] = useState({
+        search: '',
+        customer: '',
+        vehicle: '',
+        part: '',
+    });
+    const [pagination, setPagination] = useState({
+        current: 1,
+        pageSize: 30,
+    });
     const handlePrint = useReactToPrint({
         content: () => componentRef.current,
     });
@@ -47,14 +57,8 @@ export default function Pallet() {
         handleSubmit,
         reset
     } = useForm()
-    const handleSearch = (selectedKeys, confirm) => {
-        confirm();
-    };
-    const handleReset = (clearFilters) => {
-        clearFilters();
-    };
     const getColumnSearchProps = (dataIndex) => ({
-        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, close }) => (
             <div
                 style={{
                     padding: 8,
@@ -62,11 +66,10 @@ export default function Pallet() {
                 onKeyDown={(e) => e.stopPropagation()}
             >
                 <Input
-                    ref={searchInput}
                     placeholder={`Search ${dataIndex}`}
                     value={selectedKeys[0]}
                     onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-                    onPressEnter={() => handleSearch(selectedKeys, confirm)}
+                    onPressEnter={()=>confirm}
                     style={{
                         marginBottom: 8,
                         display: 'block',
@@ -74,42 +77,27 @@ export default function Pallet() {
                 />
                 <Space>
                     <Button
+                        type={'primary'}
                         size="small"
                         style={{
                             width: 90,
                         }}
-                        onClick={() => handleSearch(selectedKeys, confirm)}
+                        onClick={() => confirm({
+                            closeDropdown: false,
+                        })}
                     >
                         Search
                     </Button>
                     <Button
-                        onClick={() => clearFilters && handleReset(clearFilters)}
-                        size="small"
                         style={{
                             width: 90,
                         }}
-                    >
-                        Reset
-                    </Button>
-                    <Button
-                        type="link"
-                        size="small"
-                        onClick={() => {
-                            confirm({
-                                closeDropdown: false,
-                            });
-                        }}
-                    >
-                        Filter
-                    </Button>
-                    <Button
-                        type="link"
                         size="small"
                         onClick={() => {
                             close();
                         }}
                     >
-                        close
+                        Close
                     </Button>
                 </Space>
             </div>
@@ -123,11 +111,6 @@ export default function Pallet() {
         ),
         onFilter: (value, record) =>
             record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-        onFilterDropdownOpenChange: (visible) => {
-            if (visible) {
-                setTimeout(() => searchInput.current?.select(), 100);
-            }
-        },
     });
 
     useEffect(() => {
@@ -136,7 +119,10 @@ export default function Pallet() {
     }, [])
 
     const fetchData = () => {
-        axiosInstance.get(`/api/pallets?page=1&limit=50`).then(response=>{
+        const { current, pageSize } = pagination;
+        const { search, customer, vehicle, part } = filterParams;
+        const url = `/api/pallets?page=${current}&limit=${pageSize}&search=${search}&customer=${customer}&vehicle=${vehicle}&part=${part}`;
+        axiosInstance.get(url).then(response=>{
            setPallet(response.data);
        }).catch(()=>{
            showErrorToast("Gagal Fetch Data")
@@ -227,12 +213,19 @@ export default function Pallet() {
         await excel.download(data)
     }
 
-    const onChange = (pagination, filters, sorter, extra) => {
+    const onChange = (pagination, filters) => {
         setLoading(true)
         const searchParam = (filters?.kode && filters?.kode[0]) || '';
         const customerParam = (filters?.customer && filters?.customer[0]) || '';
         const vehicleParam = (filters?.vehicle && filters?.vehicle[0]) || '';
         const partParam = (filters?.part && filters?.part[0]) || '';
+        setPagination(pagination)
+        setFilterParams({
+            customer: customerParam,
+            vehicle: vehicleParam,
+            part: partParam,
+            search: searchParam
+        })
         const url = `/api/pallets?search=${searchParam}&customer=${customerParam || ''}&vehicle=${vehicleParam || ''}&part=${partParam || ''}&page=${pagination.current}&limit=${pagination.pageSize}`;
         axiosInstance.get(url)
             .then(response => {
@@ -249,6 +242,7 @@ export default function Pallet() {
 
     const handleRowSelection = (selectedRowKeys, selectedRows) => {
         setSelected(selectedRows);
+        setSelectedRowKeys(selectedRowKeys);
     };
 
     const edit = (record) => {
@@ -295,29 +289,30 @@ export default function Pallet() {
         {
             title: '#',
             dataIndex: 'index',
-            width: '5%',
+            width: 50,
+            fixed:'left',
             render: (_, __, index) => (listPallet.currentPage - 1) * listPallet.limit + index + 1
         },
         {
             title: 'Kode Pallet',
             dataIndex: 'kode',
             sorter: (a, b) => a.kode.localeCompare(b.kode),
-            // width: '30%'
+            width: 200,
+            fixed:'left',
             ...getColumnSearchProps('kode'),
 
         },
         {
             title: 'Nama Pallet',
             dataIndex: 'name',
-            // width: '40%',
+            width: 350,
             editable: true,
         },
         {
             title: 'Customer',
             dataIndex: 'customer',
-            // width: '40%',
+            width: 350,
             sorter: (a, b) => a.customer.localeCompare(b.customer),
-            // editable: true,
             filters: listCustomer.map(e=>(
                 {
                     text: e.name,
@@ -325,16 +320,14 @@ export default function Pallet() {
                 }
             )),
             filterMultiple: false,
-
             onFilter: (value, record) => record.customer.indexOf(value) === 0,
             render: (_, record) => record.customer + " - " + record['Customer'].name
         },
         {
             title: 'Vehicle',
             dataIndex: 'vehicle',
-            // width: '40%',
+            width: 350,
             sorter: (a, b) => a.vehicle.localeCompare(b.vehicle),
-            // editable: true,
             filterMultiple: false,
             filters: listVehicle.map(e=>(
                 {
@@ -348,9 +341,8 @@ export default function Pallet() {
         {
             title: 'Part',
             dataIndex: 'part',
-            // width: '40%',
+            width: 450,
             sorter: (a, b) => a.part.localeCompare(b.part),
-            // editable: true,
             filterMultiple: false,
             filters: listPart.map(e=>(
                 {
@@ -364,7 +356,7 @@ export default function Pallet() {
         {
             title: 'Department',
             dataIndex: 'department',
-            // width: '40%',
+            width: 300,
             filterMultiple: false,
             sorter: (a, b) => a['Vehicle'].department.localeCompare(b['Vehicle'].department),
             filters: listDepartment.map(e=>(
@@ -374,88 +366,73 @@ export default function Pallet() {
                 }
             )),
             onFilter: (value, record) => record['Vehicle'].department.indexOf(value) === 0,
-            // editable: true
             render: (_, record) => "Produksi " + record['Vehicle'].department
         },
         {
             title: 'Aksi',
             dataIndex: 'operation',
+            width: 400,
             render: (_, record) => {
                 const editable = isEditing(record);
+
                 return (
                     <span>
-        {editable ? (
-            <span>
-            <button
-                onClick={() => save(record.kode)}
-                style={{
-                    marginRight: 8
-                }}
-            >
-              <BiSave size={16} color="green" />
-            </button>
-            <button
-                onClick={cancel}
-                style={{
-                    marginRight: 8
-                }}
-            >
-              <BiX size={16} color="red" />
-            </button>
-          </span>
-        ) : (
-            <span>
-            <button
-                disabled={editingKey !== ''}
-                onClick={() => edit(record)}
-                style={{
-                    marginRight: 8
-                }}
-            >
-              <BiEdit size={16} color="orange" />
-            </button>
-                <Popover content={()=>(
-                    <center>
-                        <QRCode value={record.kode} bordered={false} />
-                        <span>{record.kode}</span>
-                    </center>
-                )}>
-                    <span style={{
-                        marginRight: 8
-                    }}>
-                        <BiQr size={16} color="green" />
+                {editable ? (
+                    <span>
+                        <button onClick={() => save(record.kode)} style={{ marginRight: 8 }}>
+                            <BiSave size={22} color="green" />
+                        </button>
+                        <button onClick={cancel} style={{ marginRight: 8 }}>
+                            <BiX size={22} color="red" />
+                        </button>
                     </span>
-                </Popover>
-                 <button
-                     onClick={handlePrint}
-                     style={{
-                         marginRight: 8
-                     }}
-                 >
-              <BiPrinter size={16} color="blue" />
-            </button>
-                <div style={{ display: 'none' }}>
-                    <LabelComponent ref={componentRef} {...record} />
-                </div>
-            <Popconfirm
-                title="Apakah Anda yakin ingin menghapus?"
-                onConfirm={() => deleteData(record.kode)}
-                okType={'primary'}
-                okButtonProps={{
-                    loading: confirmLoading,
-                }}
-            >
-              <button>
-                <BiTrash size={16} color="red" />
-              </button>
-            </Popconfirm>
-          </span>
-        )}
-      </span>
+                ) : (
+                    <span className="flex">
+                        <Popover
+                            content={() => (
+                                <center>
+                                    <QRCode size={200} value={record.kode} bordered={false} />
+                                    <span>{record.kode}</span>
+                                </center>
+                            )}
+                        >
+                            <span style={{ marginRight: 8 }}>
+                                <BiQr size={22} color="green" />
+                            </span>
+                        </Popover>
+                        <button onClick={handlePrint} style={{ marginRight: 8 }}>
+                            <BiPrinter size={22} color="blue" />
+                        </button>
+                        <div style={{ display: 'none' }}>
+                            <LabelComponent ref={componentRef} {...record} />
+                        </div>
+                        {
+                            user.role !== 'viewer' && <div>
+                                <Popconfirm
+                                    title="Apakah Anda yakin ingin menghapus?"
+                                    onConfirm={() => deleteData(record.kode)}
+                                    okType="primary"
+                                    okButtonProps={{ loading: confirmLoading }}
+                                >
+                                    <button>
+                                        <BiTrash size={22} color="red" />
+                                    </button>
+                                </Popconfirm>
+                                <button
+                                    disabled={editingKey !== ''}
+                                    onClick={() => edit(record)}
+                                    style={{ marginRight: 8 }}
+                                >
+                                    <BiEdit size={22} color="orange" />
+                                </button>
+                            </div>
+                        }
+                    </span>
+                )}
+            </span>
                 );
             }
         }
-
     ];
 
     const mergedColumns = columns.map((col) => {
@@ -474,18 +451,28 @@ export default function Pallet() {
         };
     });
 
-    const handleMultiDelete = () => {
-        Promise.all(selected.map(itemId => axiosInstance.delete(`/api/pallets/${itemId.kode}`)))
-            .then(() => {
-                showSuccessToast("Sukses Hapus Data");
-            })
-            .catch(() => {
-                showErrorToast("Gagal Hapus Data");
-            })
-            .finally(() => {
-                setSelected([]);
-                fetchData()
+    const handleMultiDelete = async () => {
+        setLoading(true)
+        try {
+            const palletsToDelete = selected.map(item => item.kode); // Array of pallet codes to delete
+
+            const response = await axiosInstance.post('/api/pallets/batch-delete', {
+                palletsToDelete
             });
+
+            if (response.data.success) {
+                showSuccessToast('Sukses Hapus Data');
+            } else {
+                showErrorToast('Gagal Hapus Data');
+            }
+        } catch (error) {
+            showErrorToast('Gagal Hapus Data, Server Error');
+        } finally {
+            setSelected([]); // Clear selected items
+            setSelectedRowKeys([])
+            fetchData(); // Refresh or update the data after successful deletion
+            setModalDelete2(false)
+        }
     };
 
     return (
@@ -521,7 +508,7 @@ export default function Pallet() {
                         <BiRefresh size={12} />
                         <p className={`text-white font-bold text-sm`}>Refresh</p>
                     </div>
-                    {user.role !== 'super' && user.role !== 'admin' ? null : (
+                    {user.role !== 'super' && user.role !== 'admin' ? null : (selected.length>0)&& (
                         <div
                             onClick={()=>setModalDelete2(true)}
                             className={`flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer`}>
@@ -529,7 +516,9 @@ export default function Pallet() {
                             <p className={`text-white font-bold text-sm`}>Hapus Massal</p>
                         </div>
                     )}
-                    <PrintAll data={selected??[]} />
+                    {
+                        selected.length>0 && <PrintAll data={selected??[]} />
+                    }
                 </div>
                 <div className={`w-full bg-white p-2 flex-grow overflow-hidden`}>
                     <Form form={form} component={false}>
@@ -539,7 +528,8 @@ export default function Pallet() {
                             }
                             bordered
                             rowSelection={{
-                                checkStrictly:true,
+                                // checkStrictly:true,
+                                selectedRowKeys,
                                 onChange: handleRowSelection,
                                 preserveSelectedRowKeys: true
                             }}
@@ -550,6 +540,7 @@ export default function Pallet() {
                             }}
                             scroll={{
                                 y: "68vh",
+                                x: "100vw",
                             }}
                             style={{
                                 width: "100%"
@@ -558,10 +549,11 @@ export default function Pallet() {
                             columns={mergedColumns}
                             dataSource={listPallet.data}
                             onChange={onChange}
-                            size={'small'} rowClassName="editable-row"
+                            size={'small'}
+                            rowClassName="editable-row"
                             pagination={{
                                 total:listPallet.totalData,
-                                defaultPageSize: 50,
+                                defaultPageSize: 30,
                                 pageSizeOptions: [30, 50, 100],
                                 showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`
                             }} />

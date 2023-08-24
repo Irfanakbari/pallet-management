@@ -1,4 +1,4 @@
-import {BiPrinter, BiRefresh} from "react-icons/bi";
+import {BiRefresh} from "react-icons/bi";
 import {AiFillFileExcel} from "react-icons/ai";
 import React, {useEffect, useState} from "react";
 import dayjs from "dayjs";
@@ -9,6 +9,7 @@ import Head from "next/head";
 import axiosInstance from "@/utils/interceptor";
 import {Button, DatePicker, Input, Space, Spin, Table} from "antd";
 import {CalendarOutlined, SearchOutlined} from "@ant-design/icons";
+import PrintAll from "@/components/Page/Laporan/LapRiwayat/Print";
 
 export default function LapRiwayat() {
     const [dataHistory, setDataHistory] = useState([]);
@@ -192,7 +193,6 @@ export default function LapRiwayat() {
         const parsedMasukStart = dayjs(masukStart);
         const parsedMasukEnd = dayjs(masukEnd);
 
-// Check if the parsed dates are valid before formatting
         const formattedKeluarStart = parsedKeluarStart.isValid() ? parsedKeluarStart.format('YYYY-MM-DD') : '';
         const formattedKeluarEnd = parsedKeluarEnd.isValid() ? parsedKeluarEnd.format('YYYY-MM-DD') : '';
         const formattedMasukStart = parsedMasukStart.isValid() ? parsedMasukStart.format('YYYY-MM-DD') : '';
@@ -218,15 +218,67 @@ export default function LapRiwayat() {
             dataIndex: 'index',
             width: 100,
             fixed:'left',
-            render: (_, __, index) => index + 1
+            render: (_, __, index) => (dataHistory.currentPage - 1) * dataHistory.limit + index + 1
         },
         {
             title: 'Kode Pallet',
             dataIndex: 'id_pallet',
-            ellipsis: true,
             fixed:'left',
             width: 200,
-
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, close }) => (
+                <div
+                    style={{
+                        padding: 8,
+                    }}
+                    onKeyDown={(e) => e.stopPropagation()}
+                >
+                    <Input
+                        placeholder={`Search Kode`}
+                        value={selectedKeys[0]}
+                        onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm}
+                        style={{
+                            marginBottom: 8,
+                            display: 'block',
+                        }}
+                    />
+                    <Space>
+                        <Button
+                            type={'primary'}
+                            size="small"
+                            style={{
+                                width: 90,
+                            }}
+                            onClick={() => {
+                                confirm({
+                                    closeDropdown: false,
+                                });
+                            }}                        >
+                            Search
+                        </Button>
+                        <Button
+                            style={{
+                                width: 90,
+                            }}
+                            size="small"
+                            onClick={() => {
+                                close();
+                            }}
+                        >
+                            Close
+                        </Button>
+                    </Space>
+                </div>
+            ),
+            filterIcon: (filtered) => (
+                <SearchOutlined
+                    style={{
+                        color: filtered ? '#1890ff' : undefined,
+                    }}
+                />
+            ),
+            onFilter: (value, record) =>
+                record['id_pallet'].toString().toLowerCase().includes(value.toLowerCase()),
             sorter: (a, b) => a.id_pallet.localeCompare(b.id_pallet),
         },
         {
@@ -241,16 +293,14 @@ export default function LapRiwayat() {
             )),
             width: 400,
             filterMultiple: false,
-            ellipsis: true,
-            onFilter: (value, record) => record['Pallet'].customer.indexOf(value) === 0,
-            render: (_, record) => record['Pallet']['Customer']['kode'] + ' - ' + record['Pallet']['Customer']['name']
+            onFilter: (value, record) => record['Pallet']?.customer.indexOf(value) === 0,
+            render: (_, record) => record['Pallet']?.['Customer']['kode'] + ' - ' + record['Pallet']?.['Customer']['name']
         },
         {
             title: 'Vehicle',
             dataIndex: 'vehicle',
             sorter: (a, b) => a.vehicle.localeCompare(b.vehicle),
             filterMultiple: false,
-            ellipsis: true,
             filters: listVehicle.map(e=>(
                 {
                     text: e.name,
@@ -258,13 +308,12 @@ export default function LapRiwayat() {
                 }
             )),
             width: 400,
-            onFilter: (value, record) => record['Pallet'].vehicle.indexOf(value) === 0,
-            render: (_, record) => record['Pallet']['Vehicle']['kode'] + ' - ' + record['Pallet']['Vehicle']['name']
+            onFilter: (value, record) => record['Pallet']?.vehicle.indexOf(value) === 0,
+            render: (_, record) => record['Pallet']?.['Vehicle']['kode'] + ' - ' + record['Pallet']?.['Vehicle']['name']
         },
         {
             title: 'Part',
             dataIndex: 'part',
-            ellipsis: true,
             sorter: (a, b) => a.part.localeCompare(b.part),
             filterMultiple: false,
             width: 700,
@@ -274,13 +323,12 @@ export default function LapRiwayat() {
                     value: e.kode
                 }
             )),
-            onFilter: (value, record) => record['Pallet'].part.indexOf(value) === 0,
-            render: (_, record) => record['Pallet']['Part']['kode'] + ' - ' + record['Pallet']['Part']['name']
+            onFilter: (value, record) => record['Pallet']?.part.indexOf(value) === 0,
+            render: (_, record) => record['Pallet']?.['Part']['kode'] + ' - ' + record['Pallet']?.['Part']['name']
         },
         {
             title: 'Destinasi',
             dataIndex: 'destination',
-            ellipsis: true,
             width: 300,
             sorter: (a, b) => a.destination.localeCompare(b.destination),
             render: (_, record) => record.destination ?? '-'
@@ -288,18 +336,15 @@ export default function LapRiwayat() {
         {
             title: 'Keluar',
             dataIndex: 'keluar',
-            ellipsis: true,
             width: 400,
             sorter: (a, b) => {
                 // Convert the 'keluar' values to Date objects for comparison
                 const dateA = a['keluar'] ? new Date(a['keluar']) : null;
                 const dateB = b['keluar'] ? new Date(b['keluar']) : null;
-
                 // Handle cases when one of the dates is null
                 if (!dateA && dateB) return -1;
                 if (dateA && !dateB) return 1;
                 if (!dateA && !dateB) return 0;
-
                 // Compare the dates
                 return dateA.getTime() - dateB.getTime();
             },
@@ -372,7 +417,6 @@ export default function LapRiwayat() {
         {
             title: 'Operator Out',
             dataIndex: 'user_out',
-            ellipsis: true,
             width: 200,
             sorter: (a, b) => a.user_out.localeCompare(b.user_out),
             render: (_, record) => record['user_out'] ?? '-'
@@ -380,18 +424,15 @@ export default function LapRiwayat() {
         {
             title: 'Masuk',
             dataIndex: 'masuk',
-            ellipsis: true,
             width: 400,
             sorter: (a, b) => {
                 // Convert the 'keluar' values to Date objects for comparison
                 const dateA = a['masuk'] ? new Date(a['masuk']) : null;
                 const dateB = b['masuk'] ? new Date(b['masuk']) : null;
-
                 // Handle cases when one of the dates is null
                 if (!dateA && dateB) return -1;
                 if (dateA && !dateB) return 1;
                 if (!dateA && !dateB) return 0;
-
                 // Compare the dates
                 return dateA.getTime() - dateB.getTime();
             },
@@ -464,7 +505,6 @@ export default function LapRiwayat() {
         {
             title: 'Operator In',
             dataIndex: 'user_in',
-            ellipsis: true,
             width: 200,
             sorter: (a, b) => a.user_in.localeCompare(b.user_in),
             render: (_, record) => record['user_in'] ?? '-'
@@ -478,10 +518,7 @@ export default function LapRiwayat() {
             </Head>
             <div className={`bg-white h-full flex flex-col`}>
                 <div className="w-full bg-base py-0.5 px-1 text-white flex flex-row">
-                    <div className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
-                        <BiPrinter size={12} />
-                        <p className="text-white font-bold text-sm">Cetak</p>
-                    </div>
+                    <PrintAll data={dataHistory} />
                     <div onClick={saveExcel} className="flex-row flex items-center gap-1 px-3 py-1 hover:bg-[#2589ce] hover:cursor-pointer">
                         <AiFillFileExcel size={12} />
                         <p className="text-white font-bold text-sm">Excel</p>
@@ -504,7 +541,7 @@ export default function LapRiwayat() {
                         style={{
                             width: "100%"
                         }}
-                        rowKey={'index'}
+                        rowKey={'id'}
                         tableLayout={"fixed"}
                         columns={columns}
                         dataSource={dataHistory.data}
@@ -512,7 +549,7 @@ export default function LapRiwayat() {
                         size={'small'}
                         pagination={{
                             total:dataHistory.totalData,
-                            defaultPageSize: 50,
+                            defaultPageSize: 30,
                             pageSizeOptions: [30, 50, 100],
                             showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`
                         }} />

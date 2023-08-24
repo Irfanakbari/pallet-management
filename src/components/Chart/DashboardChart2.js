@@ -1,10 +1,10 @@
 import {BarChart, Card, Title} from "@tremor/react";
 
-export default function Chart2({data}) {
+export default function Chart2({data, }) {
     return (<Card className={``}>
         <Title>Diagram Per Customer</Title>
         <BarChart
-            className="mt-2"
+            className={`mt-2 dark`}
             data={data}
             index="customer"
             layout={'horizontal'}

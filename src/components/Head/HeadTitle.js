@@ -6,9 +6,9 @@ import { useRouter } from "next/router";
 import ConfirmLogoutModal from "@/components/Modal/ConfirmLogoutModal";
 import Image from "next/image";
 import { showErrorToast, showSuccessToast } from "@/utils/toast";
+import {Dropdown} from "antd";
 
 export default function HeadTitle({ user }) {
-    const [dropdownUser, setDropdownUser] = useState(false);
     const [closeModal, setCloseModal] = useState(false);
     const router = useRouter();
 
@@ -37,26 +37,28 @@ export default function HeadTitle({ user }) {
                     <Image src="/logos.png" alt="Logo" width={90} height={80} />
                     <h2 className="font-bold text-[14px]">PT VUTEQ INDONESIA</h2>
                 </div>
-                {/* Dropdown pengguna */}
-                <div
-                    className="hover:cursor-pointer"
-                    onMouseEnter={() => setDropdownUser(true)}
-                    onMouseLeave={() => setDropdownUser(false)}
-                >
-                    <div className="flex flex-row items-center">
-                        <FaUserAlt size={10} />
-                        <h2 className="font-bold text-[14px] mx-2">
-                            Halo, {user.username ?? "-"}
-                        </h2>
-                        <BiSolidDownArrow size={10} />
-                    </div>
-                    {/* Tampilkan dropdown saat dihover */}
-                    {
-                        dropdownUser &&
-                        <div className="px-8 py-2 bg-white shadow-2xl text-black text-sm shadow-gray-500 absolute flex flex-col gap-2">
-                            <span onClick={() => setCloseModal(true)}>Logout</span>
+                <div className={`hover:cursor-pointer`}>
+                    <Dropdown
+                        menu={{
+                            items:[
+                                {
+                                    key:'Logout',
+                                    label:'Logout',
+                                    onClick: () => setCloseModal(true)
+                                }
+                            ]
+                            // onClick: (d)=>setNewTab(d.key)
+                        }}
+                        placement="bottom"
+                    >
+                        <div className="flex flex-row items-center">
+                            <FaUserAlt size={10} />
+                            <h2 className="font-bold text-[14px] mx-2">
+                                Halo, {user.username ?? "-"}
+                            </h2>
+                            <BiSolidDownArrow size={10} />
                         </div>
-                    }
+                    </Dropdown>
                 </div>
             </div>
         </>

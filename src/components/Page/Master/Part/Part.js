@@ -1,4 +1,4 @@
-import {BiPlusMedical, BiRefresh} from "react-icons/bi";
+import {BiEdit, BiPlusMedical, BiRefresh, BiSave, BiTrash, BiX} from "react-icons/bi";
 import React, {useEffect, useState} from "react";
 import {showErrorToast, showSuccessToast} from "@/utils/toast";
 import {dataState, modalState} from "@/context/states";
@@ -160,53 +160,40 @@ export default function Part() {
             dataIndex: 'operation',
             render: (_, record) => {
                 const editable = isEditing(record);
+
                 return (
                     <span>
-                    {editable ? (
-                        <span>
-                            <button
-                                onClick={() => save(record.kode)}
-                                style={{
-                                    marginRight: 8
-                                }}
-                            >
-                                Save
+                {editable ? (
+                    <span>
+                        <button onClick={() => save(record.kode)} style={{ marginRight: 8 }}>
+                            <BiSave size={22} color="green" />
+                        </button>
+                        <button onClick={cancel} style={{ marginRight: 8 }}>
+                            <BiX size={22} color="red" />
+                        </button>
+                    </span>
+                ) : (
+                    <span className="flex">
+                        <button
+                            disabled={editingKey !== ''}
+                            onClick={() => edit(record)}
+                            style={{ marginRight: 8 }}
+                        >
+                            <BiEdit size={22} color="orange" />
+                        </button>
+                        <Popconfirm
+                            title="Apakah Anda yakin ingin menghapus?"
+                            onConfirm={() => deleteData(record.kode)}
+                            okType="primary"
+                            okButtonProps={{ loading: confirmLoading }}
+                        >
+                            <button>
+                                <BiTrash size={22} color="red" />
                             </button>
-                            <button
-                                onClick={cancel}
-                                style={{
-                                    marginRight: 8
-                                }}
-                            >
-                                Cancel
-                            </button>
-                        </span>
-                    ) : (
-                        <span>
-                            <button
-                                disabled={editingKey !== ''}
-                                onClick={() => edit(record)}
-                                style={{
-                                    marginRight: 8
-                                }}
-                            >
-                                Edit
-                            </button>
-                            <Popconfirm
-                                title="Apakah Anda yakin ingin menghapus?"
-                                onConfirm={() => deleteData(record.kode)}
-                                okType={'primary'}
-                                okButtonProps={{
-                                    loading: confirmLoading,
-                                }}
-                            >
-                                <button>
-                                    Hapus
-                                </button>
-                            </Popconfirm>
-                        </span>
-                    )}
-                </span>
+                        </Popconfirm>
+                    </span>
+                )}
+            </span>
                 );
             }
         }

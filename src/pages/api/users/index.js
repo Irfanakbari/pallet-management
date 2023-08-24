@@ -14,10 +14,27 @@ async function handler(req, res) {
                 });
             }
             try {
-                const users = await User.findAll()
+                const users = await User.findAll({
+                    attributes: {
+                        exclude: ['password']
+                    },
+                    include: [
+                        {
+                            model: DepartmentUser,
+                            attributes: ['department_id'], // Include only the 'kode' attribute
+                        }
+                    ]
+                })
+                const transformedUsers = users.map(user => {
+                    const departmentCodes = user.DepartmentUsers.map(departmentUser => departmentUser.department_id);
+                    return {
+                        ...user.toJSON(),
+                        DepartmentUsers: departmentCodes
+                    };
+                });
                 res.status(200).json({
                     ok : true,
-                    data : users
+                    data : transformedUsers
                 })
             } catch (e) {
                 logger.error(e.message);

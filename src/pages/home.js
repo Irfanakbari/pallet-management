@@ -5,14 +5,14 @@ import { getCookie } from "cookies-next";
 import { useRouter } from "next/router";
 import { dataState, useStoreTab } from "@/context/states";
 import { showErrorToast, showSuccessToast } from "@/utils/toast";
-import { laporan, master } from "@/utils/constants";
+import {laporan, master, master2} from "@/utils/constants";
 import HeadTitle from "@/components/Head/HeadTitle";
 import Customer from "@/components/Page/Master/Customer/Customer";
 import Dashboard from "@/components/Page/Dashboard";
 import Pallet from "@/components/Page/Master/Pallet/Pallet";
 import LapRiwayat from "@/components/Page/Laporan/LapRiwayat/LapRiwayat";
 import LapMaintenance from "@/components/Page/Laporan/LapMaintenance/LapMaintenance";
-import User from "@/components/Page/Master/User";
+import User from "@/components/Page/Master/User/User";
 import Vehicle from "@/components/Page/Master/Vehicle/Vehicle";
 import Part from "@/components/Page/Master/Part/Part";
 import MainMenu from "@/components/MainMenu/MainMenu";
@@ -21,6 +21,7 @@ import DashboardAdmin from "@/components/Page/DashboardAdmin";
 import LapStok from "@/components/Page/Laporan/LapStok/LapStok";
 import axiosInstance from "@/utils/interceptor";
 import Destination from "@/components/Page/Master/Destination/Destination";
+import {Result} from "antd";
 
 export default function Home() {
     const { listTab, setCloseTab, activeMenu, setActiveMenu } = useStoreTab();
@@ -31,25 +32,13 @@ export default function Home() {
         getCurrentUser();
         fetchData();
     }, []);
-
-    const logoutHandle = async (e) => {
-        e.preventDefault();
-        try {
-            await axios.get('/api/auth/logout');
-            showSuccessToast('Logout Berhasil');
-            await router.replace('/');
-        } catch (error) {
-            showErrorToast("Gagal Logout");
-        }
-    }
-
     const fetchData = async () => {
         const [response1, response2, response3, response4] = await Promise.all([
             axiosInstance.get('/api/customers'),
             axiosInstance.get('/api/departments'),
             axiosInstance.get('/api/vehicle'),
             axiosInstance.get('/api/parts'),
-        ]).catch(e=>{
+        ]).catch(()=>{
             showErrorToast("Gagal Mengambil Data");
         })
         setCustomer(response1.data['data']);
@@ -81,8 +70,10 @@ export default function Home() {
             <div className={`overflow-x-scroll border p-1.5 border-gray-500 flex flex-col h-screen`}>
                 <HeadTitle user={user} />
                 <div className={`py-2`}>
-                    <div className={`w-full flex bg-[#EBEBEB] text-sm font-bold`}>
-                        <MainMenu data={master} title={'Master Data'}/>
+                    <div className={`w-full py-1.5 flex bg-[#EBEBEB] text-sm font-semibold`}>
+                        {
+                            user.role !== 'super' ? <MainMenu data={master2} title={'Master Data'}/> : <MainMenu data={master} title={'Master Data'}/>
+                        }
                         <MainMenu data={laporan} title={'Laporan'}/>
                     </div>
                 </div>
@@ -110,7 +101,7 @@ export default function Home() {
                                 {activeMenu === "Department" && <Department />}
                                 {activeMenu === "Customer" && <Customer />}
                                 {activeMenu === "Vehicle" && <Vehicle />}
-                                {activeMenu === "Part" && <Part />}
+                                {activeMenu === "Part" &&  <Part />}
                                 {activeMenu === "Destinasi" && <Destination />}
                                 {activeMenu === "Pallet" && <Pallet />}
                                 {activeMenu === "Lap. Riwayat Pallet" && <LapRiwayat />}
@@ -119,14 +110,13 @@ export default function Home() {
                                 {activeMenu === "Users" && <User />}
                             </div>
                             :
-                            <div
-                                className="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-75">
-                                <div className="bg-red-500 p-4 rounded-md shadow-lg text-white text-xl">
-                                    <p className="text-2xl font-semibold mb-2">Error!</p>
-                                    <p>Hanya Role Admin yang Dapat Mengakses Halaman Ini</p>
-                                    <button onClick={logoutHandle} className={`bg-green-400 rounded px-5 py-1 text-lg mt-8`}>Logout</button>
-                                </div>
-                            </div>
+                            <center className={`flex items-center justify-center h-full`}>
+                                <Result
+                                    status="403"
+                                    title="403"
+                                    subTitle="Maaf Hak Akses Kamu Tidak Cukup, Hanya Admin/Super Yang Dapat Mengakses Ini"
+                                />
+                            </center>
                     }
                 </div>
             </div>

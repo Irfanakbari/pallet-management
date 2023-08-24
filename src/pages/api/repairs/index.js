@@ -118,8 +118,15 @@ async function handler(req, res) {
                     }
                 });
 
+                if (pallet.status === 0) {
+                    return res.status(401).json({
+                        ok: false,
+                        data: "Pallet Sedang Diluar"
+                    });
+                }
+
                 if (!pallet) {
-                    res.status(404).json({
+                    return res.status(404).json({
                         ok: false,
                         data: "Pallet tidak ditemukan"
                     });

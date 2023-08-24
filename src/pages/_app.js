@@ -36,12 +36,6 @@ export default function App({ Component, pageProps }) {
               active={loading}
               spinner
               text='Loading...'
-              styles={{
-                  overlay: (base) => ({
-                      ...base,
-                      background: 'rgba(96, 160, 217, 0.4)'
-                  })
-              }}
           >
               <ToastContainer />
                   <Component {...pageProps} />

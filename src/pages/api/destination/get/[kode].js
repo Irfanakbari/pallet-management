@@ -1,9 +1,6 @@
 import checkCookieMiddleware from "@/pages/api/middleware";
-import Part from "@/models/Part";
-import {Op} from "sequelize";
 import logger from "@/utils/logger";
 import Destination from "@/models/Destination";
-import Vehicle from "@/models/Vehicle";
 import Pallet from "@/models/Pallet";
 
 async function handler(req, res) {

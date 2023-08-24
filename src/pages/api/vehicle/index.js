@@ -96,7 +96,7 @@ async function handler(req, res) {
                 // Redirect ke halaman sukses atau halaman lain yang Anda inginkan
                 res.status(200).json({ success: true });
             } catch (error) {
-                logger.error(e.message);
+                logger.error(error.message);
                 res.status(500).json({ success: false, error: 'Failed to create line' });
             }
             break;
