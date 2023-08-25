@@ -1,6 +1,5 @@
 import connection from "@/config/database";
 import {DataTypes} from "sequelize";
-import Customer from "@/models/Customer";
 
 
 const Department = connection.define('Department', {

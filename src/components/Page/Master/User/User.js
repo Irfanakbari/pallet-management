@@ -1,17 +1,20 @@
 import {BiEdit, BiPlusMedical, BiRefresh, BiSave, BiTrash, BiX} from "react-icons/bi";
-import React, {useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import {showErrorToast, showSuccessToast} from "@/utils/toast";
-import {dataState, modalState} from "@/context/states";
 import {useForm} from "react-hook-form";
-import AddModalLayout from "@/components/Page/Master/Part/AddModal";
+import {modalState} from "@/context/states";
 import Head from "next/head";
 import axiosInstance from "@/utils/interceptor";
-import {Form, Popconfirm, Spin, Table} from "antd";
-import EditableCell from "@/components/Page/Master/Customer/EditCell";
+import {Form, Popconfirm, Spin, Table, Tag} from "antd";
+import AddModalLayout from "@/components/Page/Master/User/AddModal";
+import EditableCell from "@/components/Page/Master/User/EditCell";
+import {MdOutlinePassword} from "react-icons/md";
+import EditModalLayout from "@/components/Page/Master/User/EditModal";
 
-export default function Part() {
-	const {setPart, listPart, listVehicle, listCustomer} = dataState()
-	const {setModalAdd, modalAdd} = modalState()
+export default function User() {
+	const [dataUser, setDataUser] = useState([])
+	const [selectedCell, setSelectedCell] = useState([])
+	const {setModalEdit, modalEdit, modalAdd, setModalAdd} = modalState()
 	const [form] = Form.useForm();
 	const [editingKey, setEditingKey] = useState('');
 	const [confirmLoading, setConfirmLoading] = useState(false);
@@ -20,50 +23,67 @@ export default function Part() {
 	const {
 		register,
 		handleSubmit,
-		reset
+		reset, watch
 	} = useForm()
 
 	useEffect(() => {
 		fetchData()
 	}, [])
 
-	const fetchData = () => {
+	const fetchData = async () => {
 		setLoading(true)
-		axiosInstance.get('/api/parts').then(response => {
-			setPart(response.data['data']);
-		}).catch(() => {
+		try {
+			const response = await axiosInstance.get('/api/users', {
+				withCredentials: true,
+			});
+			setDataUser(response.data['data']);
+		} catch (error) {
 			showErrorToast("Gagal Fetch Data");
-		}).finally(() => {
+		} finally {
 			setLoading(false)
-		})
+		}
 	};
 
-	const submitData = (data) => {
-		axiosInstance.post('/api/parts', data).then(() => {
-			showSuccessToast("Sukses Simpan Data");
-			fetchData()
-		}).catch((e) => {
-			showErrorToast(e.response.data.error);
-		}).finally(() => {
+	const submitData = async (data) => {
+		try {
+			await axiosInstance.post('/api/users', data).then(() => {
+				showSuccessToast("Sukses Simpan Data");
+				fetchData()
+			})
+		} catch (e) {
+			showErrorToast("Gagal Simpan Data");
+
+		} finally {
 			setModalAdd(false)
-			reset()
-		})
+		}
 	}
 
-	const deleteData = (e) => {
-		setConfirmLoading(true)
-		axiosInstance.delete('/api/parts/' + e).then(() => {
-			showSuccessToast("Sukses Hapus Data");
-		}).catch(() => {
-			showErrorToast("Gagal Hapus Data");
-		}).finally(() => {
-			fetchData()
-			setConfirmLoading(false)
-		})
+	const editData = async (data) => {
+		try {
+			await axiosInstance.put('/api/users/' + selectedCell.id, data).then(() => {
+				showSuccessToast("Sukses Edit Data");
+			})
+		} catch (e) {
+			showErrorToast("Gagal Edit Data");
+		} finally {
+			await fetchData()
+			setModalEdit(false)
+		}
 	}
-	const onChange = (pagination, filters, sorter, extra) => {
-		console.log('params', pagination, filters, sorter, extra);
-	};
+
+
+	const deleteData = async (e) => {
+		setConfirmLoading(true)
+		try {
+			await axiosInstance.delete('/api/users/' + e)
+			showSuccessToast("Sukses Hapus Data");
+		} catch (e) {
+			showErrorToast("Gagal Hapus Data");
+		} finally {
+			await fetchData()
+			setConfirmLoading(false)
+		}
+	}
 
 	const edit = (record) => {
 		form.setFieldsValue({
@@ -80,23 +100,23 @@ export default function Part() {
 	const save = async (key) => {
 		try {
 			const row = await form.validateFields();
-			const newData = [...listPart];
-			const index = newData.findIndex((item) => key === item.kode);
+			const newData = [...dataUser];
+			const index = newData.findIndex((item) => key === item.id);
 			if (index > -1) {
 				const item = newData[index];
 				newData.splice(index, 1, {
 					...item,
 					...row
 				});
-				await axiosInstance.put(`/api/parts/${item.kode}`, row);
+				await axiosInstance.put(`/api/users/${item.id}`, row);
 				showSuccessToast('Sukses Edit Data');
 				await fetchData();
 			} else {
 				newData.push(row);
-				setPart(newData);
+				setDataUser(newData);
 			}
 		} catch (errInfo) {
-			console.log('Validate Failed:', errInfo);
+			showErrorToast("Gagal Simpan Data");
 		} finally {
 			setEditingKey('');
 		}
@@ -110,50 +130,40 @@ export default function Part() {
 			render: (_, __, index) => index + 1
 		},
 		{
-			title: 'Kode Part',
-			dataIndex: 'kode',
-			sorter: (a, b) => a.kode.localeCompare(b.kode),
-			// width: '30%'
+			title: 'ID',
+			dataIndex: 'id',
 		},
 		{
-			title: 'Nama Part',
-			dataIndex: 'name',
-			// width: '40%',
-			sorter: (a, b) => a.name.localeCompare(b.name),
-			editable: true,
-			filterMode: 'menu',
-			filterSearch: true,
-			onFilter: (value, record) => record.name.startsWith(value),
+			title: 'Username',
+			dataIndex: 'username',
+			sorter: (a, b) => a.username.localeCompare(b.username),
 		},
 		{
-			title: 'Customer',
-			dataIndex: 'customer',
-			// width: '40%',
-			sorter: (a, b) => a.customer.localeCompare(b.customer),
-			// editable: true,
-			filters: listCustomer.map(e => (
-				{
-					text: e.name,
-					value: e.kode
-				}
-			)),
-			onFilter: (value, record) => record.customer.indexOf(value) === 0,
-			render: (_, record) => record.customer + " - " + record['Customer'].name
+			title: 'Role',
+			dataIndex: 'role',
 		},
 		{
-			title: 'Vehicle',
-			dataIndex: 'vehicle',
-			// width: '40%',
-			sorter: (a, b) => a.department.localeCompare(b.department),
-			filters: listVehicle.map(e => (
-				{
-					text: e.name,
-					value: e.kode
-				}
-			)),
-			onFilter: (value, record) => record.vehicle.indexOf(value) === 0,
-			// editable: true
-			render: (_, record) => record.vehicle + " - " + record['Vehicle'].name
+			title: 'Department',
+			dataIndex: 'DepartmentUsers',
+			render: (_, record) => (
+				<span>
+                    {record['DepartmentUsers'].map((tag) => {
+	                    let color = 'lime';
+	                    if (tag === 'A') {
+		                    color = 'volcano';
+	                    } else if (tag === 'B') {
+		                    color = 'blue';
+	                    } else if (tag === 'B') {
+		                    color = 'purple';
+	                    }
+	                    return (
+		                    <Tag color={color} key={tag}>
+			                    {'Produksi ' + tag.toUpperCase()}
+		                    </Tag>
+	                    );
+                    })}
+                 </span>
+			),
 		},
 		{
 			title: 'Aksi',
@@ -165,7 +175,7 @@ export default function Part() {
 					<span>
                 {editable ? (
 	                <span>
-                        <button onClick={() => save(record.kode)} style={{marginRight: 8}}>
+                        <button onClick={() => save(record.id)} style={{marginRight: 8}}>
                             <BiSave size={22} color="green"/>
                         </button>
                         <button onClick={cancel} style={{marginRight: 8}}>
@@ -180,6 +190,16 @@ export default function Part() {
 	                        style={{marginRight: 8}}
                         >
                             <BiEdit size={22} color="orange"/>
+                        </button>
+                         <button
+	                         disabled={editingKey !== ''}
+	                         onClick={() => {
+		                         setSelectedCell(record)
+		                         setModalEdit(true)
+	                         }}
+	                         style={{marginRight: 8}}
+                         >
+                            <MdOutlinePassword size={22} color="blue"/>
                         </button>
                         <Popconfirm
 	                        title="Apakah Anda yakin ingin menghapus?"
@@ -219,10 +239,13 @@ export default function Part() {
 	return (
 		<>
 			<Head>
-				<title>Part | PT Vuteq Indonesia</title>
+				<title>User | PT Vuteq Indonesia</title>
 			</Head>
 			<div className={`bg-white h-full flex flex-col`}>
-				{modalAdd && (<AddModalLayout onSubmit={handleSubmit(submitData)} reset={reset} register={register}/>)}
+				{modalAdd && (<AddModalLayout onSubmit={handleSubmit(submitData)} reset={reset} register={register}
+				                              watch={watch}/>)}
+				{modalEdit && (<EditModalLayout onSubmit={handleSubmit(editData)} reset={reset} register={register}
+				                                record={selectedCell}/>)}
 				<div className={`w-full bg-base py-0.5 px-1 text-white flex flex-row`}>
 					<div
 						onClick={() => setModalAdd(true)}
@@ -244,18 +267,21 @@ export default function Part() {
 								loading && <Spin tip="Loading..." delay={1500}/>
 							}
 							bordered
-							scroll={{
-								y: "68vh"
-							}}
 							components={{
 								body: {
 									cell: EditableCell,
 								},
 							}}
+							scroll={{
+								y: "68vh"
+							}}
 							style={{
 								width: "100%"
-							}} rowKey={'kode'} columns={mergedColumns} dataSource={listPart} onChange={onChange}
-							size={'small'} rowClassName="editable-row"
+							}} rowKey={'kode'}
+							columns={mergedColumns}
+							dataSource={dataUser}
+							size={'small'}
+							rowClassName="editable-row"
 							pagination={false}/>
 					</Form>
 				</div>

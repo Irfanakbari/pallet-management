@@ -10,9 +10,12 @@ export default function ModalLayout({children, onSubmit, reset}) {
                 <div className="w-full flex items-center justify-between bg-base font-light py-1 px-2 text-white text-sm">
                     <div className="flex items-center gap-2">
                         <FaRegWindowMaximize />
-                        Form Tambah/Edit Data
+                        Form Tambah/Ubah Data
                     </div>
-                    <div onClick={() => setModalAdd(false)} className="hover:bg-red-800 p-1">
+                    <div onClick={() => {
+                        setModalAdd(false)
+                        setModalEdit(false)
+                    }} className="hover:bg-red-800 p-1">
                         <ImCross size={10} />
                     </div>
                 </div>

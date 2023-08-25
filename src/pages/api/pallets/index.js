@@ -7,185 +7,173 @@ import Part from "@/models/Part";
 import logger from "@/utils/logger";
 
 async function handler(req, res) {
-    switch (req.method) {
-        case 'GET':
-            if (req.user.role === 'operator') {
-                return res.status(401).json({
-                    ok: false,
-                    data: "Operator Tidak Boleh Mengakses Halaman Ini"
-                });
-            }
-            try {
-                const { customer, vehicle, part, search } = req.query;
-                // Menentukan parameter halaman dan batasan data
-                const page = parseInt(req.query.page) || 1; // Halaman saat ini (default: 1)
-                const limit = parseInt(req.query.limit); // Batasan data per halaman (default: 10)
+	switch (req.method) {
+		case 'GET':
+			if (req.user.role === 'operator') {
+				return res.status(401).json({
+					ok: false,
+					data: "Operator Tidak Boleh Mengakses Halaman Ini"
+				});
+			}
+			try {
+				const {customer, vehicle, part, search} = req.query;
+				// Menentukan parameter halaman dan batasan data
+				const page = parseInt(req.query.page) || 1; // Halaman saat ini (default: 1)
+				const limit = parseInt(req.query.limit); // Batasan data per halaman (default: 10)
 
-                // Menghitung offset berdasarkan halaman dan batasan data
-                const offset = (page - 1) * limit;
+				// Menghitung offset berdasarkan halaman dan batasan data
+				const offset = (page - 1) * limit;
 
-                let whereClause = {}; // Inisialisasi objek kosong untuk kondisi where
+				let whereClause = {}; // Inisialisasi objek kosong untuk kondisi where
 
-                if (customer) {
-                    whereClause = {
-                        ...whereClause,
-                        '$Customer.kode$': customer,
-                    };
-                }
-                if (vehicle) {
-                    whereClause = {
-                        ...whereClause,
-                        '$Vehicle.kode$': vehicle,
-                    };
-                }
-                if (Array.isArray(part)) {
-                    whereClause = {
-                        ...whereClause,
-                        '$Part.kode$': { [Op.in]: part },
-                    };
-                }
-                if (search) {
-                    whereClause = {
-                        ...whereClause,
-                        kode: {
-                            [Op.like]: `%${search}%`
-                        }
-                    };
-                }
+				if (customer) {
+					whereClause = {
+						...whereClause,
+						'$Customer.kode$': customer,
+					};
+				}
+				if (vehicle) {
+					whereClause = {
+						...whereClause,
+						'$Vehicle.kode$': vehicle,
+					};
+				}
+				if (part) {
+					whereClause = {
+						...whereClause,
+						'$Part.kode$': part,
+					};
+				}
+				if (search) {
+					whereClause = {
+						...whereClause,
+						kode: {
+							[Op.like]: `%${search}%`
+						}
+					};
+				}
 
-                if (req.user.role === 'admin' || req.user.role === 'viewer') {
-                    // Jika user memiliki role 'admin', tambahkan filter berdasarkan department_id
-                    const allowedDepartments = req.department.map((department) => department.department_id);
-                    whereClause['$Vehicle.department$'] = { [Op.in]: allowedDepartments };
-                }
+				if (req.user.role === 'admin' || req.user.role === 'viewer') {
+					// Jika user memiliki role 'admin', tambahkan filter berdasarkan department_id
+					const allowedDepartments = req.department.map((department) => department.department_id);
+					whereClause['$Vehicle.department$'] = {[Op.in]: allowedDepartments};
+				}
 
-                let pallets;
-                if (limit && page){
-                    pallets = await Pallet.findAndCountAll({
-                        where: whereClause,
-                        include: [Vehicle, Customer, Part],
-                        limit,
-                        offset,
-                    });
-                } else {
-                    pallets = await Pallet.findAndCountAll({
-                        where: whereClause,
-                        include: [Vehicle, Customer, Part],
-                    });
-                }
+				let pallets;
+				if (limit && page) {
+					pallets = await Pallet.findAndCountAll({
+						where: whereClause,
+						include: [Vehicle, Customer, Part],
+						limit,
+						offset,
+					});
+				} else {
+					pallets = await Pallet.findAndCountAll({
+						where: whereClause,
+						include: [Vehicle, Customer, Part],
+					});
+				}
 
-                // Menghitung total halaman berdasarkan jumlah data dan batasan per halaman
-                const totalData = pallets.count;
+				// Menghitung total halaman berdasarkan jumlah data dan batasan per halaman
+				const totalData = pallets.count;
 
-                res.status(200).json({
-                    ok: true,
-                    data: pallets.rows,
-                    totalData,
-                    limit,
-                    currentPage: page,
-                });
-            } catch (e) {
-                logger.error(e.message);
-                res.status(500).json({
-                    ok: false,
-                    data: "Internal Server Error",
-                });
-            }
-            break;
-        case 'POST':
-            if (req.user.role !== 'super' && req.user.role !== 'admin') {
-                return res.status(401).json({
-                    ok: false,
-                    data: "Role must be admin"
-                });
-            }
-            try {
-                const { part, name, total, jenis } = req.body;
-                const parts = await Part.findOne({
-                    where: {
-                        kode: part
-                    }
-                })
-                // Dapatkan data project berdasarkan kode_project
-                const vehicles = await Vehicle.findOne({
-                    where: {
-                        kode: parts.vehicle
-                    }
-                });
+				res.status(200).json({
+					ok: true,
+					data: pallets.rows,
+					totalData,
+					limit,
+					currentPage: page,
+				});
+			} catch (e) {
+				logger.error({
+					message: e.message,
+					path: req.url, // Add the path as metadata
+				});
+				res.status(500).json({
+					ok: false,
+					data: "Internal Server Error",
+				});
+			}
+			break;
+		case 'POST':
+			if (req.user.role !== 'super' && req.user.role !== 'admin') {
+				return res.status(401).json({
+					ok: false,
+					data: "Role must be admin"
+				});
+			}
+			try {
+				const {part, name, total, jenis} = req.body;
+				const parts = await Part.findOne({
+					where: {
+						kode: part
+					}
+				})
+				// Dapatkan data project berdasarkan kode_project
+				const vehicles = await Vehicle.findOne({
+					where: {
+						kode: parts.vehicle
+					}
+				});
 
-                if (!vehicles) {
-                    return res.status(404).json({ success: false, error: 'Vehicle not found' });
-                }
+				if (!vehicles) {
+					return res.status(404).json({success: false, error: 'Vehicle not found'});
+				}
 
-                // Dapatkan daftar valet berdasarkan kode_project untuk mencari urutan kosong
-                let pallets;
-                if (vehicles.department !== 'A') {
-                    pallets = await Pallet.findAll({ where: { kode: { [Op.like]: `${jenis}-${parts.customer}${parts.vehicle}${part}%` } } });
-                } else {
-                    pallets = await Pallet.findAll({ where: { kode: { [Op.like]: `${parts.customer}${parts.vehicle}${part}%` } } });
-                }
+				// Dapatkan daftar valet berdasarkan kode_project untuk mencari urutan kosong
+				let pallets;
+				let existingCodes = [];
 
-                let nextId;
-                let palletKode;
-                if (pallets.length > 0) {
-                    const palletNumbers = pallets.map(palet => {
-                        const palletId = palet['kode'];
-                        let numberString;
-                        if (vehicles.department !== 'A') {
-                            numberString = palletId.slice(jenis.length+1+parts.customer.length + parts.vehicle.length + part.length);
-                        } else {
-                            numberString= palletId.slice(parts.customer.length + parts.vehicle.length + part.length);
-                        }
-                        return parseInt(numberString);
-                    });
+				if (vehicles.department !== 'A') {
+					pallets = await Pallet.findAll({where: {kode: {[Op.like]: `${jenis}-${parts.customer}${parts.vehicle}${part}%`}}});
+				} else {
+					pallets = await Pallet.findAll({where: {kode: {[Op.like]: `${parts.customer}${parts.vehicle}${part}%`}}});
+				}
 
-                    for (let i = 1; i <= pallets.length + 1; i++) {
-                        if (!palletNumbers.includes(i)) {
-                            nextId = i;
-                            break;
-                        }
-                    }
+				// Mendapatkan semua kode yang sudah ada
+				existingCodes = pallets.map(pallet => pallet.kode);
 
-                    // Jika tidak ada urutan kosong, gunakan urutan terakhir + 1
-                    if (!nextId) {
-                        const lastNumber = Math.max(...palletNumbers);
-                        nextId = lastNumber + 1;
-                    }
-                } else {
-                    // Jika tidak ada valet sebelumnya, gunakan urutan awal yaitu 1
-                    nextId = 1;
-                }
+				const palletsToCreate = [];
+				let nextId = 1;
 
-                for (let i = 0; i < total; i++) {
-                    const nextIdFormatted = (nextId + i).toString().padStart(3, '0');
-                    if (vehicles.department !== 'A') {
-                        palletKode = jenis + '-'+ parts.customer + parts.vehicle + part + nextIdFormatted;
-                    } else {
-                        palletKode = parts.customer + parts.vehicle + part + nextIdFormatted;
-                    }
+				for (let i = 0; i < parseInt(total); i++) {
+					// Mencari slot kosong dalam urutan kode
+					while (existingCodes.includes(`${vehicles.department !== 'A' ? `${jenis}-${parts.customer}${parts.vehicle}${part}` : `${parts.customer}${parts.vehicle}${part}`}${nextId.toString().padStart(3, '0')}`)) {
+						nextId++;
+					}
 
-                    await Pallet.create({
-                        kode: palletKode,
-                        name,
-                        vehicle: parts.vehicle,
-                        part: part,
-                        customer: parts.customer
-                    });
-                }
+					const nextIdFormatted = nextId.toString().padStart(3, '0');
+					const palletKode = vehicles.department !== 'A'
+						? `${jenis}-${parts.customer}${parts.vehicle}${part}${nextIdFormatted}`
+						: `${parts.customer}${parts.vehicle}${part}${nextIdFormatted}`;
 
-                res.status(200).json({ success: true });
+					palletsToCreate.push({
+						kode: palletKode,
+						name,
+						vehicle: parts.vehicle,
+						part: part,
+						customer: parts.customer
+					});
 
-            } catch (e) {
-                logger.error(e.message);
-                res.status(500).json({ success: false, error: 'Failed to save Pallet' });
-            }
-            break;
-        default:
-            res.status(405).json({
-                ok: false,
-                data: "Method Not Allowed"
-            });
-    }
+					nextId++;
+				}
+				await Pallet.bulkCreate(palletsToCreate);
+				res.status(200).json({success: true});
+
+			} catch (e) {
+				logger.error({
+					message: e.message,
+					path: req.url, // Add the path as metadata
+				});
+				res.status(500).json({success: false, error: 'Failed to save Pallet'});
+			}
+			break;
+		default:
+			res.status(405).json({
+				ok: false,
+				data: "Method Not Allowed"
+			});
+	}
 }
 
 const protectedAPIHandler = checkCookieMiddleware(handler);

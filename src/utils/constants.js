@@ -1,37 +1,53 @@
 const master = [
     {
-        name: "Department"
+        key: 'Department',
+        label: 'Department',
     },
     {
-        name: "Customer"
+        key: 'Customer',
+        label: 'Customer'
     },
     {
-        name: "Vehicle"
+        key: 'Vehicle',
+        label: 'Vehicle'
     },
     {
-        name: "Part"
+        key: 'Part',
+        label: 'Part'
     },
     {
-        name: "Destinasi"
+        key: 'Destinasi',
+        label: 'Destinasi'
     },
     {
-        name: "Pallet"
+        key: 'Pallet',
+        label: 'Pallet'
     },
     {
-        name: "Users"
+        key: 'Users',
+        label: 'Users'
+    },
+]
+const master2 = [
+    {
+        key: 'Pallet',
+        label: 'Pallet'
     },
 ]
 
 const laporan = [
     {
-        name: "Lap. Stok Pallet"
+        key: 'Lap. Stok Pallet',
+        label: 'Lap. Stok Pallet'
     },
     {
-        name: "Lap. Riwayat Pallet"
+        key: 'Lap. Riwayat Pallet',
+        label: 'Lap. Riwayat Pallet'
     },
     {
-        name: "Lap. Maintenance Pallet"
+        key: 'Lap. Maintenance Pallet',
+        label: 'Lap. Maintenance Pallet'
     },
 ]
 
-export {master, laporan}
+export {master, laporan, master2}
