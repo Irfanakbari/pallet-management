@@ -30,7 +30,6 @@ export default function Dashboard() {
 		totalMendep: 0,
 		memory: 0,
 		cpuUsage: 0,
-		osInfo: '-'
 	})
 	const [dataChart1, setDataChart1] = useState([])
 	const [dataChart2, setDataChart2] = useState([])
@@ -57,7 +56,6 @@ export default function Dashboard() {
 				mendep: response.data['data']['paletMendep'] ?? [],
 				memory: response.data['data']['load']['memoryUsage'] ?? 0,
 				cpuUsage: response.data['data']['load']['cpuUsage'] ?? 0,
-				osInfo: response.data['data']['load']['osInfo']['version'] ?? '-'
 			})
 			setHistory(response.data['data']['historyPallet'] ?? [])
 			setDataChart1(response.data.data['stokPart'] ?? [])
@@ -67,7 +65,6 @@ export default function Dashboard() {
 			showErrorToast("Gagal Fetch Data");
 		}
 	}
-
 	return (
 		<>
 			<Head>
@@ -202,12 +199,6 @@ export default function Dashboard() {
 										/>
 										<Typography.Text className={'!text-white'}
 										                 level={5}>{cardInfo.memory ?? 0}%</Typography.Text>
-									</div>
-									<div className={'gap-3 flex items-center'}>
-										<Typography.Text className={'!text-white'} level={5}>OS
-											: </Typography.Text>
-										<Typography.Text className={'!text-white'}
-										                 level={5}>{cardInfo.osInfo ?? '-'}</Typography.Text>
 									</div>
 								</Metric>
 							</div>
