@@ -215,7 +215,7 @@ export default function Customer() {
 					<Form form={form} component={false}>
 						<Table
 							loading={
-								loading && <Spin tip="Loading..." delay={1000}/>
+								loading && <Spin tip="Loading..." delay={1500}/>
 							}
 							bordered
 							scroll={{

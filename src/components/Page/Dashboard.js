@@ -1,7 +1,7 @@
 import {BiCheck, BiExitFullscreen, BiFullscreen, BiLogOut, BiSolidMoon, BiSolidSun} from "react-icons/bi";
 import React, {useEffect, useState} from "react";
 import {showErrorToast} from "@/utils/toast";
-import {Card, Metric, Text} from "@tremor/react";
+import {Card, Metric, Text, Title} from "@tremor/react";
 import Chart1 from "@/components/Chart/DashboardChart1";
 import dayjs from "dayjs";
 import Chart2 from "@/components/Chart/DashboardChart2";
@@ -12,9 +12,9 @@ import {modalState} from "@/context/states";
 import Head from "next/head";
 import axiosInstance from "@/utils/interceptor";
 import {FullScreen, useFullScreenHandle} from "react-full-screen";
-import {GiAutoRepair} from "react-icons/gi";
+import {GiAutoRepair, GiServerRack} from "react-icons/gi";
 import {MdPallet} from "react-icons/md";
-import {Alert} from "antd";
+import {Alert, Progress, Typography} from "antd";
 
 export default function Dashboard() {
 	const [history, setHistory] = useState([])
@@ -27,7 +27,10 @@ export default function Dashboard() {
 		keluar: '-',
 		repair: '-',
 		mendep: [],
-		totalMendep: 0
+		totalMendep: 0,
+		memory: 0,
+		cpuUsage: 0,
+		osInfo: '-'
 	})
 	const [dataChart1, setDataChart1] = useState([])
 	const [dataChart2, setDataChart2] = useState([])
@@ -51,7 +54,10 @@ export default function Dashboard() {
 				keluar: response.data['data']['totalPalletKeluar'] ?? '-',
 				repair: response.data['data']['totalPalletRepair'] ?? '-',
 				totalMendep: response.data['data']['totalPaletMendep'] ?? 0,
-				mendep: response.data['data']['paletMendep'] ?? []
+				mendep: response.data['data']['paletMendep'] ?? [],
+				memory: response.data['data']['load']['memoryUsage'] ?? 0,
+				cpuUsage: response.data['data']['load']['cpuUsage'] ?? 0,
+				osInfo: response.data['data']['load']['osInfo']['version'] ?? '-'
 			})
 			setHistory(response.data['data']['historyPallet'] ?? [])
 			setDataChart1(response.data.data['stokPart'] ?? [])
@@ -75,7 +81,7 @@ export default function Dashboard() {
 					<div className={`flex flex-row justify-between w-full mr-1 items-center`}>
 						<div className={`flex items-center gap-4`}>
 							<Image src={'/logos.png'} alt={'Logo'} width={90} height={80}/>
-							<h2 className={`font-bold text-[18px]`}>PT VUTEQ INDONESIA - Realtime Pallet Monitoring
+							<h2 className={`font-bold text-[18px] hidden md:block`}>PT VUTEQ INDONESIA - Pallet Control
 								System</h2>
 						</div>
 					</div>
@@ -107,28 +113,31 @@ export default function Dashboard() {
 					overflowY: 'scroll',
 					paddingBottom: handle.active ? '8vh' : '0'
 				}}>
-					<Alert
-						className={`mb-2 bg-red-500`}
-						message={(
-							<h3 className={`text-xl text-white font-semibold`}>{cardInfo.totalMendep + ' Pallet Belum Kembali ke Vuteq Lebih Dari Seminggu'}</h3>)}
-						description={cardInfo.mendep.map(e => (
-							<span
-								key={e['Pallet.Customer.name']}
-								onClick={() => {
-									setSelectedCustomer(e['Pallet.Customer.name'])
-									setModal(true)
-								}}
-								className={`cursor-pointer text-blue-700 font-semibold hover:text-black`}>
+					{
+						cardInfo.mendep.length > 0 && (<Alert
+							className={`mb-2 bg-red-500`}
+							message={(
+								<h3 className={`text-xl text-white font-semibold`}>{cardInfo.totalMendep + ' Pallet Belum Kembali ke Vuteq Lebih Dari Seminggu'}</h3>)}
+							description={cardInfo.mendep.map(e => (
+								<span
+									key={e['Pallet.Customer.name']}
+									onClick={() => {
+										setSelectedCustomer(e['Pallet.Customer.name'])
+										setModal(true)
+									}}
+									className={`cursor-pointer text-green-500 font-semibold hover:text-black`}>
                                         {`${e['Pallet.Customer.name']} = ${e.total} Pallet, `}
                                      </span>
-						))}
-						type="warning"
-						showIcon
-					/>
-					<div className={`grid-cols-4 pt-2 grid gap-5 text-white mb-5`}>
+							))}
+							type="warning"
+							showIcon
+						/>)
+					}
+					<div
+						className={`grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 pt-2 grid gap-5 text-white mb-5`}>
 						<Card className={`flex bg-blue-500`}>
 							<div>
-								<Text className={`text-xl text-white`}>Total Stok</Text>
+								<Text className={`text-xl text-white`}>Total Pallet</Text>
 								<Metric className={`font-bold text-white`}>{cardInfo.total} Pallet</Metric>
 							</div>
 							<div className="ml-auto">
@@ -137,7 +146,7 @@ export default function Dashboard() {
 						</Card>
 						<Card className={`flex bg-green-500`}>
 							<div>
-								<Text className={`text-xl text-white`}>Stok Tersedia</Text>
+								<Text className={`text-xl text-white`}>Pallet Tersedia</Text>
 								<Metric className={`font-bold text-white`}>{cardInfo.stok} Pallet</Metric>
 							</div>
 							<div className="ml-auto">
@@ -146,7 +155,7 @@ export default function Dashboard() {
 						</Card>
 						<Card className={`flex bg-red-500`}>
 							<div>
-								<Text className={`text-xl text-white`}>Keluar</Text>
+								<Text className={`text-xl text-white`}>Pallet Keluar</Text>
 								<Metric className={`font-bold text-white`}>{cardInfo.keluar} Pallet</Metric>
 							</div>
 							<div className="ml-auto">
@@ -155,15 +164,59 @@ export default function Dashboard() {
 						</Card>
 						<Card className={`flex bg-orange-500`}>
 							<div>
-								<Text className={`text-xl text-white`}>Repair</Text>
+								<Text className={`text-xl text-white`}>Pallet Repair</Text>
 								<Metric className={`font-bold text-white`}>{cardInfo.repair} Pallet</Metric>
 							</div>
 							<div className="ml-auto">
 								<GiAutoRepair size={80} color="orange"/>
 							</div>
 						</Card>
+						<Card className={`flex bg-purple-500`}>
+							<div>
+								<Text className={`text-xl text-white`}>Status Server</Text>
+								<Metric className={`font-bold text-white `}>
+									<div className={'gap-3 flex items-center'}>
+										<Typography.Text className={'!text-white'}
+										                 level={5}>CPU</Typography.Text>
+										<Progress
+											percent={cardInfo.cpuUsage ?? 0}
+											steps={10}
+											size={'small'}
+											showInfo={false}
+											trailColor={'gray'}
+											strokeColor={'red'}
+										/>
+										<Typography.Text className={'!text-white'}
+										                 level={5}>{cardInfo.cpuUsage ?? 0}%</Typography.Text>
+									</div>
+									<div className={'gap-3 flex items-center'}>
+										<Typography.Text className={'!text-white'} level={5}>RAM</Typography.Text>
+										<Progress
+											percent={cardInfo.memory ?? 0}
+											steps={10}
+											className={'!text-white'}
+											size={'small'}
+											showInfo={false}
+											trailColor={'gray'}
+											strokeColor={'red'}
+										/>
+										<Typography.Text className={'!text-white'}
+										                 level={5}>{cardInfo.memory ?? 0}%</Typography.Text>
+									</div>
+									<div className={'gap-3 flex items-center'}>
+										<Typography.Text className={'!text-white'} level={5}>OS
+											: </Typography.Text>
+										<Typography.Text className={'!text-white'}
+										                 level={5}>{cardInfo.osInfo ?? '-'}</Typography.Text>
+									</div>
+								</Metric>
+							</div>
+							<div className="ml-auto">
+								<GiServerRack size={80} color="indigo"/>
+							</div>
+						</Card>
 					</div>
-					<div className={`w-full grid grid-cols-2 gap-4`}>
+					<div className={`grid-cols-1 md:grid-cols-2 pt-2 grid gap-5 mb-5`}>
 						<Chart2 data={dataChart2}/>
 						<Chart3 data={dataChart3}/>
 						{/*<Card className={`overflow-y-scroll]`}>*/}
@@ -188,10 +241,8 @@ export default function Dashboard() {
 						{/*</Card>*/}
 						<Chart1 data={dataChart1}/>
 					</div>
-					<Card className={`w-full`}>
-						<div className={`p-2 dark:text-white text-l font-semibold`}>
-							Riwayat In/Out Pallet
-						</div>
+					<Card className={`w-full overflow-x-scroll mb-6`}>
+						<Title>Riwayat In/Out Pallet</Title>
 						<div>
 							<table className="min-w-full divide-y divide-gray-200 mt-1 dark:text-white">
 								<thead className={`dark:bg-gray-600`}>

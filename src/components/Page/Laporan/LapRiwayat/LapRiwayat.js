@@ -153,16 +153,16 @@ export default function LapRiwayat() {
 		];
 		filters.map((item, index) => {
 			sheet.addRow({
-				             no: index + 1,
-				             id: item.id_pallet,
-				             customer: `${item['Pallet']['Customer'].kode} - ${item['Pallet']['Customer'].name}`,
-				             vehicle: `${item['Pallet']['Vehicle'].kode} - ${item['Pallet']['Vehicle'].name}`,
-				             part: `${item['Pallet']['Part'].kode} - ${item['Pallet']['Part'].name}`,
-				             keluar: item['keluar'] ? dayjs(item['keluar']).locale('id').format('DD MMMM YYYY HH:mm') : '-',
-				             user_out: item['user_out'],
-				             masuk: item['masuk'] ? dayjs(item['masuk']).locale('id').format('DD MMMM YYYY HH:mm') : '-',
-				             user_in: item['user_in'],
-			             });
+				no: index + 1,
+				id: item.id_pallet,
+				customer: `${item['Pallet']['Customer'].kode} - ${item['Pallet']['Customer'].name}`,
+				vehicle: `${item['Pallet']['Vehicle'].kode} - ${item['Pallet']['Vehicle'].name}`,
+				part: `${item['Pallet']['Part'].kode} - ${item['Pallet']['Part'].name}`,
+				keluar: item['keluar'] ? dayjs(item['keluar']).locale('id').format('DD MMMM YYYY HH:mm') : '-',
+				user_out: item['user_out'],
+				masuk: item['masuk'] ? dayjs(item['masuk']).locale('id').format('DD MMMM YYYY HH:mm') : '-',
+				user_in: item['user_in'],
+			});
 		});
 		await workbook.xlsx.writeBuffer().then(data => {
 			const blob = new Blob([data], {type: 'application/vnd.openxmlformats-officedocument.spreadsheet.sheet'})
@@ -251,8 +251,8 @@ export default function LapRiwayat() {
 							}}
 							onClick={() => {
 								confirm({
-									        closeDropdown: false,
-								        });
+									closeDropdown: false,
+								});
 							}}>
 							Search
 						</Button>
@@ -374,8 +374,8 @@ export default function LapRiwayat() {
 							}}
 							onClick={() => {
 								confirm({
-									        closeDropdown: true,
-								        });
+									closeDropdown: true,
+								});
 							}}
 						>
 							Filter
@@ -462,8 +462,8 @@ export default function LapRiwayat() {
 							}}
 							onClick={() => {
 								confirm({
-									        closeDropdown: true,
-								        });
+									closeDropdown: true,
+								});
 							}}
 						>
 							Filter
@@ -533,7 +533,7 @@ export default function LapRiwayat() {
 				<div className="w-full bg-white p-2 flex-grow overflow-hidden">
 					<Table
 						loading={
-							loading && <Spin tip="Loading..." delay={1000}/>
+							loading && <Spin tip="Loading..." delay={1500}/>
 						}
 						bordered
 						scroll={{
