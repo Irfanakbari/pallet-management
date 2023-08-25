@@ -203,7 +203,7 @@ export default function User() {
                         </button>
                         <Popconfirm
 	                        title="Apakah Anda yakin ingin menghapus?"
-	                        onConfirm={() => deleteData(record.kode)}
+	                        onConfirm={() => deleteData(record.id)}
 	                        okType="primary"
 	                        okButtonProps={{loading: confirmLoading}}
                         >

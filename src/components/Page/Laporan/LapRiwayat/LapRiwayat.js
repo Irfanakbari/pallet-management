@@ -284,53 +284,72 @@ export default function LapRiwayat() {
 		{
 			title: 'Customer',
 			dataIndex: 'customer',
-			sorter: (a, b) => a.customer.localeCompare(b.customer),
-			filters: listCustomer.map(e => (
-				{
-					text: e.name,
-					value: e.kode
-				}
-			)),
+			sorter: (a, b) => {
+				const customerA = a['Pallet']?.customer || '';
+				const customerB = b['Pallet']?.customer || '';
+				return customerA.localeCompare(customerB);
+			},
+			filters: listCustomer.map(e => ({
+				text: e.name,
+				value: e.kode
+			})),
 			width: 400,
 			filterMultiple: false,
-			onFilter: (value, record) => record['Pallet']?.customer.indexOf(value) === 0,
-			render: (_, record) => record['Pallet']?.['Customer']['kode'] + ' - ' + record['Pallet']?.['Customer']['name']
+			onFilter: (value, record) => (record['Pallet']?.customer || '').indexOf(value) === 0,
+			render: (_, record) => {
+				const customer = record['Pallet']?.['Customer'];
+				return customer ? customer['kode'] + ' - ' + customer['name'] : '-';
+			}
 		},
 		{
 			title: 'Vehicle',
 			dataIndex: 'vehicle',
-			sorter: (a, b) => a.vehicle.localeCompare(b.vehicle),
+			sorter: (a, b) => {
+				const vehicleA = a['Pallet']?.vehicle || '';
+				const vehicleB = b['Pallet']?.vehicle || '';
+				return vehicleA.localeCompare(vehicleB);
+			},
 			filterMultiple: false,
-			filters: listVehicle.map(e => (
-				{
-					text: e.name,
-					value: e.kode
-				}
-			)),
+			filters: listVehicle.map(e => ({
+				text: e.name,
+				value: e.kode
+			})),
 			width: 400,
-			onFilter: (value, record) => record['Pallet']?.vehicle.indexOf(value) === 0,
-			render: (_, record) => record['Pallet']?.['Vehicle']['kode'] + ' - ' + record['Pallet']?.['Vehicle']['name']
+			onFilter: (value, record) => (record['Pallet']?.vehicle || '').indexOf(value) === 0,
+			render: (_, record) => {
+				const vehicle = record['Pallet']?.['Vehicle'];
+				return vehicle ? vehicle['kode'] + ' - ' + vehicle['name'] : '-';
+			}
 		},
 		{
 			title: 'Part',
 			dataIndex: 'part',
-			sorter: (a, b) => a.part.localeCompare(b.part),
+			sorter: (a, b) => {
+				const partA = a['Pallet']?.part || '';
+				const partB = b['Pallet']?.part || '';
+				return partA.localeCompare(partB);
+			},
 			filterMultiple: false,
 			width: 700,
-			filters: listPart.map(e => (
-				{
-					text: e.name,
-					value: e.kode
-				}
-			)),
-			onFilter: (value, record) => record['Pallet']?.part.indexOf(value) === 0,
-			render: (_, record) => record['Pallet']?.['Part']['kode'] + ' - ' + record['Pallet']?.['Part']['name']
+			filters: listPart.map(e => ({
+				text: e.name,
+				value: e.kode
+			})),
+			onFilter: (value, record) => (record['Pallet']?.part || '').indexOf(value) === 0,
+			render: (_, record) => {
+				const part = record['Pallet']?.['Part'];
+				return part ? part['kode'] + ' - ' + part['name'] : '-';
+			}
 		},
 		{
 			title: 'Destinasi',
 			dataIndex: 'destination',
 			width: 300,
-			sorter: (a, b) => a.destination.localeCompare(b.destination),
+			sorter: (a, b) => {
+				const destinationA = a.destination || '';
+				const destinationB = b.destination || '';
+				return destinationA.localeCompare(destinationB);
+			},
 			render: (_, record) => record.destination ?? '-'
 		},
 		{
@@ -418,7 +437,7 @@ export default function LapRiwayat() {
 			title: 'Operator Out',
 			dataIndex: 'user_out',
 			width: 200,
-			sorter: (a, b) => a.user_out.localeCompare(b.user_out),
+			sorter: (a, b) => a.user_out?.localeCompare(b.user_out),
 			render: (_, record) => record['user_out'] ?? '-'
 		},
 		{
@@ -506,9 +525,13 @@ export default function LapRiwayat() {
 			title: 'Operator In',
 			dataIndex: 'user_in',
 			width: 200,
-			sorter: (a, b) => a.user_in.localeCompare(b.user_in),
+			sorter: (a, b) => {
+				const userInA = a.user_in || '';
+				const userInB = b.user_in || '';
+				return userInA.localeCompare(userInB);
+			},
 			render: (_, record) => record['user_in'] ?? '-'
-		},
+		}
 	];
 
 	return (
