@@ -65,7 +65,6 @@ export default function Dashboard() {
 			showErrorToast("Gagal Fetch Data");
 		}
 	}
-
 	return (
 		<>
 			<Head>
