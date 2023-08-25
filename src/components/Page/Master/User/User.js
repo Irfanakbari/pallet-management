@@ -1,11 +1,11 @@
-import {BiEdit, BiPlusMedical, BiRefresh, BiSave, BiTrash, BiX} from "react-icons/bi";
+import {BiPlusMedical, BiRefresh, BiTrash} from "react-icons/bi";
 import {useEffect, useState} from "react";
 import {showErrorToast, showSuccessToast} from "@/utils/toast";
 import {useForm} from "react-hook-form";
 import {modalState} from "@/context/states";
 import Head from "next/head";
 import axiosInstance from "@/utils/interceptor";
-import {Form, Popconfirm, Spin, Table, Tag} from "antd";
+import {Popconfirm, Spin, Table, Tag} from "antd";
 import AddModalLayout from "@/components/Page/Master/User/AddModal";
 import EditableCell from "@/components/Page/Master/User/EditCell";
 import {MdOutlinePassword} from "react-icons/md";
@@ -15,11 +15,8 @@ export default function User() {
 	const [dataUser, setDataUser] = useState([])
 	const [selectedCell, setSelectedCell] = useState([])
 	const {setModalEdit, modalEdit, modalAdd, setModalAdd} = modalState()
-	const [form] = Form.useForm();
-	const [editingKey, setEditingKey] = useState('');
 	const [confirmLoading, setConfirmLoading] = useState(false);
 	const [loading, setLoading] = useState(true)
-	const isEditing = (record) => record.kode === editingKey;
 	const {
 		register,
 		handleSubmit,
@@ -85,43 +82,6 @@ export default function User() {
 		}
 	}
 
-	const edit = (record) => {
-		form.setFieldsValue({
-			name: '',
-			...record
-		});
-		setEditingKey(record.kode);
-	};
-
-	const cancel = () => {
-		setEditingKey('');
-	};
-
-	const save = async (key) => {
-		try {
-			const row = await form.validateFields();
-			const newData = [...dataUser];
-			const index = newData.findIndex((item) => key === item.id);
-			if (index > -1) {
-				const item = newData[index];
-				newData.splice(index, 1, {
-					...item,
-					...row
-				});
-				await axiosInstance.put(`/api/users/${item.id}`, row);
-				showSuccessToast('Sukses Edit Data');
-				await fetchData();
-			} else {
-				newData.push(row);
-				setDataUser(newData);
-			}
-		} catch (errInfo) {
-			showErrorToast("Gagal Simpan Data");
-		} finally {
-			setEditingKey('');
-		}
-	};
-
 	const columns = [
 		{
 			title: '#',
@@ -169,30 +129,9 @@ export default function User() {
 			title: 'Aksi',
 			dataIndex: 'operation',
 			render: (_, record) => {
-				const editable = isEditing(record);
-
 				return (
-					<span>
-                {editable ? (
-	                <span>
-                        <button onClick={() => save(record.id)} style={{marginRight: 8}}>
-                            <BiSave size={22} color="green"/>
-                        </button>
-                        <button onClick={cancel} style={{marginRight: 8}}>
-                            <BiX size={22} color="red"/>
-                        </button>
-                    </span>
-                ) : (
-	                <span className="flex">
-                        <button
-	                        disabled={editingKey !== ''}
-	                        onClick={() => edit(record)}
-	                        style={{marginRight: 8}}
-                        >
-                            <BiEdit size={22} color="orange"/>
-                        </button>
+					<span className="flex">
                          <button
-	                         disabled={editingKey !== ''}
 	                         onClick={() => {
 		                         setSelectedCell(record)
 		                         setModalEdit(true)
@@ -203,7 +142,7 @@ export default function User() {
                         </button>
                         <Popconfirm
 	                        title="Apakah Anda yakin ingin menghapus?"
-	                        onConfirm={() => deleteData(record.kode)}
+	                        onConfirm={() => deleteData(record.id)}
 	                        okType="primary"
 	                        okButtonProps={{loading: confirmLoading}}
                         >
@@ -212,29 +151,11 @@ export default function User() {
                             </button>
                         </Popconfirm>
                     </span>
-                )}
-            </span>
 				);
 			}
 		}
 	];
 
-
-	const mergedColumns = columns.map((col) => {
-		if (!col.editable) {
-			return col;
-		}
-		return {
-			...col,
-			onCell: (record) => ({
-				record,
-				inputType: 'text',
-				dataIndex: col.dataIndex,
-				title: col.title,
-				editing: isEditing(record)
-			})
-		};
-	});
 
 	return (
 		<>
@@ -261,29 +182,28 @@ export default function User() {
 					</div>
 				</div>
 				<div className="w-full bg-white p-2 flex-grow overflow-hidden">
-					<Form form={form} component={false}>
-						<Table
-							loading={
-								loading && <Spin tip="Loading..." delay={1500}/>
-							}
-							bordered
-							components={{
-								body: {
-									cell: EditableCell,
-								},
-							}}
-							scroll={{
-								y: "68vh"
-							}}
-							style={{
-								width: "100%"
-							}} rowKey={'kode'}
-							columns={mergedColumns}
-							dataSource={dataUser}
-							size={'small'}
-							rowClassName="editable-row"
-							pagination={false}/>
-					</Form>
+					<Table
+						loading={
+							loading && <Spin tip="Loading..." delay={1500}/>
+						}
+						bordered
+						components={{
+							body: {
+								cell: EditableCell,
+							},
+						}}
+						scroll={{
+							y: "68vh"
+						}}
+						style={{
+							width: "100%"
+						}}
+						rowKey={'id'}
+						dataSource={dataUser}
+						size={'small'}
+						columns={columns}
+						rowClassName="editable-row"
+						pagination={false}/>
 				</div>
 			</div>
 		</>
