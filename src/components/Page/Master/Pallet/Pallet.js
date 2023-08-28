@@ -15,7 +15,6 @@ import EditableCell from "@/components/Page/Master/Customer/EditCell";
 import {SearchOutlined} from "@ant-design/icons";
 import DeleteModal2 from "@/components/Modal/DeleteModal2";
 
-
 export default function Pallet() {
 	const {listCustomer, listVehicle, listPart, user, listDepartment} = dataState()
 	const [listPallet, setPallet] = useState([])
