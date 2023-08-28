@@ -1,6 +1,6 @@
-import {BiEdit, BiPlusMedical, BiPrinter, BiQr, BiRefresh, BiSave, BiTrash, BiX} from "react-icons/bi";
+import {BiEdit, BiPlusMedical, BiQr, BiRefresh, BiSave, BiTrash, BiX} from "react-icons/bi";
 import {AiFillFileExcel} from "react-icons/ai";
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useState} from "react";
 import {showErrorToast, showSuccessToast} from "@/utils/toast";
 import {useExcelJS} from "react-use-exceljs";
 import {dataState, modalState} from "@/context/states";
@@ -13,10 +13,7 @@ import axiosInstance from "@/utils/interceptor";
 import {Button, Form, Input, Popconfirm, Popover, QRCode, Space, Spin, Table} from "antd";
 import EditableCell from "@/components/Page/Master/Customer/EditCell";
 import {SearchOutlined} from "@ant-design/icons";
-import {LabelComponent} from "@/components/print/label";
-import {useReactToPrint} from "react-to-print";
 import DeleteModal2 from "@/components/Modal/DeleteModal2";
-
 
 export default function Pallet() {
 	const {listCustomer, listVehicle, listPart, user, listDepartment} = dataState()
@@ -29,7 +26,6 @@ export default function Pallet() {
 	const isEditing = (record) => record.kode === editingKey;
 	const [selected, setSelected] = useState([]);
 	const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-	const componentRef = useRef();
 	const [filterParams, setFilterParams] = useState({
 		search: '',
 		customer: '',
@@ -39,9 +35,6 @@ export default function Pallet() {
 	const [pagination, setPagination] = useState({
 		current: 1,
 		pageSize: 30,
-	});
-	const handlePrint = useReactToPrint({
-		content: () => componentRef.current,
 	});
 	const {
 		register,
@@ -391,16 +384,10 @@ export default function Pallet() {
                                 <BiQr size={22} color="green"/>
                             </span>
                         </Popover>
-                        <button onClick={handlePrint} style={{marginRight: 8}}>
-                            <BiPrinter size={22} color="blue"/>
-                        </button>
-                        <div style={{display: 'none'}}>
-                            <LabelComponent ref={componentRef} {...record} />
-                        </div>
 		                {
 			                user.role !== 'viewer' && <div>
 				                <Popconfirm
-					                title="Apakah Anda yakin ingin menghapus?"
+					                title={`Apakah Anda yakin ingin menghapus ${record.kode}?`}
 					                onConfirm={() => deleteData(record.kode)}
 					                okType="primary"
 					                okButtonProps={{loading: confirmLoading}}

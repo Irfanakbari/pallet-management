@@ -15,10 +15,10 @@ async function handler(req, res) {
 			try {
 				const kode = req.query.kode;
 				const pallet = await Pallet.findByPk(kode)
-				let destinations;
+				let destinations = [];
 				destinations = await Destination.findAll({
 					where: {
-						part: pallet.dataValues.part
+						part: pallet.dataValues.part ?? pallet.part
 					}
 				});
 
