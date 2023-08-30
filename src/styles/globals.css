@@ -9,10 +9,12 @@
 .ant-btn-primary {
     background-color: dodgerblue;
 }
+
 @media print {
     @page {
         margin: 1cm;
     }
+
     .print-header {
         display: flex;
         justify-content: space-between;
@@ -24,10 +26,12 @@
         background-color: #3da0e3;
         color: white;
     }
-    .print-table{
-        font-size:11px;
+
+    .print-table {
+        font-size: 11px;
     }
-    .print-table tr td{
+
+    .print-table tr td {
         padding: 2px 0 !important;
     }
 }
@@ -39,6 +43,7 @@
 ::-webkit-scrollbar-thumb {
     background-color: #888; /* Warna thumb (bagian yang dapat di-drag) */
 }
+
 .page-break {
     page-break-before: always;
 }

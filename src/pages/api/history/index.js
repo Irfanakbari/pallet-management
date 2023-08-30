@@ -31,7 +31,7 @@ async function handler(req, res) {
 					status
 				} = req.query;
 				const page = parseInt(req.query.page) || 1; // Halaman saat ini (default: 1)
-				const limit = parseInt(req.query.limit) || 50; // Batasan data per halaman (default: 10)
+				const limit = parseInt(req.query.limit) || 30; // Batasan data per halaman (default: 10)
 				// Menghitung offset berdasarkan halaman dan batasan data
 				const offset = (page - 1) * limit;
 

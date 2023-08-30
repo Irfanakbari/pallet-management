@@ -11,9 +11,9 @@ import {modalState} from "@/context/states";
 import DetailPalletSlow from "@/components/Modal/DetailPalletSlow";
 import axiosInstance from "@/utils/interceptor";
 import {FullScreen, useFullScreenHandle} from "react-full-screen";
-import {Alert, Progress, Typography} from "antd";
+import {Alert} from "antd";
 import {MdPallet} from "react-icons/md";
-import {GiAutoRepair, GiServerRack} from "react-icons/gi";
+import {GiAutoRepair} from "react-icons/gi";
 
 export default function DashboardAdmin() {
 	const [history, setHistory] = useState([])
@@ -27,8 +27,6 @@ export default function DashboardAdmin() {
 		repair: '-',
 		mendep: [],
 		totalMendep: 0,
-		memory: 0,
-		cpuUsage: 0
 	})
 	const [dataChart1, setDataChart1] = useState([])
 	const [dataChart2, setDataChart2] = useState([])
@@ -55,8 +53,6 @@ export default function DashboardAdmin() {
 				repair: response.data['data']['totalPalletRepair'] ?? '-',
 				totalMendep: response.data['data']['totalPaletMendep'] ?? 0,
 				mendep: response.data['data']['paletMendep'] ?? [],
-				memory: response.data['data']['load']['memoryUsage'] ?? 0,
-				cpuUsage: response.data['data']['load']['cpuUsage'] ?? 0
 			})
 			setHistory(response.data['data']['historyPallet'] ?? [])
 			setDataChart1(response.data.data['stokPart'] ?? [])
@@ -193,40 +189,6 @@ export default function DashboardAdmin() {
 							</div>
 							<div className="ml-auto">
 								<GiAutoRepair size={80} color="orange"/>
-							</div>
-						</Card>
-						<Card className={`flex bg-purple-500`}>
-							<div>
-								<Text className={`text-xl text-white`}>Server Load</Text>
-								<Metric className={`font-bold text-white`}>
-									<div className={'gap-3 flex items-center'}>
-										<Typography.Text className={'!text-white'} level={5}>CPU</Typography.Text>
-										<Progress
-											percent={cardInfo.cpuUsage ?? 0}
-											steps={10}
-											className={'!text-white'}
-											size={'small'}
-											showInfo={true}
-											trailColor={'gray'}
-											strokeColor={'blue'}
-										/>
-									</div>
-									<div className={'gap-3 flex items-center'}>
-										<Typography.Text className={'!text-white'} level={5}>RAM</Typography.Text>
-										<Progress
-											percent={cardInfo.memory ?? 0}
-											steps={10}
-											className={'!text-white'}
-											size={'small'}
-											showInfo={true}
-											trailColor={'gray'}
-											strokeColor={'blue'}
-										/>
-									</div>
-								</Metric>
-							</div>
-							<div className="ml-auto">
-								<GiServerRack size={80} color="indigo"/>
 							</div>
 						</Card>
 					</div>

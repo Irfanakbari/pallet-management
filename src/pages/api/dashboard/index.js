@@ -439,13 +439,12 @@ async function handler(req, res) {
 					}
 				})
 
-				const load = await getSystemLoad()
 
 				if (req.user.role === 'super') {
 					const customerPallets = await Promise.all(customerPromises);
 					const departmentPallets = await Promise.all(departmentPromises);
 					const partPallets = await Promise.all(partPromises);
-
+					const load = await getSystemLoad()
 					res.status(200).json({
 						data: {
 							stokDepartment: departmentPallets,
@@ -475,7 +474,6 @@ async function handler(req, res) {
 							historyPallet,
 							totalPaletMendep,
 							paletMendep,
-							load
 						}
 					});
 				}
