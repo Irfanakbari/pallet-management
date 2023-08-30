@@ -231,6 +231,7 @@ export default function Dashboard() {
 						{/*   </div>*/}
 						{/*</Card>*/}
 						<Chart1 data={dataChart1}/>
+						{/*<Chart4 data={dataChart4}/>*/}
 					</div>
 					<Card className={`w-full overflow-x-scroll mb-6`}>
 						<Title>Riwayat In/Out Pallet</Title>
