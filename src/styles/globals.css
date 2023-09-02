@@ -43,6 +43,7 @@
 
 ::-webkit-scrollbar {
     width: 5px; /* Atur lebar scrollbar */
+    height: 5px; /* Atur tinggi scrollbar horizontal */
 }
 
 ::-webkit-scrollbar-thumb {

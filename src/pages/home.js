@@ -7,29 +7,32 @@ import {dataState, useStoreTab} from "@/context/states";
 import {showErrorToast, showSuccessToast} from "@/utils/toast";
 import {laporan, master, master2, stockOpname} from "@/utils/constants";
 import HeadTitle from "@/components/Head/HeadTitle";
-import Customer from "@/components/Page/Master/Customer/Customer";
-import Dashboard from "@/components/Page/Dashboard";
-import Pallet from "@/components/Page/Master/Pallet/Pallet";
+import MainMenu from "@/components/MainMenu/MainMenu";
+import axiosInstance from "@/utils/interceptor";
+import {Result} from "antd";
+import DataSO from "@/components/Page/StockOpname/DataSO/DataSO";
+import LapStokOpname from "@/components/Page/Laporan/LapStokOpname/LapStokOpname";
+import StockOpname from "@/components/Page/StockOpname/StockOpname/StockOpname";
 import LapRiwayat from "@/components/Page/Laporan/LapRiwayat/LapRiwayat";
-import LapMaintenance from "@/components/Page/Laporan/LapMaintenance/LapMaintenance";
-import User from "@/components/Page/Master/User/User";
+import Dashboard from "@/components/Page/Dashboard";
+import DashboardAdmin from "@/components/Page/DashboardAdmin";
+import Department from "@/components/Page/Master/Department/Department";
+import Customer from "@/components/Page/Master/Customer/Customer";
 import Vehicle from "@/components/Page/Master/Vehicle/Vehicle";
 import Part from "@/components/Page/Master/Part/Part";
-import MainMenu from "@/components/MainMenu/MainMenu";
-import Department from "@/components/Page/Master/Department/Department";
-import DashboardAdmin from "@/components/Page/DashboardAdmin";
-import LapStok from "@/components/Page/Laporan/LapStok/LapStok";
-import axiosInstance from "@/utils/interceptor";
 import Destination from "@/components/Page/Master/Destination/Destination";
-import {Result} from "antd";
-import StockOpname from "@/components/Page/StockOpname/StockOpname/StockOpname";
-import LapStokOpname from "@/components/Page/Laporan/LapStokOpname/LapStokOpname";
-import DataSO from "@/components/Page/StockOpname/DataSO/DataSO";
+import Pallet from "@/components/Page/Master/Pallet/Pallet";
+import LapMaintenance from "@/components/Page/Laporan/LapMaintenance/LapMaintenance";
+import LapStok from "@/components/Page/Laporan/LapStok/LapStok";
+import User from "@/components/Page/Master/User/User";
+
 
 export default function Home() {
+
 	const {listTab, setCloseTab, activeMenu, setActiveMenu} = useStoreTab();
 	const {setCustomer, setVehicle, setPart, setListDepartment, user, setUser} = dataState();
 	const router = useRouter();
+
 
 	useEffect(() => {
 		getCurrentUser();
@@ -80,18 +83,20 @@ export default function Home() {
 						}
 						<MainMenu data={laporan} title={'Laporan'}/>
 						{
-							user.role === 'super' && <MainMenu data={stockOpname} title={'Stock Opname'}/>
+							user.role === 'super' &&
+							<MainMenu data={stockOpname} title={'Stock Opname'}/>
 						}
 					</div>
 				</div>
-				<div className={`bg-base w-full mt-2 flex pt-1 px-1`}>
+				<div className={`bg-base w-full mt-2 flex pt-1 px-1`} style={{maxHeight: '200px', overflowY: 'auto'}}>
 					{
 						listTab.map((e, index) => {
 							return (
 								<div
 									key={index}
 									onClick={() => setActiveMenu(e)}
-									className={`${activeMenu === e ? "bg-white text-black" : "text-white"} flex items-center bg-[#2589ce] py-1 px-5 text-sm font-bold mr-2 hover:bg-white hover:text-black hover:cursor-pointer`}>
+									className={`${activeMenu === e ? "bg-white text-black" : "text-white"} flex items-center bg-[#2589ce] py-1 px-5 text-sm font-bold mr-2 hover:bg-white hover:text-black hover:cursor-pointer`}
+									style={{flexShrink: 0}}>
 									{e} {
 									e !== 'Dashboard' &&
 									<ImCross className={`ml-2`} size={10} onClick={() => setCloseTab(e)}/>
@@ -101,6 +106,7 @@ export default function Home() {
 						})
 					}
 				</div>
+
 				<div className="w-full bg-white p-2 h-full">
 					{
 						(user.role !== 'operator') ? <div className="bg-[#EBEBEB] p-2 h-full">
