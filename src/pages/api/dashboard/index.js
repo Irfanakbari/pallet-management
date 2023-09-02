@@ -10,6 +10,7 @@ import Department from "@/models/Department";
 import Part from "@/models/Part";
 import logger from "@/utils/logger";
 import getSystemLoad from "@/utils/load_server";
+import StokOpname from "@/models/StokOpname";
 
 async function handler(req, res) {
 	switch (req.method) {
@@ -439,6 +440,11 @@ async function handler(req, res) {
 					}
 				})
 
+				const isSo = await StokOpname.count({
+					where: {
+						status: 1
+					}
+				})
 
 				if (req.user.role === 'super') {
 					const customerPallets = await Promise.all(customerPromises);
@@ -457,7 +463,8 @@ async function handler(req, res) {
 							historyPallet,
 							totalPaletMendep,
 							paletMendep,
-							load
+							load,
+							isSo: isSo > 0
 						}
 					});
 				} else {
@@ -474,6 +481,7 @@ async function handler(req, res) {
 							historyPallet,
 							totalPaletMendep,
 							paletMendep,
+							isSo: isSo > 0
 						}
 					});
 				}

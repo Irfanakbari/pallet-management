@@ -4,7 +4,7 @@ export default function Chart2({data,}) {
 	return (<Card className={``}>
 		<Title>Diagram Per Customer</Title>
 		<BarChart
-			className={`mt-2 dark`}
+			className={`mt-2`}
 			data={data}
 			index="customer"
 			layout={'horizontal'}

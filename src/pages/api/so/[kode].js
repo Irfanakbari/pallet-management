@@ -1,0 +1,113 @@
+import checkCookieMiddleware from "@/pages/api/middleware";
+import logger from "@/utils/logger";
+import StokOpname from "@/models/StokOpname";
+
+async function handler(req, res) {
+	switch (req.method) {
+		case 'DELETE':
+			if (req.user.role !== 'super') {
+				return res.status(401).json({
+					ok: false,
+					data: "Role must be Superadmin"
+				});
+			}
+			try {
+				const soId = req.query.kode; // Anggap req.body.id berisi ID pelanggan yang akan dihapus
+				await StokOpname.destroy({
+					where: {
+						kode: soId
+					}
+				});
+				res.status(200).json({
+					ok: true,
+					data: "SO deleted successfully"
+				});
+			} catch (e) {
+				logger.error({
+					message: e.message,
+					path: req.url, // Add the path as metadata
+				});
+				res.status(500).json({
+					ok: false,
+					data: "Internal Server Error"
+				});
+			}
+			break;
+		case 'PUT':
+			if (req.user.role !== 'super') {
+				return res.status(401).json({
+					ok: false,
+					data: "Role must be Superadmin"
+				});
+			}
+			try {
+				const soId = req.query.kode; // Anggap req.body.id berisi ID pelanggan yang akan dihapus
+				const newSo = req.body; // Anggap req.body berisi data pelanggan baru
+
+				// Cek apakah ada StokOpname aktif
+				const activeStokOpname = await StokOpname.findOne({
+					where: {
+						status: 1,
+					},
+				});
+
+				if (activeStokOpname && newSo.status === 1) {
+					// Jika ada StokOpname aktif dan Anda mencoba membuat yang baru aktif, tolak pembaruan
+					return res.status(400).json({
+						ok: false,
+						data: "An active StokOpname already exists. You cannot create a new active one while another is active.",
+					});
+				}
+
+				// Pertama-tama, jika status baru adalah aktif (1), nonaktifkan semua StokOpname yang ada
+				if (newSo.status === 1) {
+					await StokOpname.update(
+						{status: 0},
+						{
+							where: {
+								status: 1, // Hanya nonaktifkan yang aktif
+							},
+						}
+					);
+				}
+
+				// Selanjutnya, jika status baru adalah aktif (1), buat StokOpname baru dengan status aktif
+				if (newSo.status === 1) {
+					await StokOpname.create(newSo);
+				} else {
+					// Jika status baru adalah non-aktif (0), cukup perbarui StokOpname yang ada dengan data yang diberikan
+					await StokOpname.update(
+						newSo,
+						{
+							where: {
+								kode: soId,
+							},
+						}
+					);
+				}
+
+				res.status(201).json({
+					ok: true,
+					data: "Success"
+				});
+			} catch (e) {
+				logger.error({
+					message: e.message,
+					path: req.url, // Add the path as metadata
+				});
+				res.status(500).json({
+					ok: false,
+					data: "Internal Server Error"
+				});
+			}
+			break;
+		default:
+			res.status(405).json({
+				ok: false,
+				data: "Method Not Allowed"
+			});
+	}
+}
+
+const protectedAPIHandler = checkCookieMiddleware(handler);
+export default protectedAPIHandler;

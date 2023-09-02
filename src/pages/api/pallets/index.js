@@ -64,12 +64,18 @@ async function handler(req, res) {
 					pallets = await Pallet.findAndCountAll({
 						where: whereClause,
 						include: [Vehicle, Customer, Part],
+						attributes: {
+							exclude: ['so']
+						},
 						limit,
 						offset,
 					});
 				} else {
 					pallets = await Pallet.findAndCountAll({
 						where: whereClause,
+						attributes: {
+							exclude: ['so']
+						},
 						include: [Vehicle, Customer, Part],
 					});
 				}

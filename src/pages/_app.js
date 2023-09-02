@@ -7,6 +7,7 @@ import LoadingOverlay from '@speedy4all/react-loading-overlay';
 import 'react-tooltip/dist/react-tooltip.css'
 import {ConfigProvider} from "antd";
 // import 'antd/dist/reset.css';
+import idId from 'antd/locale/id_ID';
 
 export default function App({Component, pageProps}) {
 	const [loading, setLoading] = useState(false)
@@ -32,7 +33,7 @@ export default function App({Component, pageProps}) {
 
 
 	return (
-		<ConfigProvider>
+		<ConfigProvider locale={idId}>
 			<LoadingOverlay
 				active={loading}
 				spinner
