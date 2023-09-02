@@ -30,10 +30,19 @@ async function handler(req, res) {
 					}
 				})
 
+				const formattedHistories = histories.map((history) => {
+					const timestamp = new Date(history.timestamp);
+					const formattedTimestamp = `${String(timestamp.getHours()).padStart(2, '0')}:${String(
+						timestamp.getMinutes()
+					).padStart(2, '0')}:${String(timestamp.getSeconds()).padStart(2, '0')}`;
+					return {...history.toJSON(), timestamp: formattedTimestamp};
+				});
+
 				res.status(200).json({
 					ok: true,
-					data: histories,
+					data: formattedHistories,
 				});
+
 			} catch (e) {
 				logger.error({
 					message: e.message,

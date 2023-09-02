@@ -30,6 +30,7 @@ export default function Dashboard() {
 		totalMendep: 0,
 		memory: 0,
 		cpuUsage: 0,
+		isSo: false,
 	})
 	const [dataChart1, setDataChart1] = useState([])
 	const [dataChart2, setDataChart2] = useState([])
@@ -56,6 +57,7 @@ export default function Dashboard() {
 				mendep: response.data['data']['paletMendep'] ?? [],
 				memory: response.data['data']['load']['memoryUsage'] ?? 0,
 				cpuUsage: response.data['data']['load']['cpuUsage'] ?? 0,
+				isSo: response.data['data']['isSo'] ?? false,
 			})
 			setHistory(response.data['data']['historyPallet'] ?? [])
 			setDataChart1(response.data.data['stokPart'] ?? [])
@@ -111,6 +113,15 @@ export default function Dashboard() {
 					paddingBottom: handle.active ? '8vh' : '0'
 				}}>
 					{
+						cardInfo.isSo && (<Alert
+							className={`mb-2 bg-yellow-500`}
+							message={(
+								<h3 className={`text-xl text-white font-semibold`}>Mode Stock Opname Sedang Aktif</h3>)}
+							type="info"
+							// showIcon
+						/>)
+					}
+					{
 						cardInfo.mendep.length > 0 && (<Alert
 							className={`mb-2 bg-red-500`}
 							message={(
@@ -122,7 +133,7 @@ export default function Dashboard() {
 										setSelectedCustomer(e['Pallet.Customer.name'])
 										setModal(true)
 									}}
-									className={`cursor-pointer text-green-500 font-semibold hover:text-black`}>
+									className={`cursor-pointer text-gray-500 font-semibold hover:text-black`}>
                                         {`${e['Pallet.Customer.name']} = ${e.total} Pallet, `}
                                      </span>
 							))}

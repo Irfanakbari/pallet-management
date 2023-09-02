@@ -10,6 +10,11 @@
     background-color: dodgerblue;
 }
 
+.ant-table-tbody > tr.ant-table-row:hover > td,
+.ant-table-tbody > tr > td.ant-table-cell-row-hover {
+    background-color: white !important;
+}
+
 @media print {
     @page {
         margin: 1cm;

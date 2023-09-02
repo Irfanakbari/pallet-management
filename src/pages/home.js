@@ -5,7 +5,7 @@ import {getCookie} from "cookies-next";
 import {useRouter} from "next/router";
 import {dataState, useStoreTab} from "@/context/states";
 import {showErrorToast, showSuccessToast} from "@/utils/toast";
-import {laporan, master, master2} from "@/utils/constants";
+import {laporan, master, master2, stockOpname} from "@/utils/constants";
 import HeadTitle from "@/components/Head/HeadTitle";
 import Customer from "@/components/Page/Master/Customer/Customer";
 import Dashboard from "@/components/Page/Dashboard";
@@ -22,6 +22,9 @@ import LapStok from "@/components/Page/Laporan/LapStok/LapStok";
 import axiosInstance from "@/utils/interceptor";
 import Destination from "@/components/Page/Master/Destination/Destination";
 import {Result} from "antd";
+import StockOpname from "@/components/Page/StockOpname/StockOpname/StockOpname";
+import LapStokOpname from "@/components/Page/Laporan/LapStokOpname/LapStokOpname";
+import DataSO from "@/components/Page/StockOpname/DataSO/DataSO";
 
 export default function Home() {
 	const {listTab, setCloseTab, activeMenu, setActiveMenu} = useStoreTab();
@@ -76,6 +79,9 @@ export default function Home() {
 								<MainMenu data={master} title={'Master Data'}/>
 						}
 						<MainMenu data={laporan} title={'Laporan'}/>
+						{
+							user.role === 'super' && <MainMenu data={stockOpname} title={'Stock Opname'}/>
+						}
 					</div>
 				</div>
 				<div className={`bg-base w-full mt-2 flex pt-1 px-1`}>
@@ -111,6 +117,10 @@ export default function Home() {
 								{activeMenu === "Lap. Maintenance Pallet" && <LapMaintenance/>}
 								{activeMenu === "Lap. Stok Pallet" && <LapStok/>}
 								{activeMenu === "Users" && <User/>}
+								{activeMenu === "Stock Opname" && <StockOpname/>}
+								{activeMenu === "Lap. Stok Opname" && <LapStokOpname/>}
+								{activeMenu === "Data SO" && <DataSO/>}
+
 							</div>
 							:
 							<center className={`flex items-center justify-center h-full`}>

@@ -27,6 +27,7 @@ export default function DashboardAdmin() {
 		repair: '-',
 		mendep: [],
 		totalMendep: 0,
+		isSo: false
 	})
 	const [dataChart1, setDataChart1] = useState([])
 	const [dataChart2, setDataChart2] = useState([])
@@ -53,6 +54,7 @@ export default function DashboardAdmin() {
 				repair: response.data['data']['totalPalletRepair'] ?? '-',
 				totalMendep: response.data['data']['totalPaletMendep'] ?? 0,
 				mendep: response.data['data']['paletMendep'] ?? [],
+				isSo: response.data['data']['isSo'] ?? false,
 			})
 			setHistory(response.data['data']['historyPallet'] ?? [])
 			setDataChart1(response.data.data['stokPart'] ?? [])
@@ -109,6 +111,15 @@ export default function DashboardAdmin() {
 					paddingBottom: handle.active ? '8vh' : '0'
 				}}>
 					{
+						cardInfo.isSo && (<Alert
+							className={`mb-2 bg-yellow-500`}
+							message={(
+								<h3 className={`text-xl text-white font-semibold`}>Mode Stock Opname Sedang Aktif</h3>)}
+							type="info"
+							// showIcon
+						/>)
+					}
+					{
 						cardInfo.mendep.length > 0 && (<Alert
 							className={`mb-2 bg-red-500`}
 							message={(
@@ -154,7 +165,7 @@ export default function DashboardAdmin() {
 					{/*    </div>*/}
 					{/*}*/}
 					<div
-						className={`grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 pt-2 grid gap-5 text-white mb-5`}>
+						className={`grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-2 grid gap-5 text-white mb-5`}>
 						<Card className={`flex bg-blue-500`}>
 							<div>
 								<Text className={`text-xl text-white`}>Total Stok</Text>

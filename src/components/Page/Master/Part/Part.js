@@ -7,7 +7,7 @@ import AddModalLayout from "@/components/Page/Master/Part/AddModal";
 import Head from "next/head";
 import axiosInstance from "@/utils/interceptor";
 import {Form, Popconfirm, Spin, Table} from "antd";
-import EditableCell from "@/components/Page/Master/Customer/EditCell";
+import EditableCell from "@/components/Page/Master/Part/EditCell";
 
 export default function Part() {
 	const {setPart, listPart, listVehicle, listCustomer} = dataState()

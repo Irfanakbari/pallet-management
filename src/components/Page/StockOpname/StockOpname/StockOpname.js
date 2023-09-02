@@ -3,14 +3,15 @@ import React, {useEffect, useState} from "react";
 import {showErrorToast, showSuccessToast} from "@/utils/toast";
 import {dataState, modalState} from "@/context/states";
 import {useForm} from "react-hook-form";
-import AddModalLayout from "@/components/Page/Master/Vehicle/AddModal";
 import Head from "next/head";
 import axiosInstance from "@/utils/interceptor";
 import {Form, Popconfirm, Spin, Table} from "antd";
-import EditableCell from "@/components/Page/Master/Vehicle/EditCell";
+import AddModalLayout from "@/components/Page/StockOpname/StockOpname/AddModal";
+import EditableCell from "@/components/Page/StockOpname/StockOpname/EditCell";
+import dayjs from "dayjs";
 
-export default function Vehicle() {
-	const {setVehicle, listVehicle, listCustomer, listDepartment} = dataState()
+export default function StockOpname() {
+	const {listDepartment, setSO, listSO} = dataState()
 	const {setModalAdd, modalAdd} = modalState()
 	const [form] = Form.useForm();
 	const [editingKey, setEditingKey] = useState('');
@@ -30,8 +31,8 @@ export default function Vehicle() {
 
 	const fetchData = () => {
 		setLoading(true)
-		axiosInstance.get('/api/vehicle').then(response => {
-			setVehicle(response.data['data']);
+		axiosInstance.get('/api/so').then(response => {
+			setSO(response.data['data']);
 		}).catch(() => {
 			showErrorToast("Gagal Fetch Data");
 		}).finally(() => {
@@ -40,11 +41,11 @@ export default function Vehicle() {
 	};
 
 	const submitData = async (data) => {
-		axiosInstance.post('/api/vehicle', data).then(() => {
+		axiosInstance.post('/api/so', data).then(() => {
 			showSuccessToast("Sukses Simpan Data");
 			fetchData()
-		}).catch(() => {
-			showErrorToast("Gagal Simpan Data");
+		}).catch((e) => {
+			showErrorToast(e.response.data.data);
 		}).finally(() => {
 			setModalAdd(false)
 			reset()
@@ -53,7 +54,7 @@ export default function Vehicle() {
 
 	const deleteData = async (e) => {
 		setConfirmLoading(true)
-		axiosInstance.delete('/api/vehicle/' + e).then(() => {
+		axiosInstance.delete('/api/so/' + e).then(() => {
 			showSuccessToast("Sukses Hapus Data");
 		}).catch(() => {
 			showErrorToast("Gagal Hapus Data");
@@ -63,9 +64,9 @@ export default function Vehicle() {
 		})
 	}
 
-	const onChange = (pagination, filters, sorter, extra) => {
-		console.log('params', pagination, filters, sorter, extra);
-	};
+	// const onChange = (pagination, filters, sorter, extra) => {
+	// 	console.log('params', pagination, filters, sorter, extra);
+	// };
 
 	const edit = (record) => {
 		form.setFieldsValue({
@@ -82,7 +83,7 @@ export default function Vehicle() {
 	const save = async (key) => {
 		try {
 			const row = await form.validateFields();
-			const newData = [...listVehicle];
+			const newData = [...listSO];
 			const index = newData.findIndex((item) => key === item.kode);
 			if (index > -1) {
 				const item = newData[index];
@@ -90,14 +91,15 @@ export default function Vehicle() {
 					...item,
 					...row
 				});
-				await axiosInstance.put(`/api/vehicle/${item.kode}`, row);
+				await axiosInstance.put(`/api/so/${item.kode}`, row);
 				showSuccessToast('Sukses Edit Data');
 				await fetchData();
 			} else {
 				newData.push(row);
-				setVehicle(newData);
+				setSO(newData);
 			}
 		} catch (errInfo) {
+			showErrorToast("Gagal Simpan Data");
 			console.log('Validate Failed:', errInfo);
 		} finally {
 			setEditingKey('');
@@ -112,50 +114,85 @@ export default function Vehicle() {
 			render: (_, __, index) => index + 1
 		},
 		{
-			title: 'Kode Vehicle',
+			title: 'Kode SO',
 			dataIndex: 'kode',
 			sorter: (a, b) => a.kode.localeCompare(b.kode),
 			// width: '30%'
 		},
 		{
-			title: 'Nama Vehicle',
-			dataIndex: 'name',
+			title: 'Tanggal Mulai SO',
+			dataIndex: 'tanggal_so',
 			// width: '40%',
-			sorter: (a, b) => a.name.localeCompare(b.name),
-			editable: true,
-			filterMode: 'menu',
-			filterSearch: true,
-			onFilter: (value, record) => record.name.startsWith(value),
+			// sorter: (a, b) => a.name.localeCompare(b.name),
+			// onFilter: (value, record) => record.name.startsWith(value),
+			render: (_, record) => {
+				return record['tanggal_so']
+					? dayjs(record['tanggal_so']).locale('id').format('DD MMMM YYYY HH:mm')
+					: '-'
+			}
+		},
+		// {
+		// 	title: 'Department',
+		// 	dataIndex: 'department',
+		// 	// width: '40%',
+		// 	sorter: (a, b) => a.customer.localeCompare(b.customer),
+		// 	// editable: true,
+		// 	filters: listDepartment.map(e => (
+		// 		{
+		// 			text: e.name,
+		// 			value: e.kode
+		// 		}
+		// 	)),
+		// 	onFilter: (value, record) => record.department.indexOf(value) === 0,
+		// 	render: (_, record) => "Produksi " + record.department
+		// },
+		{
+			title: 'Tanggal Tutup SO',
+			dataIndex: 'tanggal_so_closed',
+			// width: '40%',
+			// sorter: (a, b) => a.department.localeCompare(b.department),
+			// onFilter: (value, record) => record.department.indexOf(value) === 0,
+			// render: (_, record) => "Produksi " + record.department
+			render: (_, record) => {
+				return record['tanggal_so_closed']
+					? dayjs(record['tanggal_so_closed']).locale('id').format('DD MMMM YYYY HH:mm')
+					: '-'
+			}
 		},
 		{
-			title: 'Customer',
-			dataIndex: 'customer',
+			title: 'Dibuat Oleh',
+			dataIndex: 'created_by',
 			// width: '40%',
-			sorter: (a, b) => a.customer.localeCompare(b.customer),
-			// editable: true,
-			filters: listCustomer.map(e => (
-				{
-					text: e.name,
-					value: e.kode
-				}
-			)),
-			onFilter: (value, record) => record.customer.indexOf(value) === 0,
-			render: (_, record) => record.customer + " - " + record['Customer'].name
-		},
-		{
-			title: 'Department',
-			dataIndex: 'department',
-			// width: '40%',
-			sorter: (a, b) => a.department.localeCompare(b.department),
-			filters: listDepartment.map(e => (
-				{
-					text: e.name,
-					value: e.kode
-				}
-			)),
-			onFilter: (value, record) => record.department.indexOf(value) === 0,
+			// sorter: (a, b) => a.department.localeCompare(b.department),
+			// onFilter: (value, record) => record.department.indexOf(value) === 0,
 			// editable: true
-			render: (_, record) => "Produksi " + record.department
+			// render: (_, record) => "Produksi " + record.department
+
+		},
+		{
+			title: 'Status',
+			dataIndex: 'status',
+			// width: '40%',
+			// sorter: (a, b) => a.department.localeCompare(b.department),
+			// onFilter: (value, record) => record.department.indexOf(value) === 0,
+			editable: true,
+			inputType: 'select', // Kolom ini menggunakan select
+			options: [
+				{value: 1, label: 'Dibuka'},
+				{value: 0, label: 'Ditutup'}
+			],
+			render: (_, record) => (record.status === 1) ? 'Dibuka' : 'Ditutup'
+
+		},
+		{
+			title: 'Catatan',
+			dataIndex: 'catatan',
+			// width: '40%',
+			// sorter: (a, b) => a.department.localeCompare(b.department),
+			// onFilter: (value, record) => record.department.indexOf(value) === 0,
+			inputType: 'text', // Kolom ini menggunakan input teks
+			editable: true
+			// render: (_, record) => (record.status ===1 ) ? 'Dibuka' : 'Ditutup'
 
 		},
 		{
@@ -211,7 +248,8 @@ export default function Vehicle() {
 			...col,
 			onCell: (record) => ({
 				record,
-				inputType: 'text',
+				inputType: col.inputType || 'text', // Gunakan inputType yang diberikan atau default 'text'
+				options: col.options || [],
 				dataIndex: col.dataIndex,
 				title: col.title,
 				editing: isEditing(record)
@@ -222,7 +260,7 @@ export default function Vehicle() {
 	return (
 		<>
 			<Head>
-				<title>Vehicle | PT Vuteq Indonesia</title>
+				<title>Stock Opname | PT Vuteq Indonesia</title>
 			</Head>
 			<div className={`bg-white h-full flex flex-col`}>
 				{modalAdd && <AddModalLayout onSubmit={handleSubmit(submitData)} reset={reset} register={register}/>}
@@ -257,7 +295,8 @@ export default function Vehicle() {
 							}}
 							style={{
 								width: "100%"
-							}} rowKey={'kode'} columns={mergedColumns} dataSource={listVehicle} onChange={onChange}
+							}} rowKey={'kode'} columns={mergedColumns} dataSource={listSO}
+							// onChange={onChange}
 							size={'small'} rowClassName="editable-row"
 							pagination={false}/>
 					</Form>

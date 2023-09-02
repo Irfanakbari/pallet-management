@@ -9,13 +9,15 @@ const dataState = create((set) => ({
 	listDepartment: [],
 	listDestination: [],
 	user: [],
+	listSO: [],
 	setCustomer: (data) => set({listCustomer: data}),
 	setVehicle: (data) => set({listVehicle: data}),
 	setPart: (data) => set({listPart: data}),
 	setPallet: (data) => set({listPallet: data}),
 	setUser: (data) => set({user: data}),
 	setListDepartment: (data) => set({listDepartment: data}),
-	setListDestination: (data) => set({listDestination: data})
+	setListDestination: (data) => set({listDestination: data}),
+	setSO: (data) => set({listSO: data}),
 }));
 
 // State untuk pengaturan tab
