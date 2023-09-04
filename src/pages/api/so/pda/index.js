@@ -10,15 +10,13 @@ import DetailSO from "@/models/DetailSO";
 async function handler(req, res) {
 	switch (req.method) {
 		case 'POST':
-			if (req.user.role !== 'operator') {
+			if (req.user.role !== 'so') {
 				return res.status(401).json({
 					success: false,
-					error: "Role must be Operator"
+					data: "Akun Ini Tidak Di Izinkan Melakukan SO"
 				});
 			}
-
 			const {kode} = req.body;
-
 			try {
 				await connection.transaction(async (t) => {
 					const pallet = await Pallet.findOne({
