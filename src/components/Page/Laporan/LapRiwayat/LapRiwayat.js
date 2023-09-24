@@ -121,6 +121,11 @@ export default function LapRiwayat() {
 				width: 20,
 			},
 			{
+				header: "Destinasi",
+				key: "destinasi",
+				width: 20,
+			},
+			{
 				header: "Vehicle",
 				key: "vehicle",
 				width: 24,
@@ -158,6 +163,7 @@ export default function LapRiwayat() {
 				customer: `${item['Pallet']['Customer'].kode} - ${item['Pallet']['Customer'].name}`,
 				vehicle: `${item['Pallet']['Vehicle'].kode} - ${item['Pallet']['Vehicle'].name}`,
 				part: `${item['Pallet']['Part'].kode} - ${item['Pallet']['Part'].name}`,
+				destinasi: item.destination,
 				keluar: item['keluar'] ? dayjs(item['keluar']).locale('id').format('DD MMMM YYYY HH:mm') : '-',
 				user_out: item['user_out'],
 				masuk: item['masuk'] ? dayjs(item['masuk']).locale('id').format('DD MMMM YYYY HH:mm') : '-',
