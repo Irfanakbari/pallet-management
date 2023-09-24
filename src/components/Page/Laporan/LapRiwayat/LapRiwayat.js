@@ -99,6 +99,11 @@ export default function LapRiwayat() {
 			pattern: 'solid',
 			fgColor: {argb: '0366fc'}
 		}
+		sheet.getCell('J1').fill = {
+			type: 'pattern',
+			pattern: 'solid',
+			fgColor: {argb: '0366fc'}
+		}
 		sheet.getRow(1).font = {
 			size: 12,
 			bold: true,
@@ -208,7 +213,8 @@ export default function LapRiwayat() {
 		axiosInstance.get(url)
 		             .then(response => {
 			             setDataHistory(response.data);
-		             })
+						 setFilters(response.data['data']);
+					 })
 		             .catch(() => {
 			             showErrorToast("Gagal Fetch Data");
 		             })
