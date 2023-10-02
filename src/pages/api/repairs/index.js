@@ -5,7 +5,7 @@ import connection from "@/config/database";
 import Customer from "@/models/Customer";
 import Vehicle from "@/models/Vehicle";
 import Part from "@/models/Part";
-import logger from "@/utils/logger";
+
 import {Op} from "sequelize";
 
 async function handler(req, res) {
@@ -95,10 +95,7 @@ async function handler(req, res) {
 					currentPage: parseInt(page),
 				});
 			} catch (e) {
-				logger.error({
-					message: e.message,
-					path: req.url, // Add the path as metadata
-				});
+				
 				res.status(500).json({
 					ok: false,
 					data: "Internal Server Error",
@@ -162,10 +159,7 @@ async function handler(req, res) {
 					});
 				}
 			} catch (e) {
-				logger.error({
-					message: e.message,
-					path: req.url, // Add the path as metadata
-				});
+				
 				res.status(500).json({
 					ok: false,
 					data: "Internal Server Error"

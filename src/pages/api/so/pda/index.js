@@ -1,5 +1,5 @@
 import checkCookieMiddleware from "@/pages/api/middleware";
-import logger from "@/utils/logger";
+
 import Pallet from "@/models/Pallet";
 import Vehicle from "@/models/Vehicle";
 import StokOpname from "@/models/StokOpname";
@@ -75,10 +75,7 @@ async function handler(req, res) {
 				// Redirect ke halaman sukses atau halaman lain yang Anda inginkan
 				return res.status(200).json({success: true, data: `Berhasil`});
 			} catch (e) {
-				logger.error({
-					message: e.message,
-					path: req.url, // Add the path as metadata
-				});
+				
 				res.status(500).json({success: false, data: 'Failed to stock opname'});
 			}
 			break;

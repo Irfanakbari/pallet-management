@@ -1,5 +1,5 @@
 import checkCookieMiddleware from "@/pages/api/middleware";
-import logger from "@/utils/logger";
+
 import StokOpname from "@/models/StokOpname";
 
 async function handler(req, res) {
@@ -23,10 +23,7 @@ async function handler(req, res) {
 					data: "SO deleted successfully"
 				});
 			} catch (e) {
-				logger.error({
-					message: e.message,
-					path: req.url, // Add the path as metadata
-				});
+				
 				res.status(500).json({
 					ok: false,
 					data: "Internal Server Error"
@@ -91,10 +88,7 @@ async function handler(req, res) {
 					data: "Success"
 				});
 			} catch (e) {
-				logger.error({
-					message: e.message,
-					path: req.url, // Add the path as metadata
-				});
+				
 				res.status(500).json({
 					ok: false,
 					data: "Internal Server Error"

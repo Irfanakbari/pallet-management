@@ -5,7 +5,7 @@ import History from "@/models/History";
 import {Op} from "sequelize";
 import moment from "moment";
 import Part from "@/models/Part";
-import logger from "@/utils/logger";
+
 import Vehicle from "@/models/Vehicle";
 
 async function handler(req, res) {
@@ -28,7 +28,7 @@ async function handler(req, res) {
 							},
 							masuk: null
 						},
-						attributes: ['id_pallet'],
+						attributes: ['id_pallet','destination'],
 						include: [
 							{
 								model: Pallet,
@@ -94,10 +94,7 @@ async function handler(req, res) {
 					data: datas
 				});
 			} catch (e) {
-				logger.error({
-					message: e.message,
-					path: req.url, // Add the path as metadata
-				});
+				console.log(e.message)
 				res.status(500).json({error: 'Internal Server Error'});
 			}
 			break;

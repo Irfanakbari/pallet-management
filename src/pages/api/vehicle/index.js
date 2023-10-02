@@ -3,7 +3,7 @@ import checkCookieMiddleware from "@/pages/api/middleware";
 import {Op} from "sequelize";
 import Department from "@/models/Department";
 import Customer from "@/models/Customer";
-import logger from "@/utils/logger";
+
 
 async function handler(req, res) {
 	switch (req.method) {
@@ -39,10 +39,7 @@ async function handler(req, res) {
 					data: vehicles
 				});
 			} catch (e) {
-				logger.error({
-					message: e.message,
-					path: req.url, // Add the path as metadata
-				});
+				
 				res.status(500).json({
 					ok: false,
 					data: "Internal Server Error"
@@ -99,10 +96,7 @@ async function handler(req, res) {
 				// Redirect ke halaman sukses atau halaman lain yang Anda inginkan
 				res.status(200).json({success: true});
 			} catch (e) {
-				logger.error({
-					message: e.message,
-					path: req.url, // Add the path as metadata
-				});
+				
 				res.status(500).json({success: false, error: 'Failed to create line'});
 			}
 			break;

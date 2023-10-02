@@ -1,7 +1,7 @@
 import checkCookieMiddleware from "@/pages/api/middleware";
 import {Op} from "sequelize";
 import TempHistory from "@/models/TempHistoryUser";
-import logger from "@/utils/logger";
+
 
 async function handler(req, res) {
 	switch (req.method) {
@@ -44,10 +44,7 @@ async function handler(req, res) {
 				});
 
 			} catch (e) {
-				logger.error({
-					message: e.message,
-					path: req.url, // Add the path as metadata
-				});
+				
 				res.status(500).json({
 					ok: false,
 					data: "Internal Server Error",

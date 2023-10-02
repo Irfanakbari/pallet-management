@@ -108,6 +108,11 @@ export default function DetailPalletSlow({selected}) {
 													render: (_, record) => (record['Pallet']['Customer']['name'])
 												},
 												{
+													title: 'Destinasi',
+													dataIndex: 'destination',
+													render: (_, record) => (record['destination']?? '-')
+												},
+												{
 													title: 'Last Update',
 													dataIndex: 'last_update',
 													render: (_, record) => (dayjs(record['Pallet']['updated_at']).locale('id').format('DD MMMM YYYY HH:mm'))

@@ -3,7 +3,7 @@ import Customer from "@/models/Customer";
 import Part from "@/models/Part";
 import {Op} from "sequelize";
 import Vehicle from "@/models/Vehicle";
-import logger from "@/utils/logger";
+
 
 async function handler(req, res) {
 	switch (req.method) {
@@ -45,10 +45,7 @@ async function handler(req, res) {
 					data: parts
 				});
 			} catch (e) {
-				logger.error({
-					message: e.message,
-					path: req.url, // Add the path as metadata
-				});
+				
 				res.status(500).json({
 					ok: false,
 					data: "Internal Server Error"
@@ -79,10 +76,7 @@ async function handler(req, res) {
 				});
 				res.status(200).json({success: true});
 			} catch (error) {
-				logger.error({
-					message: e.message,
-					path: req.url, // Add the path as metadata
-				});
+				
 				if (error.name === 'SequelizeUniqueConstraintError') {
 					const field = error.errors[0].path;
 					const message = `Duplikat data pada kolom ${field}`;

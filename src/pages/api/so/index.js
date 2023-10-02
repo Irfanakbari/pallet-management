@@ -1,5 +1,5 @@
 import checkCookieMiddleware from "@/pages/api/middleware";
-import logger from "@/utils/logger";
+
 import StokOpname from "@/models/StokOpname";
 import {customAlphabet} from "nanoid";
 
@@ -35,10 +35,7 @@ async function handler(req, res) {
 					data: sos
 				});
 			} catch (e) {
-				logger.error({
-					message: e.message,
-					path: req.url, // Add the path as metadata
-				});
+				
 				res.status(500).json({
 					ok: false,
 					data: "Internal Server Error"
@@ -82,10 +79,7 @@ async function handler(req, res) {
 
 				res.status(200).json({success: true});
 			} catch (e) {
-				logger.error({
-					message: e.message,
-					path: req.url, // Add the path as metadata
-				});
+				
 				res.status(500).json({success: false, data: 'Failed to create stock opname'});
 			}
 			break;

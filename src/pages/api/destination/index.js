@@ -1,7 +1,7 @@
 import checkCookieMiddleware from "@/pages/api/middleware";
 import Part from "@/models/Part";
 import {Op} from "sequelize";
-import logger from "@/utils/logger";
+
 import Destination from "@/models/Destination";
 import Vehicle from "@/models/Vehicle";
 
@@ -52,10 +52,7 @@ async function handler(req, res) {
 					data: destinatios
 				});
 			} catch (e) {
-				logger.error({
-					message: e.message,
-					path: req.url, // Add the path as metadata
-				});
+				
 				res.status(500).json({
 					ok: false,
 					data: "Internal Server Error"
@@ -77,10 +74,7 @@ async function handler(req, res) {
 				});
 				res.status(200).json({success: true});
 			} catch (error) {
-				logger.error({
-					message: e.message,
-					path: req.url, // Add the path as metadata
-				});
+				
 				res.status(500).json({success: false, error: error.message});
 			}
 			break;

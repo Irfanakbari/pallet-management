@@ -4,7 +4,7 @@ import Vehicle from "@/models/Vehicle";
 import {Op} from "sequelize";
 import checkCookieMiddleware from "@/pages/api/middleware";
 import Part from "@/models/Part";
-import logger from "@/utils/logger";
+
 
 async function handler(req, res) {
 	switch (req.method) {
@@ -91,10 +91,7 @@ async function handler(req, res) {
 					currentPage: page,
 				});
 			} catch (e) {
-				logger.error({
-					message: e.message,
-					path: req.url, // Add the path as metadata
-				});
+				
 				res.status(500).json({
 					ok: false,
 					data: "Internal Server Error",
@@ -167,10 +164,7 @@ async function handler(req, res) {
 				res.status(200).json({success: true});
 
 			} catch (e) {
-				logger.error({
-					message: e.message,
-					path: req.url, // Add the path as metadata
-				});
+				
 				res.status(500).json({success: false, error: 'Failed to save Pallet'});
 			}
 			break;

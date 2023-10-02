@@ -1,6 +1,6 @@
 import checkCookieMiddleware from "@/pages/api/middleware";
 import Department from "@/models/Department";
-import logger from "@/utils/logger";
+
 
 async function handler(req, res) {
 	switch (req.method) {
@@ -18,10 +18,7 @@ async function handler(req, res) {
 					data: departments
 				})
 			} catch (e) {
-				logger.error({
-					message: e.message,
-					path: req.url, // Add the path as metadata
-				});
+				
 				res.status(500).json({
 					ok: false,
 					data: "Internal Server Error"
@@ -43,10 +40,7 @@ async function handler(req, res) {
 					data: department
 				});
 			} catch (e) {
-				logger.error({
-					message: e.message,
-					path: req.url, // Add the path as metadata
-				});
+				
 				res.status(500).json({
 					ok: false,
 					data: "Internal Server Error"

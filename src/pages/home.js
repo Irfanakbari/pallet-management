@@ -88,7 +88,7 @@ export default function Home() {
 						}
 					</div>
 				</div>
-				<div className={`bg-base w-full mt-2 flex pt-1 px-1`} style={{maxHeight: '200px', overflowY: 'auto'}}>
+				<div className={`bg-base w-full mt-2 flex pt-1 px-1`}>
 					{
 						listTab.map((e, index) => {
 							return (

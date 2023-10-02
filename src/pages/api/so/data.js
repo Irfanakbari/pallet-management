@@ -1,7 +1,6 @@
 import Pallet from "@/models/Pallet";
 import {Op} from "sequelize";
 import checkCookieMiddleware from "@/pages/api/middleware";
-import logger from "@/utils/logger";
 import DetailSO from "@/models/DetailSO";
 import Vehicle from "@/models/Vehicle";
 import Customer from "@/models/Customer";
@@ -112,10 +111,6 @@ async function handler(req, res) {
 				});
 
 			} catch (e) {
-				logger.error({
-					message: e.message,
-					path: req.url, // Add the path as metadata
-				});
 				res.status(500).json({
 					ok: false,
 					data: "Internal Server Error",

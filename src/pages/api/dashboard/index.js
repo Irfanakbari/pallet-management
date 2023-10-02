@@ -8,7 +8,7 @@ import moment from "moment";
 import Vehicle from "@/models/Vehicle";
 import Department from "@/models/Department";
 import Part from "@/models/Part";
-import logger from "@/utils/logger";
+
 import getSystemLoad from "@/utils/load_server";
 import StokOpname from "@/models/StokOpname";
 
@@ -486,10 +486,7 @@ async function handler(req, res) {
 					});
 				}
 			} catch (e) {
-				logger.error({
-					message: e.message,
-					path: req.url, // Add the path as metadata
-				});
+				
 				res.status(500).json({error: 'Internal Server Error'});
 			}
 			break;

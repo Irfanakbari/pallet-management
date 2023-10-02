@@ -1,7 +1,7 @@
 import Pallet from "@/models/Pallet";
 import {Op} from "sequelize";
 import checkCookieMiddleware from "@/pages/api/middleware";
-import logger from "@/utils/logger";
+
 
 async function handler(req, res) {
 	switch (req.method) {
@@ -26,10 +26,7 @@ async function handler(req, res) {
 				res.status(200).json({success: true});
 
 			} catch (e) {
-				logger.error({
-					message: e.message,
-					path: req.url, // Add the path as metadata
-				});
+				
 				res.status(500).json({success: false, error: 'Failed to delete pallets'});
 			}
 			break;
