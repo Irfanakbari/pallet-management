@@ -586,8 +586,8 @@ export default function LapRiwayat() {
 						size={'small'}
 						pagination={{
 							total: dataHistory.totalData,
-							defaultPageSize: 30,
-							pageSizeOptions: [30, 50, 100],
+							defaultPageSize: 50,
+							pageSizeOptions: [50, 100, 500, 1000, 1500, 2000],
 							showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`
 						}}/>
 				</div>
