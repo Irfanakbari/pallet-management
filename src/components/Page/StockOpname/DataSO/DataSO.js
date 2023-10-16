@@ -267,13 +267,13 @@ export default function DataSO() {
 						onChange={onChange}
 						size={'small'}
 						rowClassName="editable-row"
-						pagination={false}
-						// pagination={{
-						// 	total: listPallet.totalData,
-						// 	defaultPageSize: 30,
-						// 	pageSizeOptions: [30, 50, 100],
-						// 	showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`
-						// }}
+						// pagination={false}
+						pagination={{
+							total: listPallet.totalData,
+							defaultPageSize: 100,
+							pageSizeOptions: [100, 200, 1000],
+							showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`
+						}}
 					/>
 				</div>
 			</div>

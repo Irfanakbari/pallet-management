@@ -211,6 +211,9 @@ export default function LapStokOpname() {
 							type: 'radio',
 							...rowSelection,
 						}}
+						scroll={{
+							y: "68vh"
+						}}
 						columns={columns}
 						rowKey={'id_so'}
 						bordered={true}

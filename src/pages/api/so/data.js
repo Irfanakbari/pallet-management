@@ -65,7 +65,9 @@ async function handler(req, res) {
 					where: whereClause,
 					// limit,
 					// offset,
-					include: [Vehicle, Customer, Part],
+					include: [Vehicle, Customer, {
+						model: Part,
+					}],
 				});
 
 				const so = await StokOpname.findOne({
