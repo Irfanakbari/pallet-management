@@ -165,16 +165,27 @@ export default function LapRiwayat() {
 			sheet.addRow({
 				no: index + 1,
 				id: item.id_pallet ?? '-',
-				customer: `${item['Pallet']['Customer'].kode} - ${item['Pallet']['Customer'].name ?? '-'}`,
-				vehicle: `${item['Pallet']['Vehicle'].kode} - ${item['Pallet']['Vehicle'].name?? '-'}`,
-				part: `${item['Pallet']['Part'].kode} - ${item['Pallet']['Part'].name?? '-'}`,
-				destinasi: item.destination?? '-',
-				keluar: item['keluar'] ? dayjs(item['keluar']).locale('id').format('DD MMMM YYYY HH:mm') : '-',
-				user_out: item['user_out']?? '-',
-				masuk: item['masuk'] ? dayjs(item['masuk']).locale('id').format('DD MMMM YYYY HH:mm') : '-',
-				user_in: item['user_in']?? '-',
+				customer: item['Pallet']['Customer']
+					? `${item['Pallet']['Customer'].kode} - ${item['Pallet']['Customer'].name ?? '-'}`
+					: '-',
+				vehicle: item['Pallet']['Vehicle']
+					? `${item['Pallet']['Vehicle'].kode} - ${item['Pallet']['Vehicle'].name ?? '-'}`
+					: '-',
+				part: item['Pallet']['Part']
+					? `${item['Pallet']['Part'].kode} - ${item['Pallet']['Part'].name ?? '-'}`
+					: '-',
+				destinasi: item.destination ?? '-',
+				keluar: item['keluar']
+					? dayjs(item['keluar']).locale('id').format('DD MMMM YYYY HH:mm')
+					: '-',
+				user_out: item['user_out'] ?? '-',
+				masuk: item['masuk']
+					? dayjs(item['masuk']).locale('id').format('DD MMMM YYYY HH:mm')
+					: '-',
+				user_in: item['user_in'] ?? '-',
 			});
 		});
+
 		await workbook.xlsx.writeBuffer().then(data => {
 			const blob = new Blob([data], {type: 'application/vnd.openxmlformats-officedocument.spreadsheet.sheet'})
 			const url = window.URL.createObjectURL(blob)
