@@ -165,14 +165,14 @@ export default function LapRiwayat() {
 			sheet.addRow({
 				no: index + 1,
 				id: item.id_pallet ?? '-',
-				customer: item['Pallet']['Customer']
-					? `${item['Pallet']['Customer'].kode} - ${item['Pallet']['Customer'].name ?? '-'}`
+				customer: item['Pallet']
+					? `${item['Pallet']['Customer'].kode} - ${item['Pallet']['Customer'].name}`
 					: '-',
-				vehicle: item['Pallet']['Vehicle']
-					? `${item['Pallet']['Vehicle'].kode} - ${item['Pallet']['Vehicle'].name ?? '-'}`
+				vehicle: item['Pallet']
+					? `${item['Pallet']['Vehicle'].kode} - ${item['Pallet']['Vehicle'].name}`
 					: '-',
-				part: item['Pallet']['Part']
-					? `${item['Pallet']['Part'].kode} - ${item['Pallet']['Part'].name ?? '-'}`
+				part: item['Pallet']
+					? `${item['Pallet']['Part'].kode} - ${item['Pallet']['Part'].name}`
 					: '-',
 				destinasi: item.destination ?? '-',
 				keluar: item['keluar']
