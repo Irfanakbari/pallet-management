@@ -80,7 +80,7 @@ export default function Index() {
 					PT VUTEQ INDONESIA © 2023
 				</p>
 				<p className="text-white mt-2">
-					Versi 2.9.5
+					Versi 3.1.0
 				</p>
 			</div>
 		</>

@@ -19,9 +19,14 @@ const DetailSO = connection.define('DetailSO', {
 		type: DataTypes.STRING(100),
 		allowNull: false,
 	},
+	scanned_at: {
+		type: DataTypes.DATE,
+		allowNull: true
+	}
 }, {
 	tableName: 'detail_so', // Nama tabel dalam database
-	timestamps: false, // Nonaktifkan createdAt dan updatedAt
+	createdAt: 'scanned_at', // Nonaktifkan createdAt dan updatedAt
+	updatedAt: false
 });
 
 export default DetailSO;

@@ -17,7 +17,7 @@ async function handler(req, res) {
 				});
 			}
 			try {
-				const {customer, vehicle, part, search, department} = req.query;
+				const {customer, vehicle, part, search, department, status} = req.query;
 				// Menentukan parameter halaman dan batasan data
 				// const page = parseInt(req.query.page) || 1; // Halaman saat ini (default: 1)
 				// const limit = parseInt(req.query.limit); // Batasan data per halaman (default: 10)
@@ -85,7 +85,7 @@ async function handler(req, res) {
 
 				// Ambil semua kode Pallet dari DetailSO
 				const detailSOKodePallets = await DetailSO.findAll({
-					attributes: ['pallet_id'], // Hanya ambil kolom 'pallet_id'
+					// attributes: ['pallet_id','scanned_at'], // Hanya ambil kolom 'pallet_id'
 				}, {
 					where: {
 						so_id: so.kode
@@ -99,6 +99,7 @@ async function handler(req, res) {
 				const palletsWithStatus = pallets.rows.map(pallet => ({
 					...pallet.toJSON(),
 					status: kodePalletsInDetailSO.has(pallet['kode']) ? 1 : 0, // Jika kode Pallet ada di DetailSO, status = 1; jika tidak, status = 0
+					scanned_at: detailSOKodePallets.find(r=> r['pallet_id'] === pallet['kode']) ?? null
 				}));
 
 				// Menghitung total halaman berdasarkan jumlah data dan batasan per halaman
@@ -106,13 +107,14 @@ async function handler(req, res) {
 
 				res.status(200).json({
 					ok: true,
-					data: palletsWithStatus, // Mengganti data dengan palletsWithStatus yang telah difilter
+					data: status ? palletsWithStatus.filter(pallet => pallet.status === parseInt(status)) : palletsWithStatus, // Mengganti data dengan palletsWithStatus yang telah difilter
 					// totalData, // Total data keseluruhan
 					// limit, // Batasan data per halaman
 					// currentPage: page, // Halaman saat ini
 				});
 
 			} catch (e) {
+				console.log(e.message)
 				res.status(500).json({
 					ok: false,
 					data: "Internal Server Error",

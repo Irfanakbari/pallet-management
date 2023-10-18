@@ -112,9 +112,13 @@ export default function DashboardAdmin() {
 				}}>
 					{
 						cardInfo.isSo && (<Alert
-							className={`mb-2 bg-yellow-500`}
+							className={`mb-2 bg-yellow-400`}
 							message={(
-								<h3 className={`text-xl text-white font-semibold`}>Mode Stock Opname Sedang Aktif</h3>)}
+								<>
+									<h3 className={`text-lg text-white font-semibold`}>Mode Stock Opname Sedang Aktif</h3>
+									<span className={`text-gray-400 text-sm`}>*Operator dapat melakukan scan opname melalui perangkat scanner</span>
+								</>
+							)}
 							type="info"
 							// showIcon
 						/>)
@@ -123,7 +127,7 @@ export default function DashboardAdmin() {
 						cardInfo.mendep.length > 0 && (<Alert
 							className={`mb-2 bg-red-500`}
 							message={(
-								<h3 className={`text-xl text-white font-semibold`}>{cardInfo.totalMendep + ' Pallet Belum Kembali ke Vuteq Lebih Dari Seminggu'}</h3>)}
+								<h3 className={`text-xl text-white font-semibold`}>{cardInfo.totalMendep + ' Pallet Belum Kembali ke Vuteq Lebih Dari 2 Minggu'}</h3>)}
 							description={cardInfo.mendep.map(e => (
 								<span
 									key={e['Pallet.Customer.name']}

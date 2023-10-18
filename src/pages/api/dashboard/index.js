@@ -3,7 +3,7 @@ import checkCookieMiddleware from "@/pages/api/middleware";
 import Customer from "@/models/Customer";
 import History from "@/models/History";
 import * as sequelize from "sequelize";
-import {Op} from "sequelize";
+import {Op, Sequelize} from "sequelize";
 import moment from "moment";
 import Vehicle from "@/models/Vehicle";
 import Department from "@/models/Department";
@@ -50,7 +50,7 @@ async function handler(req, res) {
 						],
 						where: {
 							keluar: {
-								[Op.lt]: moment().subtract(1, 'week').toDate(),
+								[Op.lt]: moment().subtract(2, 'week').toDate(),
 							},
 							masuk: null
 						},
@@ -75,7 +75,7 @@ async function handler(req, res) {
 					totalPaletMendep = await History.count({
 						where: {
 							keluar: {
-								[Op.lt]: moment().subtract(1, 'week').toDate(),
+								[Op.lt]: moment().subtract(2, 'week').toDate(),
 							},
 							masuk: null
 						},
@@ -152,7 +152,7 @@ async function handler(req, res) {
 						],
 						where: {
 							keluar: {
-								[Op.lt]: moment().subtract(1, 'week').toDate(),
+								[Op.lt]: moment().subtract(2, 'week').toDate(),
 							},
 							masuk: null
 						},
@@ -184,7 +184,7 @@ async function handler(req, res) {
 					totalPaletMendep = await History.count({
 						where: {
 							keluar: {
-								[Op.lt]: moment().subtract(1, 'week').toDate(),
+								[Op.lt]: moment().subtract(2, 'week').toDate(),
 							},
 							'$Pallet.Vehicle.department$': {[Op.in]: allowedDepartments},
 							masuk: null
@@ -446,6 +446,31 @@ async function handler(req, res) {
 					}
 				})
 
+				const palletWaspada = await Pallet.findAndCountAll({
+					attributes: ['kode','part','vehicle','updated_at', 'customer'],
+					include: [
+						{
+							model: Customer,
+							attribute: ['name']
+						},
+						{
+							model: Vehicle,
+							attribute: ['name']
+						},
+						{
+							model: Part,
+							attribute: ['name']
+						}
+					],
+					where: {
+						updated_at: {
+							[Op.lt]: moment().subtract(3, 'week').toDate(),
+						},
+						kode: {
+							[Op.notIn]: Sequelize.literal('(SELECT id_pallet FROM History)') // Cek apakah kode tidak ada di tabel History
+						}
+					},
+				});
 				if (req.user.role === 'super') {
 					const customerPallets = await Promise.all(customerPromises);
 					const departmentPallets = await Promise.all(departmentPromises);
@@ -457,6 +482,8 @@ async function handler(req, res) {
 							stokPart: partPallets,
 							chartStok: customerPallets,
 							totalPallet,
+							palletWaspadaTotal: palletWaspada.count,
+							palletWaspadaList: palletWaspada.rows,
 							totalStokPallet,
 							totalPalletKeluar,
 							totalPalletRepair,
@@ -486,7 +513,6 @@ async function handler(req, res) {
 					});
 				}
 			} catch (e) {
-				
 				res.status(500).json({error: 'Internal Server Error'});
 			}
 			break;

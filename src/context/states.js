@@ -73,12 +73,14 @@ const modalState = create((set) => ({
 	modalDelet2: false,
 	modalQr: false,
 	modal: false,
+	modal2: false,
 	setModalAdd: (data) => set({modalAdd: data}),
 	setModalEdit: (data) => set({modalEdit: data}),
 	setModalDelete: (data) => set({modalDelete: data}),
 	setModalDelete2: (data) => set({modalDelete2: data}),
 	setModalQR: (data) => set({modalQr: data}),
 	setModalFilter: (data) => set({modalFilter: data}),
+	setModal2: (data) => set({modal2: data}),
 	setModal: (data) => set({modal: data}),
 }));
 

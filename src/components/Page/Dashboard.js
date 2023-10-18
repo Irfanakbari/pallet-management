@@ -15,10 +15,12 @@ import {FullScreen, useFullScreenHandle} from "react-full-screen";
 import {GiAutoRepair, GiServerRack} from "react-icons/gi";
 import {MdPallet} from "react-icons/md";
 import {Alert, Progress, Typography} from "antd";
+import DetailPalletWaspada from "@/components/Modal/DetailPalletWaspada";
 
 export default function Dashboard() {
 	const [history, setHistory] = useState([])
 	const {modal, setModal} = modalState()
+	const {modal2, setModal2} = modalState()
 	const [dark, setDark] = useState(true);
 	const [selectedCustomer, setSelectedCustomer] = useState(null);
 	const [cardInfo, setCardInfo] = useState({
@@ -31,6 +33,8 @@ export default function Dashboard() {
 		memory: 0,
 		cpuUsage: 0,
 		isSo: false,
+		totalWaspada: 0,
+		waspadaList:[]
 	})
 	const [dataChart1, setDataChart1] = useState([])
 	const [dataChart2, setDataChart2] = useState([])
@@ -58,6 +62,9 @@ export default function Dashboard() {
 				memory: response.data['data']['load']['memoryUsage'] ?? 0,
 				cpuUsage: response.data['data']['load']['cpuUsage'] ?? 0,
 				isSo: response.data['data']['isSo'] ?? false,
+				totalWaspada: response.data['data']['palletWaspadaTotal'] ?? 0,
+				waspadaList: response.data['data']['palletWaspadaList'] ?? [],
+
 			})
 			setHistory(response.data['data']['historyPallet'] ?? [])
 			setDataChart1(response.data.data['stokPart'] ?? [])
@@ -73,6 +80,8 @@ export default function Dashboard() {
 				<title>Dashboard | PT Vuteq Indonesia</title>
 			</Head>
 			{modal && <DetailPalletSlow selected={selectedCustomer}/>}
+			{modal2 && <DetailPalletWaspada selected={cardInfo.waspadaList}/>}
+
 			<FullScreen handle={handle} className={`w-full p-2 flex-grow overflow-hidden ${
 				handle.active ? dark ? 'dark' : 'bg-white' : 'bg-white'}`}>
 				<div className={`py-1.5 px-2 text-white flex flex-row justify-between ${
@@ -114,18 +123,37 @@ export default function Dashboard() {
 				}}>
 					{
 						cardInfo.isSo && (<Alert
-							className={`mb-2 bg-yellow-500`}
+							className={`mb-2 bg-yellow-400`}
 							message={(
-								<h3 className={`text-xl text-white font-semibold`}>Mode Stock Opname Sedang Aktif</h3>)}
+								<>
+									<h3 className={`text-lg text-white font-semibold`}>Mode Stock Opname Sedang Aktif</h3>
+									<span className={`text-gray-400 text-sm`}>*Operator dapat melakukan scan opname melalui perangkat scanner</span>
+								</>
+						)}
 							type="info"
-							// showIcon
+							showIcon
+						/>)
+					}
+					{
+						cardInfo.totalWaspada >0 && (<Alert
+							className={`mb-2 bg-indigo-500`}
+							message={(
+								<>
+									<h3 className={`text-lg text-white font-semibold`}>{
+										cardInfo.totalWaspada + " Pallet Belum Bergerak Lebih Dari 3 Minggu Sejak Dibuat "
+									}<button type={'button'} className={`bg-orange-600 text-sm rounded p-1`} onClick={()=>setModal2(true)}>Lihat Detail</button></h3>
+									<span className={`text-gray-400 text-sm`}>*Cek Fisik Pallet Untuk Memastikan Pallet Ini Ada dan Menghindari Salah Input/Salah Tempel Label</span>
+								</>
+							)}
+							type="error"
+							showIcon
 						/>)
 					}
 					{
 						cardInfo.mendep.length > 0 && (<Alert
 							className={`mb-2 bg-red-500`}
 							message={(
-								<h3 className={`text-xl text-white font-semibold`}>{cardInfo.totalMendep + ' Pallet Belum Kembali ke Vuteq Lebih Dari Seminggu'}</h3>)}
+								<h3 className={`text-xl text-white font-semibold`}>{cardInfo.totalMendep + ' Pallet Belum Kembali ke Vuteq Lebih Dari 2 Minggu'}</h3>)}
 							description={cardInfo.mendep.map(e => (
 								<span
 									key={e['Pallet.Customer.name']}

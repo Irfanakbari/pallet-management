@@ -29,7 +29,7 @@ const Pallet = connection.define('Pallet', {
 	},
 }, {
 	tableName: 'pallets',
-	createdAt: false,
+	createdAt: 'created_at',
 	updatedAt: 'updated_at'
 });
 
