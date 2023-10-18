@@ -467,7 +467,7 @@ async function handler(req, res) {
 							[Op.lt]: moment().subtract(3, 'week').toDate(),
 						},
 						kode: {
-							[Op.notIn]: Sequelize.literal('(SELECT id_pallet FROM History)') // Cek apakah kode tidak ada di tabel History
+							[Op.notIn]: Sequelize.literal('(SELECT id_pallet FROM history)') // Cek apakah kode tidak ada di tabel History
 						}
 					},
 				});

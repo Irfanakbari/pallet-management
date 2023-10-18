@@ -199,8 +199,7 @@ export default function LapRiwayat() {
 
 	const onChange = (pagination, filters, sorter, extra) => {
 		setLoading(true)
-		console.log('params', pagination, filters, sorter, extra);
-		const searchParam = (filters?.kode && filters?.kode[0]) || '';
+		const searchParam = (filters?.id_pallet && filters?.id_pallet[0]) || '';
 		const keluarStart = (filters?.keluar && filters?.keluar[0][0]) || '';
 		const keluarEnd = (filters?.keluar && filters?.keluar[0][1]) || '';
 		const masukStart = (filters?.masuk && filters?.masuk[0][0]) || '';
