@@ -60,7 +60,7 @@ function PrintAll({ data }) {
                                         <div className={`flex gap-4 items-center print-header`}>
                                             <Image src={'/logos.png'} alt={'Logo'} width={120} height={120} />
                                             <div className={`flex flex-col`}>
-                                                <h2 className={`font-bold text-xl `}>Laporan Pallet Maintenance</h2>
+                                                <h2 className={`font-bold text-xl `}>Laporan Riwayat Pallet</h2>
                                                 <h3>Tanggal : {formattedDate}</h3>
                                             </div>
                                         </div>

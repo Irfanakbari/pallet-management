@@ -5,7 +5,7 @@ import {getCookie} from "cookies-next";
 import {useRouter} from "next/router";
 import {dataState, useStoreTab} from "@/context/states";
 import {showErrorToast, showSuccessToast} from "@/utils/toast";
-import {laporan, master, master2, stockOpname} from "@/utils/constants";
+import {delivery, laporan, master, master2, stockOpname} from "@/utils/constants";
 import HeadTitle from "@/components/Head/HeadTitle";
 import MainMenu from "@/components/MainMenu/MainMenu";
 import axiosInstance from "@/utils/interceptor";
@@ -25,12 +25,13 @@ import Pallet from "@/components/Page/Master/Pallet/Pallet";
 import LapMaintenance from "@/components/Page/Laporan/LapMaintenance/LapMaintenance";
 import LapStok from "@/components/Page/Laporan/LapStok/LapStok";
 import User from "@/components/Page/Master/User/User";
+import Delivery from "@/components/Page/Master/Delivery/Delivery";
 
 
 export default function Home() {
 
 	const {listTab, setCloseTab, activeMenu, setActiveMenu} = useStoreTab();
-	const {setCustomer, setVehicle, setPart, setListDepartment, user, setUser} = dataState();
+	const {setCustomer, setVehicle, setPart, setListDepartment, user, setUser, setListDestination} = dataState();
 	const router = useRouter();
 
 
@@ -39,11 +40,12 @@ export default function Home() {
 		fetchData();
 	}, []);
 	const fetchData = async () => {
-		const [response1, response2, response3, response4] = await Promise.all([
+		const [response1, response2, response3, response4,response5] = await Promise.all([
 			axiosInstance.get('/api/customers'),
 			axiosInstance.get('/api/departments'),
 			axiosInstance.get('/api/vehicle'),
 			axiosInstance.get('/api/parts'),
+			axiosInstance.get('/api/destination'),
 		]).catch(() => {
 			showErrorToast("Gagal Mengambil Data");
 		})
@@ -51,6 +53,7 @@ export default function Home() {
 		setListDepartment(response2.data['data']);
 		setVehicle(response3.data['data']);
 		setPart(response4.data['data']);
+		setListDestination(response5.data['data']);
 	};
 
 	function getCurrentUser() {
@@ -85,6 +88,10 @@ export default function Home() {
 						{
 							user.role === 'super' &&
 							<MainMenu data={stockOpname} title={'Stock Opname'}/>
+						}
+						{
+							(user.role === 'super' || user.role ==='admin') &&
+							<MainMenu data={delivery} title={'Delivery'}/>
 						}
 					</div>
 				</div>
@@ -126,7 +133,7 @@ export default function Home() {
 								{activeMenu === "Stock Opname" && <StockOpname/>}
 								{activeMenu === "Lap. Stok Opname" && <LapStokOpname/>}
 								{activeMenu === "Data SO" && <DataSO/>}
-
+								{activeMenu === "Data Delivery" && <Delivery/>}
 							</div>
 							:
 							<center className={`flex items-center justify-center h-full`}>

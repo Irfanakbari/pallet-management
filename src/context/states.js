@@ -3,6 +3,7 @@ import {create} from "zustand";
 // State untuk data umum
 const dataState = create((set) => ({
 	listCustomer: [],
+	listDelivery: [],
 	listVehicle: [],
 	listPart: [],
 	listPallet: [],
@@ -18,6 +19,7 @@ const dataState = create((set) => ({
 	setListDepartment: (data) => set({listDepartment: data}),
 	setListDestination: (data) => set({listDestination: data}),
 	setSO: (data) => set({listSO: data}),
+	setDelivery: (data) => set({listDelivery: data}),
 }));
 
 // State untuk pengaturan tab

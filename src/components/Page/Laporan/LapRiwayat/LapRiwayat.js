@@ -238,7 +238,7 @@ export default function LapRiwayat() {
 		{
 			title: '#',
 			dataIndex: 'index',
-			width: 100,
+			width: 60,
 			fixed: 'left',
 			render: (_, __, index) => (dataHistory.currentPage - 1) * dataHistory.limit + index + 1
 		},
@@ -246,7 +246,7 @@ export default function LapRiwayat() {
 			title: 'Kode Pallet',
 			dataIndex: 'id_pallet',
 			fixed: 'left',
-			width: 200,
+			width: 180,
 			filterDropdown: ({setSelectedKeys, selectedKeys, confirm, close}) => (
 				<div
 					style={{
@@ -315,7 +315,7 @@ export default function LapRiwayat() {
 				text: e.name,
 				value: e.kode
 			})),
-			width: 400,
+			width: 200,
 			filterMultiple: false,
 			onFilter: (value, record) => (record['Pallet']?.customer || '').indexOf(value) === 0,
 			render: (_, record) => {
@@ -336,7 +336,7 @@ export default function LapRiwayat() {
 				text: e.name,
 				value: e.kode
 			})),
-			width: 400,
+			width: 240,
 			onFilter: (value, record) => (record['Pallet']?.vehicle || '').indexOf(value) === 0,
 			render: (_, record) => {
 				const vehicle = record['Pallet']?.['Vehicle'];
@@ -352,7 +352,7 @@ export default function LapRiwayat() {
 				return partA.localeCompare(partB);
 			},
 			filterMultiple: false,
-			width: 700,
+			width: 300,
 			filters: listPart.map(e => ({
 				text: e.name,
 				value: e.kode
@@ -366,7 +366,7 @@ export default function LapRiwayat() {
 		{
 			title: 'Destinasi',
 			dataIndex: 'destination',
-			width: 300,
+			width: 200,
 			sorter: (a, b) => {
 				const destinationA = a.destination || '';
 				const destinationB = b.destination || '';
@@ -377,7 +377,7 @@ export default function LapRiwayat() {
 		{
 			title: 'Keluar',
 			dataIndex: 'keluar',
-			width: 400,
+			width: 180,
 			sorter: (a, b) => {
 				// Convert the 'keluar' values to Date objects for comparison
 				const dateA = a['keluar'] ? new Date(a['keluar']) : null;
@@ -458,14 +458,14 @@ export default function LapRiwayat() {
 		{
 			title: 'Operator Out',
 			dataIndex: 'user_out',
-			width: 200,
+			width: 160,
 			sorter: (a, b) => a.user_out?.localeCompare(b.user_out),
 			render: (_, record) => record['user_out'] ?? '-'
 		},
 		{
 			title: 'Masuk',
 			dataIndex: 'masuk',
-			width: 400,
+			width: 180,
 			sorter: (a, b) => {
 				// Convert the 'keluar' values to Date objects for comparison
 				const dateA = a['masuk'] ? new Date(a['masuk']) : null;
@@ -546,7 +546,7 @@ export default function LapRiwayat() {
 		{
 			title: 'Operator In',
 			dataIndex: 'user_in',
-			width: 200,
+			width: 160,
 			sorter: (a, b) => {
 				const userInA = a.user_in || '';
 				const userInB = b.user_in || '';
@@ -582,7 +582,7 @@ export default function LapRiwayat() {
 						}
 						bordered
 						scroll={{
-							y: "68vh",
+							y: "64vh",
 							x: "100vw",
 						}}
 						style={{

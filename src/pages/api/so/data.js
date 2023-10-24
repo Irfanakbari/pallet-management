@@ -6,6 +6,7 @@ import Vehicle from "@/models/Vehicle";
 import Customer from "@/models/Customer";
 import Part from "@/models/Part";
 import StokOpname from "@/models/StokOpname";
+import History from "@/models/History";
 
 async function handler(req, res) {
 	switch (req.method) {
@@ -96,12 +97,23 @@ async function handler(req, res) {
 				const kodePalletsInDetailSO = new Set(detailSOKodePallets.map(item => item.pallet_id));
 
 				// Tambahkan atribut 'status' ke setiap Pallet
-				const palletsWithStatus = pallets.rows.map(pallet => ({
-					...pallet.toJSON(),
-					status: kodePalletsInDetailSO.has(pallet['kode']) ? 1 : 0, // Jika kode Pallet ada di DetailSO, status = 1; jika tidak, status = 0
-					scanned_at: detailSOKodePallets.find(r=> r['pallet_id'] === pallet['kode']) ?? null
-				}));
+				const palletsWithStatus = await Promise.all(pallets.rows.map(async pallet => {
+					const history = await History.findAll({
+						where: {
+							'$id_pallet$': pallet['kode'],
+						} ,
+						order: [['keluar', 'DESC']], // Mengurutkan berdasarkan tanggal_keluar dari yang terbaru ke yang terlama
+						limit: 5 // Membatasi hasil menjadi 5 record
+					});
 
+					return {
+						...pallet.toJSON(),
+						status: kodePalletsInDetailSO.has(pallet['kode']) ? 1 : 0,
+						scanned_at: detailSOKodePallets.find(r => r['pallet_id'] === pallet['kode']) ?? null,
+						history: history
+					};
+				}));
+				
 				// Menghitung total halaman berdasarkan jumlah data dan batasan per halaman
 				// const totalData = pallets.count;
 

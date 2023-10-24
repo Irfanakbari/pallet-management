@@ -5,7 +5,7 @@ import {dataState} from "@/context/states";
 import Head from "next/head";
 import axiosInstance from "@/utils/interceptor";
 import {Button, Input, Space, Spin, Table} from "antd";
-import {SearchOutlined} from "@ant-design/icons";
+import {CalendarOutlined, SearchOutlined} from "@ant-design/icons";
 import ExcelJS from "exceljs";
 import dayjs from "dayjs";
 import {AiFillFileExcel} from "react-icons/ai";
@@ -158,7 +158,7 @@ export default function DataSO() {
 		{
 			title: 'Customer',
 			dataIndex: 'customer',
-			width: 350,
+			width: 200,
 			sorter: (a, b) => a.customer.localeCompare(b.customer),
 			filters: listCustomer.map(e => (
 				{
@@ -173,7 +173,7 @@ export default function DataSO() {
 		{
 			title: 'Vehicle',
 			dataIndex: 'vehicle',
-			width: 350,
+			width: 220,
 			sorter: (a, b) => a.vehicle.localeCompare(b.vehicle),
 			filterMultiple: false,
 			filters: listVehicle.map(e => (
@@ -188,7 +188,7 @@ export default function DataSO() {
 		{
 			title: 'Part',
 			dataIndex: 'part',
-			width: 450,
+			width: 300,
 			sorter: (a, b) => a.part.localeCompare(b.part),
 			filterMultiple: false,
 			filters: listPart.map(e => (
@@ -203,7 +203,7 @@ export default function DataSO() {
 		{
 			title: 'Department',
 			dataIndex: 'department',
-			width: 250,
+			width: 180,
 			filterMultiple: false,
 			sorter: (a, b) => a['Vehicle'].department.localeCompare(b['Vehicle'].department),
 			filters: listDepartment.map(e => (
@@ -219,7 +219,7 @@ export default function DataSO() {
 		{
 			title: 'Status SO',
 			dataIndex: 'status',
-			width: 350,
+			width: 250,
 			filterMultiple: false,
 			render: (_, record) => {
 				const statusText = record.status === 0 ? 'Belum' : 'Sudah';
@@ -256,6 +256,113 @@ export default function DataSO() {
 			render: (_, record) => record.scanned_at ? dayjs(record['scanned_at']['scanned_at']).locale('id').format('DD MMMM YYYY HH:mm') : '-'
 		},
 	];
+
+	const expandedRow= (record) => {
+		const columns = [
+			{
+				title: '#',
+				dataIndex: 'index',
+				// width: 40,
+				render: (_, __, index) => index + 1
+			},
+			{
+				title: 'Kode Pallet',
+				dataIndex: 'id_pallet',
+				// width: 80,
+				sorter: (a, b) => a.id_pallet.localeCompare(b.id_pallet),
+			},
+			{
+				title: 'Destinasi',
+				dataIndex: 'destination',
+				// width: 100,
+				sorter: (a, b) => {
+					const destinationA = a.destination || '';
+					const destinationB = b.destination || '';
+					return destinationA.localeCompare(destinationB);
+				},
+				render: (_, record) => record.destination ?? '-'
+			},
+			{
+				title: 'Keluar',
+				dataIndex: 'keluar',
+				// width: 120,
+				sorter: (a, b) => {
+					// Convert the 'keluar' values to Date objects for comparison
+					const dateA = a['keluar'] ? new Date(a['keluar']) : null;
+					const dateB = b['keluar'] ? new Date(b['keluar']) : null;
+					// Handle cases when one of the dates is null
+					if (!dateA && dateB) return -1;
+					if (dateA && !dateB) return 1;
+					if (!dateA && !dateB) return 0;
+					// Compare the dates
+					return dateA.getTime() - dateB.getTime();
+				},
+				render: (_, record) => {
+					return record['keluar']
+						? dayjs(record['keluar']).locale('id').format('DD MMMM YYYY HH:mm')
+						: '-'
+				}
+			},
+			{
+				title: 'Operator Out',
+				dataIndex: 'user_out',
+				// width: 100,
+				sorter: (a, b) => a.user_out?.localeCompare(b.user_out),
+				render: (_, record) => record['user_out'] ?? '-'
+			},
+			{
+				title: 'Masuk',
+				dataIndex: 'masuk',
+				// width: 120,
+				sorter: (a, b) => {
+					// Convert the 'keluar' values to Date objects for comparison
+					const dateA = a['masuk'] ? new Date(a['masuk']) : null;
+					const dateB = b['masuk'] ? new Date(b['masuk']) : null;
+					// Handle cases when one of the dates is null
+					if (!dateA && dateB) return -1;
+					if (dateA && !dateB) return 1;
+					if (!dateA && !dateB) return 0;
+					// Compare the dates
+					return dateA.getTime() - dateB.getTime();
+				},
+				render: (_, record) => {
+					return record['masuk']
+						? dayjs(record['masuk']).locale('id').format('DD MMMM YYYY HH:mm')
+						: '-'
+				}
+			},
+			{
+				title: 'Operator In',
+				dataIndex: 'user_in',
+				// width: 100,
+				sorter: (a, b) => {
+					const userInA = a.user_in || '';
+					const userInB = b.user_in || '';
+					return userInA.localeCompare(userInB);
+				},
+				render: (_, record) => record['user_in'] ?? '-'
+			}
+		];
+
+		return <Table
+			loading={
+				loading && <Spin tip="Loading..." delay={1500}/>
+			}
+			bordered
+			scroll={{
+				y: "64vh",
+				// x: "100vw",
+			}}
+			style={{
+				width: "100%"
+			}}
+			rowKey={'id'}
+			// tableLayout={"fixed"}
+			pagination={false}
+			columns={columns}
+			dataSource={record.history}
+			size={'small'}/>
+	}
 
 	const saveExcel = async (e) => {
 		e.preventDefault();
@@ -431,7 +538,7 @@ export default function DataSO() {
 						}
 						bordered
 						scroll={{
-							y: "68vh",
+							y: "64vh",
 							x: "100vw",
 						}}
 						style={{
@@ -443,6 +550,9 @@ export default function DataSO() {
 						onChange={onChange}
 						size={'small'}
 						rowClassName="editable-row"
+						expandable={{
+							expandedRowRender: (record) => expandedRow(record),
+						}}
 						// pagination={false}
 						pagination={{
 							total: listPallet.totalData,

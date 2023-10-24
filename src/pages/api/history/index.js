@@ -7,6 +7,8 @@ import checkCookieMiddleware from "@/pages/api/middleware";
 import Part from "@/models/Part";
 import {Op} from "sequelize";
 import TempHistory from "@/models/TempHistoryUser";
+import PalletDelivery from "@/models/PalletDelivery";
+import Delivery from "@/models/Delivery";
 
 
 async function handler(req, res) {
@@ -193,7 +195,7 @@ async function handler(req, res) {
 
 				const totalData = histories.count;
 
-				res.status(200).json({
+				return res.status(200).json({
 					ok: true,
 					data: histories.rows,
 					totalData,
@@ -201,7 +203,6 @@ async function handler(req, res) {
 					currentPage: parseInt(page),
 				});
 			} catch (e) {
-				
 				res.status(500).json({
 					ok: false,
 					data: "Internal Server Error",
@@ -217,7 +218,7 @@ async function handler(req, res) {
 				});
 			}
 			try {
-				const {kode, destination} = req.body;
+				const {kode, delivery_kode} = req.body;
 				const pallet = await Pallet.findOne({
 					where: {kode: kode}
 				});
@@ -234,11 +235,12 @@ async function handler(req, res) {
 					});
 				}
 				await connection.transaction(async t => {
-					await History.create(
+					const delivery = await Delivery.findByPk(delivery_kode)
+					const history = await History.create(
 						{
 							id_pallet: kode,
 							user_out: req.user.username,
-							destination: destination || null
+							destination: delivery.tujuan || null
 						},
 						{transaction: t}
 					);
@@ -251,14 +253,19 @@ async function handler(req, res) {
 						status: 'Keluar',
 						operator: req.user.username
 					}, {transaction: t})
-					res.status(201).json({
-						ok: true,
-						data: "Sukses"
-					});
+
+					await PalletDelivery.create({
+						history_kode: history.id,
+						delivery_kode: delivery_kode
+					},{transaction: t})
 				})
+				res.status(201).json({
+					ok: true,
+					data: "Sukses"
+				});
 			} catch (e) {
-				
-				res.status(500).json({
+				// console.log(e.message);
+				return res.status(500).json({
 					ok: false,
 					data: "Internal Server Error"
 				});

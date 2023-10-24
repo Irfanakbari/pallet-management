@@ -7,6 +7,7 @@ const History = connection.define('History', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
+        autoIncrement: true
     },
     id_pallet: {
         type: DataTypes.STRING

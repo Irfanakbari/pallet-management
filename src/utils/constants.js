@@ -66,4 +66,11 @@ const stockOpname = [
 
 ]
 
-export {master, laporan, master2, stockOpname}
+const delivery = [
+	{
+		key: 'Data Delivery',
+		label: 'Data Delivery'
+	},
+]
+
+export {master, laporan, master2, stockOpname, delivery}
