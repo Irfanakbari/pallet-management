@@ -1,8 +1,5 @@
 import checkCookieMiddleware from "@/pages/api/middleware";
-import History from "@/models/History";
 import Delivery from "@/models/Delivery";
-import PalletDelivery from "@/models/PalletDelivery";
-import Part from "@/models/Part";
 import PalletDelivered from "@/models/PalletDelivered";
 
 async function handler(req, res) {
@@ -16,42 +13,11 @@ async function handler(req, res) {
 			// }
 			try {
 				const id = req.query.kode;
-				const data = await Delivery.findOne({
+				const data = await PalletDelivered.findAll({
 					where: {
-						id: id
-					},include: [
-						{
-							model: PalletDelivery,
-							include: [
-								{
-									model: History,
-									attributes: ['id_pallet', 'destination','keluar', 'user_out']
-								}
-							]
-						}     ,
-						{
-							model: PalletDelivered,
-							include: [
-								{
-									model: PalletDelivery,
-									include: [
-										{
-											model: History,
-											attributes: ['id_pallet', 'destination','keluar', 'user_out']
-										}
-									]
-								}
-							]
-						}     ,
-						Part
-					]
-				});
-				const temp = await PalletDelivery.count({
-					where: {
-						delivery_kode: data.id
+						delivery_kode: id
 					}
 				});
-				data.dataValues.isCukup = temp === data.total_pallet
 
 				res.status(200).json({
 					ok: true,

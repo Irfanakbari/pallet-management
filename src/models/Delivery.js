@@ -1,7 +1,5 @@
 import connection from "@/config/database";
 import {DataTypes} from "sequelize";
-import * as uuid from "uuid";
-import PalletDelivery from "@/models/PalletDelivery";
 
 
 const Delivery = connection.define('Delivery', {
@@ -41,6 +39,6 @@ const Delivery = connection.define('Delivery', {
     createdAt: 'created_at',
 });
 
-Delivery.hasMany(PalletDelivery, {foreignKey: 'delivery_kode'})
+
 
 export default Delivery;

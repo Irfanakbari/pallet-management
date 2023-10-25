@@ -256,6 +256,7 @@ async function handler(req, res) {
 
 					await PalletDelivery.create({
 						history_kode: history.id,
+						pallet_kode: pallet.kode,
 						delivery_kode: delivery_kode
 					},{transaction: t})
 				})

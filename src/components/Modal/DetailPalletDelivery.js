@@ -252,15 +252,27 @@ export default function DetailPalletDelivery({selected}) {
 												},
 											]}
 										/>
-										<div className={`mt-4`}>
-											<List
-												size="small"
-												header={<div>List Pallet From Vuteq</div>}
-												// footer={<div>Footer</div>}
-												bordered
-												dataSource={data['PalletDeliveries']}
-												renderItem={(item, index) => <List.Item>{(index +1) + ' - '+item['History']['id_pallet']+ ' - '+item['History']['user_out']}</List.Item>}
-											/>
+										<div className={`mt-4 flex gap-2 w-full justify-between`}>
+											<div className={`w-full h-full`}>
+												<List
+													size="small"
+													header={<div>Dikirim Vuteq</div>}
+													// footer={<div>Footer</div>}
+													bordered
+													dataSource={data['PalletDeliveries']}
+													renderItem={(item, index) => <List.Item>{(index +1) + ' - '+item['History']['id_pallet']+ ' - '+item['History']['user_out']}</List.Item>}
+												/>
+											</div>
+											<div className={`w-full h-full`}>
+												<List
+													size="small"
+													header={<div>Diterima Customer</div>}
+													// footer={<div>Footer</div>}
+													bordered
+													dataSource={data['PalletDelivereds']}
+													renderItem={(item, index) => <List.Item>{(index +1) + ' - '+item['PalletDelivery']['History']['id_pallet']+ ' - '+item['scannedBy']}</List.Item>}
+												/>
+											</div>
 										</div>
 									</div>
 								</div>

@@ -20,7 +20,7 @@ async function handler(req, res) {
 						deliveries = await Delivery.findAll({
 							where: {
 								'$tanggal_delivery$': dayjs().format('YYYY-MM-DD')  ,
-								'$status$': null
+								'$status$': null,
 							},
 							include: [
 								{
