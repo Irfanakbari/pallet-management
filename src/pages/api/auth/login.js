@@ -2,19 +2,10 @@ import jwt from "jsonwebtoken";
 import {setCookie} from "cookies-next";
 import User from "@/models/User";
 import bcrypt from "bcrypt";
-import sendEmail from "@/utils/email_service";
 
 
 export default async function handler(req, res) {
 	switch (req.method) {
-		case 'GET':
-			try {
-				await sendEmail('irfan.akbarihabibi@gmail.com','Tes','Tes')
-				res.status(200)
-			} catch (e) {
-				res.status(500)
-			}
-			break;
 		case 'POST':
 			try {
 				const credential = req.body;

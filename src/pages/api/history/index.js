@@ -218,7 +218,7 @@ async function handler(req, res) {
 				});
 			}
 			try {
-				const {kode, delivery_kode} = req.body;
+				const {kode, destination} = req.body;
 				const pallet = await Pallet.findOne({
 					where: {kode: kode}
 				});
@@ -235,12 +235,12 @@ async function handler(req, res) {
 					});
 				}
 				await connection.transaction(async t => {
-					const delivery = await Delivery.findByPk(delivery_kode)
-					const history = await History.create(
+					// const delivery = await Delivery.findByPk(delivery_kode)
+					await History.create(
 						{
 							id_pallet: kode,
 							user_out: req.user.username,
-							destination: delivery.tujuan || null
+							destination: destination || null
 						},
 						{transaction: t}
 					);
@@ -254,11 +254,11 @@ async function handler(req, res) {
 						operator: req.user.username
 					}, {transaction: t})
 
-					await PalletDelivery.create({
-						history_kode: history.id,
-						pallet_kode: pallet.kode,
-						delivery_kode: delivery_kode
-					},{transaction: t})
+					// await PalletDelivery.create({
+					// 	history_kode: history.id,
+					// 	pallet_kode: pallet.kode,
+					// 	delivery_kode: delivery_kode
+					// },{transaction: t})
 				})
 				res.status(201).json({
 					ok: true,

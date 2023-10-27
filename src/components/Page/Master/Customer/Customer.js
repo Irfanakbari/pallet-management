@@ -219,7 +219,7 @@ export default function Customer() {
 							}
 							bordered
 							scroll={{
-								y: "68vh"
+								y: "65vh"
 							}}
 							components={{
 								body: {

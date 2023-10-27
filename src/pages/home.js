@@ -5,7 +5,7 @@ import {getCookie} from "cookies-next";
 import {useRouter} from "next/router";
 import {dataState, useStoreTab} from "@/context/states";
 import {showErrorToast, showSuccessToast} from "@/utils/toast";
-import {delivery, laporan, master, master2, stockOpname} from "@/utils/constants";
+import { laporan, master, master2, stockOpname} from "@/utils/constants";
 import HeadTitle from "@/components/Head/HeadTitle";
 import MainMenu from "@/components/MainMenu/MainMenu";
 import axiosInstance from "@/utils/interceptor";
@@ -25,7 +25,6 @@ import Pallet from "@/components/Page/Master/Pallet/Pallet";
 import LapMaintenance from "@/components/Page/Laporan/LapMaintenance/LapMaintenance";
 import LapStok from "@/components/Page/Laporan/LapStok/LapStok";
 import User from "@/components/Page/Master/User/User";
-import Delivery from "@/components/Page/Master/Delivery/Delivery";
 
 
 export default function Home() {
@@ -89,10 +88,10 @@ export default function Home() {
 							user.role === 'super' &&
 							<MainMenu data={stockOpname} title={'Stock Opname'}/>
 						}
-						{
-							(user.role === 'super' || user.role ==='admin') &&
-							<MainMenu data={delivery} title={'Delivery'}/>
-						}
+						{/*{*/}
+						{/*	(user.role === 'super' || user.role ==='admin') &&*/}
+						{/*	<MainMenu data={delivery} title={'Delivery'}/>*/}
+						{/*}*/}
 					</div>
 				</div>
 				<div className={`bg-base w-full mt-2 flex pt-1 px-1`}>
@@ -133,7 +132,6 @@ export default function Home() {
 								{activeMenu === "Stock Opname" && <StockOpname/>}
 								{activeMenu === "Lap. Stok Opname" && <LapStokOpname/>}
 								{activeMenu === "Data SO" && <DataSO/>}
-								{activeMenu === "Data Delivery" && <Delivery/>}
 							</div>
 							:
 							<center className={`flex items-center justify-center h-full`}>

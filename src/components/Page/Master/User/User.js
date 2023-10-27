@@ -193,7 +193,7 @@ export default function User() {
 							},
 						}}
 						scroll={{
-							y: "68vh"
+							y: "65vh"
 						}}
 						style={{
 							width: "100%"

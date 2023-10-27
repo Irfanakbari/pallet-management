@@ -281,7 +281,7 @@ export default function Pallet() {
 			title: 'Kode Pallet',
 			dataIndex: 'kode',
 			sorter: (a, b) => a.kode.localeCompare(b.kode),
-			width: 200,
+			width: 170,
 			fixed: 'left',
 			...getColumnSearchProps('kode'),
 
@@ -289,13 +289,13 @@ export default function Pallet() {
 		{
 			title: 'Nama Pallet',
 			dataIndex: 'name',
-			width: 350,
+			width: 280,
 			editable: true,
 		},
 		{
 			title: 'Customer',
 			dataIndex: 'customer',
-			width: 350,
+			width: 200,
 			sorter: (a, b) => a.customer.localeCompare(b.customer),
 			filters: listCustomer.map(e => (
 				{
@@ -310,7 +310,7 @@ export default function Pallet() {
 		{
 			title: 'Vehicle',
 			dataIndex: 'vehicle',
-			width: 350,
+			width: 220,
 			sorter: (a, b) => a.vehicle.localeCompare(b.vehicle),
 			filterMultiple: false,
 			filters: listVehicle.map(e => (
@@ -325,7 +325,7 @@ export default function Pallet() {
 		{
 			title: 'Part',
 			dataIndex: 'part',
-			width: 450,
+			width: 380,
 			sorter: (a, b) => a.part.localeCompare(b.part),
 			filterMultiple: false,
 			filters: listPart.map(e => (
@@ -340,7 +340,7 @@ export default function Pallet() {
 		{
 			title: 'Department',
 			dataIndex: 'department',
-			width: 300,
+			width: 250,
 			filterMultiple: false,
 			sorter: (a, b) => a['Vehicle'].department.localeCompare(b['Vehicle'].department),
 			filters: listDepartment.map(e => (
@@ -355,7 +355,7 @@ export default function Pallet() {
 		{
 			title: 'Aksi',
 			dataIndex: 'operation',
-			width: 400,
+			width: 100,
 			render: (_, record) => {
 				const editable = isEditing(record);
 
@@ -518,7 +518,7 @@ export default function Pallet() {
 								},
 							}}
 							scroll={{
-								y: "68vh",
+								y: "65vh",
 								x: "100vw",
 							}}
 							style={{

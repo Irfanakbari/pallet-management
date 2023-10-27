@@ -7,6 +7,7 @@ import dayjs from "dayjs";
 import {useReactToPrint} from "react-to-print";
 import Image from "next/image";
 import {Table} from "antd";
+import {useExcelJS} from "react-use-exceljs";
 
 export default function DetailPalletSlow({selected}) {
 	const {setModal} = modalState();
@@ -36,6 +37,61 @@ export default function DetailPalletSlow({selected}) {
 		});
 	};
 
+	const excel = useExcelJS({
+		filename: "lap_pallet_slowmove.xlsx",
+		worksheets: [
+			{
+				name: "Data Pallet Slow Move",
+				columns: [
+					{
+						header: "No",
+						key: "no",
+						width: 10,
+					},
+					{
+						header: "Kode Pallet",
+						key: "kode_pallet",
+						width: 32,
+					},
+					{
+						header: "Nama Part",
+						key: "nama_part",
+						width: 50,
+					},
+					{
+						header: "Customer",
+						key: "customer",
+						width: 32,
+					},
+					{
+						header: "Destinasi",
+						key: "destinasi",
+						width: 32,
+					}           ,
+					{
+						header:  "Last Update",
+						key: 'last_update',
+						width: 40
+					},
+				],
+			},
+		],
+	})
+
+	// Fungsi untuk melakukan save/export data ke excel
+	const saveExcel = async (e) => {
+		e.preventDefault();
+		const datas = data.map((item, index) => ({
+			no: index + 1,
+			kode_pallet: item.id_pallet,
+			nama_part: item['Pallet']['Part']['name'],
+			customer: item['Pallet']['Customer']['name'],
+			destinasi: item['destination']?? '-',
+			last_update: dayjs(item['Pallet']['updated_at']).locale('id').format('DD MMMM YYYY HH:mm') ?? '-'
+		}));
+		await excel.download(datas)
+	}
+
 	return (
 		<>
 			{/* Tampilan modal detail */}
@@ -61,6 +117,9 @@ export default function DetailPalletSlow({selected}) {
 										handlePrint()
 									}} className="w-full py-1 text-sm rounded bg-blue-600">
 										Print
+									</button>
+									<button onClick={saveExcel} className="w-full py-1 text-sm rounded bg-purple-600">
+										Excel
 									</button>
 									<button onClick={() => {
 										setModal(false)

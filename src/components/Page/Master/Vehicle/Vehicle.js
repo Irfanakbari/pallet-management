@@ -248,7 +248,7 @@ export default function Vehicle() {
 							}
 							bordered
 							scroll={{
-								y: "68vh"
+								y: "65vh"
 							}}
 							components={{
 								body: {
