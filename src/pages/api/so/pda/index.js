@@ -75,6 +75,7 @@ async function handler(req, res) {
 				// Redirect ke halaman sukses atau halaman lain yang Anda inginkan
 				return res.status(200).json({success: true, data: `Berhasil`});
 			} catch (e) {
+				
 				res.status(500).json({success: false, data: 'Failed to stock opname'});
 			}
 			break;
