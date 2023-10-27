@@ -7,8 +7,6 @@ import checkCookieMiddleware from "@/pages/api/middleware";
 import Part from "@/models/Part";
 import {Op} from "sequelize";
 import TempHistory from "@/models/TempHistoryUser";
-import PalletDelivery from "@/models/PalletDelivery";
-import Delivery from "@/models/Delivery";
 
 
 async function handler(req, res) {
