@@ -127,7 +127,7 @@ export default function DashboardAdmin() {
 						cardInfo.mendep.length > 0 && (<Alert
 							className={`mb-2 bg-red-500`}
 							message={(
-								<h3 className={`text-xl text-white font-semibold`}>{cardInfo.totalMendep + ' Pallet Belum Kembali ke Vuteq Lebih Dari 2 Minggu'}</h3>)}
+								<h3 className={`text-xl text-white font-semibold`}>{cardInfo.totalMendep + ' Pallet Belum Kembali ke Vuteq Lebih Dari 3 Minggu'}</h3>)}
 							description={cardInfo.mendep.map(e => (
 								<span
 									key={e['Pallet.Customer.name']}

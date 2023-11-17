@@ -7,6 +7,7 @@ import Head from "next/head";
 import axiosInstance from "@/utils/interceptor";
 import {Spin, Table} from "antd";
 import PrintAll from "@/components/Page/Laporan/LapStok/Print";
+import dayjs from "dayjs";
 
 export default function LapStok() {
 	const [dataStok, setDataStok] = useState([])
@@ -156,6 +157,62 @@ export default function LapStok() {
 		},
 	];
 
+	const expandedRowRender = (record) => {
+		const columns = [
+			{
+				title: 'Destinasi',
+				dataIndex: 'dest',
+				key: 'dest',
+
+			},
+			{
+				title: 'Total',
+				render: (total) => total.data.length ?? '-'
+			}
+		];
+		return <Table bordered={true}
+					  rowKey={'dest'}
+					  columns={columns} dataSource={record.data} pagination={false} expandable={{
+			expandedRowRender: (record) => expandedRowRender3(record),
+		}}/>;
+	};
+	const expandedRowRender2 = (record) => {
+		const columns = [
+			{
+				title: 'Kategori',
+				dataIndex: 'id',
+				key: 'id',
+			},
+		];
+		return <Table
+			bordered={true}
+			columns={columns} rowKey={'id'} dataSource={record.dataDetail} pagination={false} expandable={{
+			expandedRowRender: (record) => expandedRowRender(record),
+		}}/>;
+	};
+	const expandedRowRender3 = (record) => {
+		const columns = [
+			{
+				title: 'Kode Pallet',
+				render: (data)=> data.id_pallet ? data.id_pallet : data.kode
+			},
+			{
+				title: 'Last Update',
+				render: (_, record) => {
+					return record['updated_at']
+						? dayjs(record['updated_at']).locale('id').format('DD MMMM YYYY HH:mm')
+						: '-'
+				}
+			},
+		];
+		return <Table
+			bordered={true}
+			columns={columns} rowKey={'id_pallet'} dataSource={record.data} pagination={{
+				defaultPageSize: 10,
+			hideOnSinglePage: true
+		}}/>;
+	};
+
 	return (
 		<>
 			<Head>
@@ -194,6 +251,9 @@ export default function LapStok() {
 						dataSource={dataStok}
 						onChange={onChange}
 						size={'small'}
+						expandable={{
+							expandedRowRender: (record) => expandedRowRender2(record),
+						}}
 						pagination={false}/>
 				</div>
 			</div>
