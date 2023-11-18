@@ -38,6 +38,14 @@ export default async function handler(req, res) {
 							[sequelize.col('Vehicle.department'), 'department'],
 							[sequelize.col('Part.name'), 'part'],
 						],
+						created_at: {
+							[Op.or]: [
+								null,
+								{
+									[Op.lte]: so.tanggal_so_closed ?? new Date()
+								},
+							],
+						},
 						include: [
 							{
 								model: Vehicle,
@@ -144,7 +152,18 @@ export default async function handler(req, res) {
 						tanggal_akhir: so.tanggal_so_closed,
 						status: so.status === 1 ? 'Dibuka' : 'Ditutup',
 						sudah_dihitung: detailSo.length,
-						belum_dihitung: await Pallet.count() - detailSo.length,
+						belum_dihitung: await Pallet.count({
+							where: {
+								created_at: {
+									[Op.or]: [
+										null,
+										{
+											[Op.lte]: so.tanggal_so_closed?? new Date()
+										},
+									],
+								},
+							}
+						}) - detailSo.length,
 						data: transformedData,
 					};
 				})
