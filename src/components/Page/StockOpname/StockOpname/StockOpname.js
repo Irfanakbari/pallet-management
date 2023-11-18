@@ -99,8 +99,7 @@ export default function StockOpname() {
 				setSO(newData);
 			}
 		} catch (errInfo) {
-			showErrorToast("Gagal Simpan Data");
-			console.log('Validate Failed:', errInfo);
+			showErrorToast(errInfo.response.data['data']?? "Gagal Simpan Data");
 		} finally {
 			setEditingKey('');
 		}

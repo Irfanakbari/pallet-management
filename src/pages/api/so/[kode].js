@@ -59,7 +59,7 @@ async function handler(req, res) {
 				// Pertama-tama, jika status baru adalah aktif (1), nonaktifkan semua StokOpname yang ada
 				if (newSo.status === 1) {
 					await StokOpname.update(
-						{status: 0},
+						{status: 0, tanggal_so_closed: new Date()},
 						{
 							where: {
 								status: 1, // Hanya nonaktifkan yang aktif
@@ -70,17 +70,35 @@ async function handler(req, res) {
 
 				// Selanjutnya, jika status baru adalah aktif (1), buat StokOpname baru dengan status aktif
 				if (newSo.status === 1) {
-					await StokOpname.create(newSo);
-				} else {
-					// Jika status baru adalah non-aktif (0), cukup perbarui StokOpname yang ada dengan data yang diberikan
 					await StokOpname.update(
-						newSo,
+						{status: 1},
 						{
 							where: {
-								kode: soId,
+								kode: soId
 							},
 						}
 					);
+				} else {
+					// Jika status baru adalah non-aktif (0), cukup perbarui StokOpname yang ada dengan data yang diberikan
+					if (newSo.status ===0) {
+						await StokOpname.update(
+							{status: 0, tanggal_so_closed: new Date()},
+							{
+								where: {
+									kode: soId,
+								},
+							}
+						);
+					}  else {
+						await StokOpname.update(
+							{status: 1},
+							{
+								where: {
+									kode: soId,
+								},
+							}
+						);
+					}
 				}
 
 				res.status(201).json({
@@ -88,7 +106,6 @@ async function handler(req, res) {
 					data: "Success"
 				});
 			} catch (e) {
-				
 				res.status(500).json({
 					ok: false,
 					data: "Internal Server Error"

@@ -86,8 +86,6 @@ async function handler(req, res) {
 
 				// Ambil semua kode Pallet dari DetailSO
 				const detailSOKodePallets = await DetailSO.findAll({
-					// attributes: ['pallet_id','scanned_at'], // Hanya ambil kolom 'pallet_id'
-				}, {
 					where: {
 						so_id: so.kode
 					}
