@@ -24,7 +24,7 @@ async function handler(req, res) {
 					datas = await History.findAll({
 						where: {
 							keluar: {
-								[Op.lt]: moment().subtract(3, 'week').toDate(),
+								[Op.lt]: moment().subtract(1, 'week').toDate(),
 							},
 							masuk: null
 						},
@@ -56,7 +56,7 @@ async function handler(req, res) {
 					datas = await History.findAll({
 						where: {
 							keluar: {
-								[Op.lt]: moment().subtract(3, 'week').toDate(),
+								[Op.lt]: moment().subtract(1, 'week').toDate(),
 							},
 							masuk: null
 						},

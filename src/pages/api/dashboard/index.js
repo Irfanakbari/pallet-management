@@ -50,7 +50,7 @@ async function handler(req, res) {
 						],
 						where: {
 							keluar: {
-								[Op.lt]: moment().subtract(3, 'week').toDate(),
+								[Op.lt]: moment().subtract(1, 'week').toDate(),
 							},
 							masuk: null
 						},
@@ -75,7 +75,7 @@ async function handler(req, res) {
 					totalPaletMendep = await History.count({
 						where: {
 							keluar: {
-								[Op.lt]: moment().subtract(3, 'week').toDate(),
+								[Op.lt]: moment().subtract(1, 'week').toDate(),
 							},
 							masuk: null
 						},
@@ -152,7 +152,7 @@ async function handler(req, res) {
 						],
 						where: {
 							keluar: {
-								[Op.lt]: moment().subtract(3, 'week').toDate(),
+								[Op.lt]: moment().subtract(1, 'week').toDate(),
 							},
 							masuk: null
 						},
@@ -184,7 +184,7 @@ async function handler(req, res) {
 					totalPaletMendep = await History.count({
 						where: {
 							keluar: {
-								[Op.lt]: moment().subtract(3, 'week').toDate(),
+								[Op.lt]: moment().subtract(1, 'week').toDate(),
 							},
 							'$Pallet.Vehicle.department$': {[Op.in]: allowedDepartments},
 							masuk: null
