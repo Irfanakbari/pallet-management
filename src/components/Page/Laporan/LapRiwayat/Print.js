@@ -21,7 +21,10 @@ function PrintAll({ data }) {
     const handlePrint = useReactToPrint({
         content: reactToPrintContent,
         documentTitle: "AwesomeFileName",
-        onAfterPrint: ()=>setModal(false),
+        onAfterPrint: ()=>{
+
+            setModal(false)
+        },
         removeAfterPrint: true,
     });
 

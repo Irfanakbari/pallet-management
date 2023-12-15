@@ -17,7 +17,12 @@ export default function PrintAll({data}) {
 	const handlePrint = useReactToPrint({
 		content: reactToPrintContent,
 		documentTitle: "AwesomeFileName",
-		onAfterPrint: () => setModal(false),
+		onAfterPrint: () => {
+			data.map(async (labelData, index) => (
+				await fetch(`/api/pallets/print/${labelData.kode}`)
+			))
+			setModal(false)
+		},
 		removeAfterPrint: true
 	});
 

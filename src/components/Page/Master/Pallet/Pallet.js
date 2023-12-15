@@ -14,6 +14,7 @@ import {Button, Form, Input, Popconfirm, Popover, QRCode, Space, Spin, Table} fr
 import EditableCell from "@/components/Page/Master/Customer/EditCell";
 import {SearchOutlined} from "@ant-design/icons";
 import DeleteModal2 from "@/components/Modal/DeleteModal2";
+import dayjs from "dayjs";
 
 export default function Pallet() {
 	const {listCustomer, listVehicle, listPart, user, listDepartment} = dataState()
@@ -351,6 +352,14 @@ export default function Pallet() {
 			)),
 			onFilter: (value, record) => record['Vehicle'].department.indexOf(value) === 0,
 			render: (_, record) => "Produksi " + record['Vehicle'].department
+		},
+		{
+			title: 'Print Label',
+			dataIndex: 'printed_at',
+			width: 250,
+			render: (_, record) => record['printed_at']
+				? dayjs(record['printed_at']).locale('id').format('DD MMMM YYYY HH:mm')
+				: '-',
 		},
 		{
 			title: 'Aksi',

@@ -27,6 +27,9 @@ const Pallet = connection.define('Pallet', {
 		type: DataTypes.INTEGER,
 		defaultValue: 1
 	},
+	printed_at: {
+		type: DataTypes.DATE
+	}
 }, {
 	tableName: 'pallets',
 	createdAt: 'created_at',
