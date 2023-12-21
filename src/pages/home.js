@@ -25,6 +25,7 @@ import Pallet from "@/components/Page/Master/Pallet/Pallet";
 import LapMaintenance from "@/components/Page/Laporan/LapMaintenance/LapMaintenance";
 import LapStok from "@/components/Page/Laporan/LapStok/LapStok";
 import User from "@/components/Page/Master/User/User";
+import LapTransit from "@/components/Page/Laporan/LapTransit/LapTransit";
 
 
 export default function Home() {
@@ -132,6 +133,7 @@ export default function Home() {
 								{activeMenu === "Stock Opname" && <StockOpname/>}
 								{activeMenu === "Lap. Stok Opname" && <LapStokOpname/>}
 								{activeMenu === "Data SO" && <DataSO/>}
+								{activeMenu === "Lap. Transit" && <LapTransit/>}
 							</div>
 							:
 							<center className={`flex items-center justify-center h-full`}>

@@ -52,6 +52,10 @@ const laporan = [
 		key: 'Lap. Stok Opname',
 		label: 'Lap. Stok Opname'
 	},
+	{
+		key: 'Lap. Transit',
+		label: 'Lap. Transit'
+	},
 ]
 
 const stockOpname = [

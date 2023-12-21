@@ -24,6 +24,15 @@ const History = connection.define('History', {
     destination: {
         type: DataTypes.STRING
     },
+    from_vuteq: {
+        type: DataTypes.DATE
+    },
+    from_cust: {
+        type: DataTypes.DATE
+    },
+    is_transit: {
+        type: DataTypes.INTEGER
+    },
 }, {
     tableName: 'history',
     updatedAt: 'updated_at',

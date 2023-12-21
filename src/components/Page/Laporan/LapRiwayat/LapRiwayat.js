@@ -377,7 +377,7 @@ export default function LapRiwayat() {
 		{
 			title: 'Keluar',
 			dataIndex: 'keluar',
-			width: 180,
+			width: 200,
 			sorter: (a, b) => {
 				// Convert the 'keluar' values to Date objects for comparison
 				const dateA = a['keluar'] ? new Date(a['keluar']) : null;
@@ -463,9 +463,183 @@ export default function LapRiwayat() {
 			render: (_, record) => record['user_out'] ?? '-'
 		},
 		{
+			title: 'Transit',
+			children: [
+				{
+					title: 'On Transit',
+					dataIndex: 'is_transit',
+					width: 160,
+					sorter: (a, b) => a.status?.localeCompare(b.status),
+					render: (_, record) => record['is_transit'] === 1 ? 'Yes' : 'No' ?? 'No'
+				},
+				{
+					title: 'Dari Vuteq',
+					dataIndex: 'from_vuteq',
+					width: 200,
+					sorter: (a, b) => {
+						// Convert the 'keluar' values to Date objects for comparison
+						const dateA = a['from_vuteq'] ? new Date(a['from_vuteq']) : null;
+						const dateB = b['from_vuteq'] ? new Date(b['from_vuteq']) : null;
+						// Handle cases when one of the dates is null
+						if (!dateA && dateB) return -1;
+						if (dateA && !dateB) return 1;
+						if (!dateA && !dateB) return 0;
+						// Compare the dates
+						return dateA.getTime() - dateB.getTime();
+					},
+					// filterDropdown: ({setSelectedKeys, selectedKeys, confirm, clearFilters, close}) => (
+					// 	<div
+					// 		style={{
+					// 			padding: 8,
+					// 		}}
+					// 		onKeyDown={(e) => e.stopPropagation()}
+					// 	>
+					// 		<RangePicker
+					// 			style={{
+					// 				marginBottom: 8,
+					// 				width: "100%",
+					// 			}}
+					// 			value={selectedKeys[0]}
+					// 			onChange={newDateRange => {
+					// 				setSelectedKeys(newDateRange ? [newDateRange] : [])
+					// 			}}
+					// 		/>
+					// 		<Space>
+					// 			<Button
+					// 				type="primary"
+					// 				size="small"
+					// 				style={{
+					// 					width: 90,
+					// 				}}
+					// 				onClick={() => {
+					// 					confirm({
+					// 						closeDropdown: true,
+					// 					});
+					// 				}}
+					// 			>
+					// 				Filter
+					// 			</Button>
+					// 			<Button
+					// 				onClick={() => clearFilters}
+					// 				size="small"
+					// 				style={{
+					// 					width: 90,
+					// 				}}
+					// 			>
+					// 				Reset
+					// 			</Button>
+					// 			<Button
+					// 				type="link"
+					// 				size="small"
+					// 				onClick={() => {
+					// 					close();
+					// 				}}
+					// 			>
+					// 				close
+					// 			</Button>
+					// 		</Space>
+					// 	</div>
+					// ),
+					// filterIcon: filtered => (
+					// 	<CalendarOutlined
+					// 		style={{
+					// 			color: filtered ? '#1890ff' : undefined,
+					// 		}}
+					// 	/>
+					// ),
+					render: (_, record) => {
+						return record['from_vuteq']
+							? dayjs(record['from_vuteq']).locale('id').format('DD MMMM YYYY HH:mm')
+							: '-'
+					}
+				},
+				{
+					title: 'Dari Cust',
+					dataIndex: 'from_cust',
+					width: 200,
+					sorter: (a, b) => {
+						// Convert the 'keluar' values to Date objects for comparison
+						const dateA = a['from_cust'] ? new Date(a['from_cust']) : null;
+						const dateB = b['from_cust'] ? new Date(b['from_cust']) : null;
+						// Handle cases when one of the dates is null
+						if (!dateA && dateB) return -1;
+						if (dateA && !dateB) return 1;
+						if (!dateA && !dateB) return 0;
+						// Compare the dates
+						return dateA.getTime() - dateB.getTime();
+					},
+					// filterDropdown: ({setSelectedKeys, selectedKeys, confirm, clearFilters, close}) => (
+					// 	<div
+					// 		style={{
+					// 			padding: 8,
+					// 		}}
+					// 		onKeyDown={(e) => e.stopPropagation()}
+					// 	>
+					// 		<RangePicker
+					// 			style={{
+					// 				marginBottom: 8,
+					// 				width: "100%",
+					// 			}}
+					// 			value={selectedKeys[0]}
+					// 			onChange={newDateRange => {
+					// 				setSelectedKeys(newDateRange ? [newDateRange] : [])
+					// 			}}
+					// 		/>
+					// 		<Space>
+					// 			<Button
+					// 				type="primary"
+					// 				size="small"
+					// 				style={{
+					// 					width: 90,
+					// 				}}
+					// 				onClick={() => {
+					// 					confirm({
+					// 						closeDropdown: true,
+					// 					});
+					// 				}}
+					// 			>
+					// 				Filter
+					// 			</Button>
+					// 			<Button
+					// 				onClick={() => clearFilters}
+					// 				size="small"
+					// 				style={{
+					// 					width: 90,
+					// 				}}
+					// 			>
+					// 				Reset
+					// 			</Button>
+					// 			<Button
+					// 				type="link"
+					// 				size="small"
+					// 				onClick={() => {
+					// 					close();
+					// 				}}
+					// 			>
+					// 				close
+					// 			</Button>
+					// 		</Space>
+					// 	</div>
+					// ),
+					// filterIcon: filtered => (
+					// 	<CalendarOutlined
+					// 		style={{
+					// 			color: filtered ? '#1890ff' : undefined,
+					// 		}}
+					// 	/>
+					// ),
+					render: (_, record) => {
+						return record['from_cust']
+							? dayjs(record['from_cust']).locale('id').format('DD MMMM YYYY HH:mm')
+							: '-'
+					}
+				},
+			]
+		},
+		{
 			title: 'Masuk',
 			dataIndex: 'masuk',
-			width: 180,
+			width: 200,
 			sorter: (a, b) => {
 				// Convert the 'keluar' values to Date objects for comparison
 				const dateA = a['masuk'] ? new Date(a['masuk']) : null;
