@@ -21,14 +21,11 @@ const History = connection.define('History', {
     masuk: {
         type: DataTypes.DATE
     },
+    keluar: {
+        type: DataTypes.DATE,
+    },
     destination: {
         type: DataTypes.STRING
-    },
-    from_vuteq: {
-        type: DataTypes.DATE
-    },
-    from_cust: {
-        type: DataTypes.DATE
     },
     is_transit: {
         type: DataTypes.INTEGER
@@ -36,7 +33,7 @@ const History = connection.define('History', {
 }, {
     tableName: 'history',
     updatedAt: 'updated_at',
-    createdAt: 'keluar'
+    createdAt: false
 });
 
 

@@ -238,6 +238,7 @@ async function handler(req, res) {
 						{
 							id_pallet: kode,
 							user_out: req.user.username,
+							keluar: Date.now(),
 							destination: destination || null
 						},
 						{transaction: t}

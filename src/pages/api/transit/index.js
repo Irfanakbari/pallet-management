@@ -111,8 +111,7 @@ async function handler(req, res) {
                 });
             }
             try {
-                const {kode, target} = req.body;
-                console.log(target)
+                const {kode} = req.body;
                 const pallet = await Pallet.findOne({
                     where: {kode: kode}
                 });
@@ -144,20 +143,25 @@ async function handler(req, res) {
                     }, {
                         transaction: t
                     })
-                    if (target === 'from_vuteq') {
-                        await currentHistory.update(
-                            { is_transit: 1, from_vuteq: Date.now()}, {
-                                transaction: t
-                            }
-                        );
-                    }
-                    if (target === 'from_cust')        {
-                        await currentHistory.update(
-                            { is_transit: 1, from_cust: Date.now()}, {
-                                transaction: t
-                            }
-                        );
-                    }
+                    // if (target === 'from_vuteq') {
+                    //     await currentHistory.update(
+                    //         { is_transit: 1, from_vuteq: Date.now()}, {
+                    //             transaction: t
+                    //         }
+                    //     );
+                    // }
+                    await currentHistory.update(
+                        { is_transit: 1}, {
+                            transaction: t
+                        }
+                    );
+                    // if (target === 'from_cust')        {
+                    //     await currentHistory.update(
+                    //         { is_transit: 1, from_cust: Date.now()}, {
+                    //             transaction: t
+                    //         }
+                    //     );
+                    // }
 
                     await Pallet.update(
                         {status: 4},
@@ -179,7 +183,7 @@ async function handler(req, res) {
                     data: "Sukses"
                 });
             } catch (e) {
-                // console.log(e.message);
+                console.log(e.message);
                 return res.status(500).json({
                     ok: false,
                     data: "Internal Server Error"
@@ -226,8 +230,9 @@ async function handler(req, res) {
                     }, {
                         transaction: t
                     })
+
                     await currentHistory.update(
-                        { is_transit: 0}, {
+                        { is_transit: 0,keluar: Date.now()}, {
                             transaction: t
                         }
                     );
