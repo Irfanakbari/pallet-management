@@ -26,6 +26,7 @@ import LapMaintenance from "@/components/Page/Laporan/LapMaintenance/LapMaintena
 import LapStok from "@/components/Page/Laporan/LapStok/LapStok";
 import User from "@/components/Page/Master/User/User";
 import LapTransit from "@/components/Page/Laporan/LapTransit/LapTransit";
+import LapRiwayatMaintenance from "@/components/Page/Laporan/LapRiwayatMaintenance/LapRiwayatMaintenance";
 
 
 export default function Home() {
@@ -127,6 +128,7 @@ export default function Home() {
 								{activeMenu === "Destinasi" && <Destination/>}
 								{activeMenu === "Pallet" && <Pallet/>}
 								{activeMenu === "Lap. Riwayat Pallet" && <LapRiwayat/>}
+								{activeMenu === "Lap. Riwayat Maintenance Pallet" && <LapRiwayatMaintenance/>}
 								{activeMenu === "Lap. Maintenance Pallet" && <LapMaintenance/>}
 								{activeMenu === "Lap. Stok Pallet" && <LapStok/>}
 								{activeMenu === "Users" && <User/>}

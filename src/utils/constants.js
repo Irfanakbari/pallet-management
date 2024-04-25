@@ -49,6 +49,10 @@ const laporan = [
 		label: 'Lap. Maintenance Pallet'
 	},
 	{
+		key: 'Lap. Riwayat Maintenance Pallet',
+		label: 'Lap. Riwayat Maintenance Pallet'
+	},
+	{
 		key: 'Lap. Stok Opname',
 		label: 'Lap. Stok Opname'
 	},

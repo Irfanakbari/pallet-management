@@ -3,6 +3,7 @@ import {DataTypes} from "sequelize";
 import History from "@/models/History";
 import Customer from "@/models/Customer";
 import DetailSO from "@/models/DetailSO";
+import HistoryRepair from "@/models/HistoryRepair";
 
 const Pallet = connection.define('Pallet', {
 	// Model attributes are defined here
@@ -38,6 +39,9 @@ const Pallet = connection.define('Pallet', {
 
 Pallet.hasMany(History, {foreignKey: 'id_pallet'});
 History.belongsTo(Pallet, {foreignKey: 'id_pallet'});
+
+Pallet.hasMany(HistoryRepair, {foreignKey: 'id_pallet'});
+HistoryRepair.belongsTo(Pallet, {foreignKey: 'id_pallet'});
 
 Customer.hasMany(Pallet, {foreignKey: 'customer'});
 Pallet.belongsTo(Customer, {foreignKey: 'customer'});
