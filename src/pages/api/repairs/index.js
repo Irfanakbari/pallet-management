@@ -7,6 +7,8 @@ import Vehicle from "@/models/Vehicle";
 import Part from "@/models/Part";
 
 import {Op} from "sequelize";
+import HistoryRepair from "@/models/HistoryRepair";
+import History from "@/models/History";
 
 async function handler(req, res) {
 	switch (req.method) {
@@ -146,12 +148,39 @@ async function handler(req, res) {
 								kode: kode
 							}
 						}, {transaction: t});
+						if (newStatus === 1) {
+							await HistoryRepair.create({
+								id_pallet: kode,
+								user_out: req.user.username,
+								keluar: Date.now(),
+							})
+							await TempHistory.create({
+								id_pallet: kode,
+								status: 'Maintenance',
+								operator: req.user.username
+							}, {transaction: t})
+						} else if (newStatus===3) {
+							const currentHistory = await HistoryRepair.findOne({
+								where: {
+									id_pallet: kode
+								},
+								order: [['keluar', 'DESC']]
+							}, {
+								transaction: t
+							})
+							await currentHistory.update({
+								masuk: Date.now(),
+								user_in: req.user.username
+							}, {
+								transaction: t
+							})
+							await TempHistory.create({
+								id_pallet: kode,
+								status: 'Out Maintenance',
+								operator: req.user.username
+							}, {transaction: t})
+						}
 
-						await TempHistory.create({
-							id_pallet: kode,
-							status: 'Maintenance',
-							operator: req.user.username
-						}, {transaction: t})
 					})
 					res.status(200).json({
 						ok: true,

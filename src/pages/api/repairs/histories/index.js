@@ -192,7 +192,6 @@ async function handler(req, res) {
 					});
 				}
 			} catch (e) {
-				
 				res.status(500).json({
 					ok: false,
 					data: "Internal Server Error"

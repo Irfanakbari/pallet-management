@@ -174,7 +174,7 @@ export default function LapRiwayatMaintenance() {
 		})
 	};
 
-	const onChange = (pagination, filters, sorter, extra) => {
+	const onChange = (pagination, filters) => {
 		setLoading(true)
 		const searchParam = (filters?.id_pallet && filters?.id_pallet[0]) || '';
 		// const keluarStart = (filters?.keluar && filters?.keluar[0][0]) || '';
@@ -444,8 +444,8 @@ export default function LapRiwayatMaintenance() {
 		// 			width: 200,
 		// 			sorter: (a, b) => {
 		// 				// Convert the 'keluar' values to Date objects for comparison
-		// 				const dateA = a['from_vuteq'] ? new Date(a['from_vuteq']) : null;
-		// 				const dateB = b['from_vuteq'] ? new Date(b['from_vuteq']) : null;
+		// 				const dateA = a['from_vuteq']?new Date(a['from_vuteq']) : null;
+		// 				const dateB = b['from_vuteq']?new Date(b['from_vuteq']) : null;
 		// 				// Handle cases when one of the dates is null
 		// 				if (!dateA && dateB) return -1;
 		// 				if (dateA && !dateB) return 1;
@@ -525,8 +525,8 @@ export default function LapRiwayatMaintenance() {
 		// 			width: 200,
 		// 			sorter: (a, b) => {
 		// 				// Convert the 'keluar' values to Date objects for comparison
-		// 				const dateA = a['from_cust'] ? new Date(a['from_cust']) : null;
-		// 				const dateB = b['from_cust'] ? new Date(b['from_cust']) : null;
+		// 				const dateA = a['from_cust']?new Date(a['from_cust']) : null;
+		// 				const dateB = b['from_cust']?new Date(b['from_cust']) : null;
 		// 				// Handle cases when one of the dates is null
 		// 				if (!dateA && dateB) return -1;
 		// 				if (dateA && !dateB) return 1;
