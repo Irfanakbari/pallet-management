@@ -61,9 +61,6 @@ async function handler(req, res) {
 						include: [
 							{
 								model: Pallet,
-								where: {
-									status: 3
-								},
 								include: [
 									{
 										model: Customer,
@@ -93,9 +90,6 @@ async function handler(req, res) {
 						include: [
 							{
 								model: Pallet,
-								where: {
-									status: 3
-								},
 								include: [
 									{
 										model: Customer,

@@ -153,7 +153,7 @@ async function handler(req, res) {
 								id_pallet: kode,
 								user_out: req.user.username,
 								keluar: Date.now(),
-							})
+							}, {transaction: t})
 							await TempHistory.create({
 								id_pallet: kode,
 								status: 'Maintenance',

@@ -119,22 +119,22 @@ export default function LapRiwayatMaintenance() {
 				width: 32,
 			},
 			{
-				header: "Keluar",
+				header: "Masuk",
 				key: "keluar",
 				width: 27,
 			},
 			{
-				header: "Operator Out",
+				header: "Operator In",
 				key: "user_out",
 				width: 13,
 			},
 			{
-				header: "Masuk",
+				header: "Keluar",
 				key: "masuk",
 				width: 27,
 			},
 			{
-				header: "Operator In",
+				header: "Operator Out",
 				key: "user_in",
 				width: 13,
 			},
