@@ -120,7 +120,7 @@ export default function LapRiwayatMaintenance() {
 			},
 			{
 				header: "Masuk",
-				key: "keluar",
+				key: "masuk",
 				width: 27,
 			},
 			{
@@ -130,7 +130,7 @@ export default function LapRiwayatMaintenance() {
 			},
 			{
 				header: "Keluar",
-				key: "masuk",
+				key: "keluar",
 				width: 27,
 			},
 			{
@@ -152,12 +152,12 @@ export default function LapRiwayatMaintenance() {
 				part: item['Pallet']
 					? `${item['Pallet']['Part'].kode} - ${item['Pallet']['Part'].name}`
 					: '-',
-				keluar: item['keluar']
-					? dayjs(item['keluar']).locale('id').format('DD MMMM YYYY HH:mm')
+				keluar: item['masuk']
+					? dayjs(item['masuk']).locale('id').format('DD MMMM YYYY HH:mm')
 					: '-',
 				user_out: item['user_out'] ?? '-',
-				masuk: item['masuk']
-					? dayjs(item['masuk']).locale('id').format('DD MMMM YYYY HH:mm')
+				masuk: item['keluar']
+					? dayjs(item['keluar']).locale('id').format('DD MMMM YYYY HH:mm')
 					: '-',
 				user_in: item['user_in'] ?? '-',
 			});
