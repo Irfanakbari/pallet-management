@@ -148,28 +148,28 @@ async function handler(req, res) {
 								kode: kode
 							}
 						}, {transaction: t});
-						if (newStatus === 1) {
+						if (newStatus === 3) {
 							await HistoryRepair.create({
 								id_pallet: kode,
 								user_out: req.user.username,
-								keluar: Date.now(),
+								masuk: Date.now(),
 							}, {transaction: t})
 							await TempHistory.create({
 								id_pallet: kode,
-								status: 'Maintenance',
+								status: 'In Maintenance',
 								operator: req.user.username
 							}, {transaction: t})
-						} else if (newStatus===3) {
+						} else if (newStatus===1) {
 							const currentHistory = await HistoryRepair.findOne({
 								where: {
 									id_pallet: kode
 								},
-								order: [['keluar', 'DESC']]
+								order: [['masuk', 'DESC']]
 							}, {
 								transaction: t
 							})
 							await currentHistory.update({
-								masuk: Date.now(),
+								keluar: Date.now(),
 								user_in: req.user.username
 							}, {
 								transaction: t
