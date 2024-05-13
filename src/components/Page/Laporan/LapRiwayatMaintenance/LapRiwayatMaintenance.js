@@ -120,7 +120,7 @@ export default function LapRiwayatMaintenance() {
 			},
 			{
 				header: "Masuk",
-				key: "keluar",
+				key: "masuk",
 				width: 27,
 			},
 			{
@@ -130,7 +130,7 @@ export default function LapRiwayatMaintenance() {
 			},
 			{
 				header: "Keluar",
-				key: "masuk",
+				key: "keluar",
 				width: 27,
 			},
 			{
