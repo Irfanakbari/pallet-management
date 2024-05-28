@@ -134,10 +134,10 @@ async function handler(req, res) {
 					});
 				} else {
 					let newStatus;
-					if (pallet.status === 3) {
-						newStatus = 1;
-					} else {
+					if (pallet.status === 1) {
 						newStatus = 3;
+					} else {
+						newStatus = 1;
 					}
 
 					await connection.transaction(async t => {
@@ -148,18 +148,7 @@ async function handler(req, res) {
 								kode: kode
 							}
 						}, {transaction: t});
-						if (newStatus === 3) {
-							await HistoryRepair.create({
-								id_pallet: kode,
-								user_out: req.user.username,
-								masuk: Date.now(),
-							}, {transaction: t})
-							await TempHistory.create({
-								id_pallet: kode,
-								status: 'In Maintenance',
-								operator: req.user.username
-							}, {transaction: t})
-						} else if (newStatus===1) {
+						if (newStatus === 1) {
 							const currentHistory = await HistoryRepair.findOne({
 								where: {
 									id_pallet: kode
@@ -170,13 +159,25 @@ async function handler(req, res) {
 							})
 							await currentHistory.update({
 								keluar: Date.now(),
-								user_in: req.user.username
+								user_out: req.user.username
 							}, {
 								transaction: t
 							})
 							await TempHistory.create({
 								id_pallet: kode,
 								status: 'Out Maintenance',
+								operator: req.user.username
+							}, {transaction: t})
+						} else if (newStatus===3) {
+							console.log('Dirun')
+							await HistoryRepair.create({
+								id_pallet: kode,
+								user_in: req.user.username,
+								masuk: Date.now(),
+							}, {transaction: t})
+							await TempHistory.create({
+								id_pallet: kode,
+								status: 'In Maintenance',
 								operator: req.user.username
 							}, {transaction: t})
 						}
@@ -188,7 +189,7 @@ async function handler(req, res) {
 					});
 				}
 			} catch (e) {
-				
+				console.log(e)
 				res.status(500).json({
 					ok: false,
 					data: "Internal Server Error"
