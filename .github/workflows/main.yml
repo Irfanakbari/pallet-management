@@ -33,5 +33,5 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            irfanakbari18/pallet-control-v1:latest
-            irfanakbari18/pallet-control-v1:${{ steps.get_commit.outputs.commit }}
+            vuteq/pallet-control-v1:latest
+            vuteq/pallet-control-v1:${{ steps.get_commit.outputs.commit }}

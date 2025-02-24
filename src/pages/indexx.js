@@ -68,6 +68,7 @@ export default function Index() {
 								type="password" placeholder="Password"/>
 						</div>
 						{/* Tombol untuk submit form login */}
+
 						<button
 							type="submit"
 							className="w-full bg-blue-600 hover:bg-blue-900 py-4 text-white text-center text-xl mt-7 rounded-b-xl">
